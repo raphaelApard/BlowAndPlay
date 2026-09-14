@@ -72,6 +72,9 @@ const fr = {
   'games.level': 'niveau {id}',
   'games.blows': '{n} souffles',
   'games.finish': 'Terminer',
+  'game.skip': 'Passer',
+  'game.skipLongPress': 'Passer le niveau (appui long)',
+  'game.skipHint': 'Reste appuyé un peu plus longtemps',
 
   // ── Espace parents
   'parents.title': 'Espace parents',
@@ -206,6 +209,9 @@ const en: Record<StringKey, string> = {
   'games.level': 'level {id}',
   'games.blows': '{n} blows',
   'games.finish': 'Finish',
+  'game.skip': 'Skip',
+  'game.skipLongPress': 'Skip the level (long press)',
+  'game.skipHint': 'Keep holding a little longer',
 
   'parents.title': 'Parents area',
   'parents.children': 'Children',

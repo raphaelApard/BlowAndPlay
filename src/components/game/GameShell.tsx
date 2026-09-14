@@ -13,6 +13,10 @@ import styles from './game.module.css';
 
 /** Maximum time the instruction is shown if the child does not blow. */
 const HINT_MAX_MS = 8000;
+/** Hold time to skip the level (the same as the parents button). */
+const SKIP_PRESS_MS = 700;
+/** How long the "keep holding" bubble stays. */
+const SKIP_TIP_MS = 2600;
 
 interface Props {
   game: AnyGameDefinition;
@@ -128,6 +132,28 @@ export function GameShell({ game, level, profileId }: Props) {
     };
   }, [engine]);
 
+  // Skip: held down, not tapped. A child who cannot manage a level moves on
+  // rather than being stuck, but a brush against the screen does nothing.
+  // The level counts as passed with a single star: it unlocks what follows
+  // without claiming a performance that did not happen.
+  const skipTimer = useRef(0);
+  const skipTipTimer = useRef(0);
+  const [skipPressing, setSkipPressing] = useState(false);
+  const [skipTip, setSkipTip] = useState(false);
+  // Press tracked in a ref as well: on a brief press `pointerdown` and
+  // `pointerup` fall in the same render batch, so the state would still read
+  // `false` on release and the bubble would never show on the shortest
+  // presses — the very ones it is there to explain.
+  const skipPressingRef = useRef(false);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(skipTimer.current);
+      window.clearTimeout(skipTipTimer.current);
+    },
+    [],
+  );
+
   const handleComplete = useCallback(
     (result: GameResult) => {
       if (completedRef.current) return;
@@ -144,6 +170,33 @@ export function GameShell({ game, level, profileId }: Props) {
     },
     [profileId, game.id, level.id, navigate, free],
   );
+
+  const startSkip = () => {
+    setSkipTip(false);
+    window.clearTimeout(skipTipTimer.current);
+    skipPressingRef.current = true;
+    setSkipPressing(true);
+    skipTimer.current = window.setTimeout(() => {
+      setSkipPressing(false);
+      skipPressingRef.current = false;
+      handleComplete({ stars: 1 });
+    }, SKIP_PRESS_MS);
+  };
+
+  /**
+   * End of the press. `earlyRelease` distinguishes a real release (finger
+   * lifted on the button, so too short a press: we explain) from a pointer
+   * that simply leaves the button — nothing to explain there.
+   */
+  const endSkip = (earlyRelease: boolean) => {
+    const wasPressing = skipPressingRef.current;
+    skipPressingRef.current = false;
+    window.clearTimeout(skipTimer.current);
+    setSkipPressing(false);
+    if (!earlyRelease || !wasPressing) return;
+    setSkipTip(true);
+    skipTipTimer.current = window.setTimeout(() => setSkipTip(false), SKIP_TIP_MS);
+  };
 
   const Game = game.Game;
 
@@ -172,15 +225,29 @@ export function GameShell({ game, level, profileId }: Props) {
         </PaperButton>
         <BreathStrip progress={progress} />
         <ParentsButton className={styles.parents} />
-        {/* Dev shortcut: finishes the level without blowing, to reach the map,
-            the games list or the next level quickly. `import.meta.env.DEV`
-            is replaced by `false` at build time, so this block is removed from
-            the production bundle entirely. */}
-        {import.meta.env.DEV && (
-          <PaperButton small tone="ghost" className={styles.devFinish} onClick={() => handleComplete({ stars: 3 })}>
-            Finish ★★★
-          </PaperButton>
-        )}
+        <PaperButton
+          small
+          tone="ghost"
+          silent
+          className={cx(styles.skip, skipPressing && styles.skipPressing)}
+          onPointerDown={startSkip}
+          onPointerUp={() => endSkip(true)}
+          onPointerLeave={() => endSkip(false)}
+          onPointerCancel={() => endSkip(false)}
+          onContextMenu={(e) => e.preventDefault()}
+          aria-label={t('game.skipLongPress')}
+          data-no-blow
+        >
+          <span className={styles.skipIcon}>
+            <span className={styles.skipFill} />
+          </span>
+          {t('game.skip')}
+          {skipTip && (
+            <span className={styles.skipTip} role="status" aria-live="polite">
+              {t('game.skipHint')}
+            </span>
+          )}
+        </PaperButton>
       </div>
 
       {ready && hint !== 'gone' && (
