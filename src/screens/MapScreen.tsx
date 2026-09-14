@@ -176,12 +176,19 @@ export function MapScreen() {
     if (isNodeDone(node, progress)) return 'done';
     return 'locked';
   };
-  const balloonIdx = phase === 'done' ? realCurrent : fromIdx;
+  // Vrai quand tous les niveaux sont réussis : l'étape courante est l'étoile bonus.
+  const endReached = path[realCurrent]?.kind === 'bonus';
+
+  // Aventure terminée (l'étape courante est l'étoile bonus) : le ballon ne se
+  // pose pas sur l'étoile, il repart au premier jeu — l'enfant peut rejouer ce
+  // qu'il veut. Aucun jeu ne s'ouvre pour autant : c'est lui qui choisit.
+  const firstGameIdx = path.findIndex((n) => n.kind === 'game');
+  const restIdx = endReached && firstGameIdx >= 0 ? firstGameIdx : realCurrent;
+  const balloonIdx = phase === 'done' ? restIdx : fromIdx;
 
   // Fête d'arrivée : à chaque fois que le ballon vient de se poser sur une étape
   // (`animating`), pas à chaque retour sur la carte. La fanfare reste réservée à
   // l'étoile finale — à chaque niveau elle couvrirait les étoiles qui tintent.
-  const endReached = path[realCurrent]?.kind === 'bonus';
   const [party, setParty] = useState(false);
   useEffect(() => {
     if (phase !== 'party') return;
@@ -280,30 +287,18 @@ export function MapScreen() {
   const currentNode = path[realCurrent];
   const balloonPos = points[balloonIdx];
 
-  // Bouton « jouer » : seulement quand rien ne s'enchaîne tout seul, c'est-à-dire
-  // à l'arrivée sur la carte hors animation de fin de niveau (nouvelle séance,
-  // retour par les onglets). Après un niveau, la séquence cotillons -> ballon ->
-  // ouverture s'en charge et le bouton n'a pas lieu d'être.
-  const showPlay =
-    !animating && phase === 'done' && currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
+  // Bouton « jouer » : aucun jeu ne s'ouvre jamais tout seul, c'est toujours
+  // l'enfant qui lance. Affiché dès que l'animation d'arrivée est finie, et
+  // seulement si l'étape courante est un jeu jouable — à la fin de l'aventure
+  // (étoile bonus) il n'y a rien à lancer, le ballon repart au premier jeu et
+  // l'enfant choisit son étape sur la carte.
+  const showPlay = phase === 'done' && currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
 
   // Démarre le moteur à l'arrivée sur la map (le micro est coupé quand l'onglet
   // est caché, et aucun autre écran ne le démarre).
   useEffect(() => {
     if (breathStatus === 'idle') void start();
   }, [breathStatus, start]);
-
-  // Le ballon vient de se poser sur une nouvelle étape : on ouvre le jeu
-  // aussitôt, sans temps mort. L'enfant n'a rien à viser ni à souffler —
-  // l'aventure enchaîne toute seule. Seulement après une animation d'arrivée
-  // (`animating`) : un simple retour sur la carte doit laisser l'enfant
-  // regarder le chemin.
-  useEffect(() => {
-    if (phase !== 'done' || !animating) return;
-    if (currentNode?.kind !== 'game' || !isNodeOpen(currentNode, progress, order)) return;
-    open(currentNode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, animating]);
 
   return (
     <Sky horizon={0.5} clouds={false}>
@@ -372,19 +367,6 @@ export function MapScreen() {
                 <Balloon className={cx(styles.nodeBalloon, phase === 'fly' && styles.nodeBalloonFlying)} />
               </div>
             )}
-
-            {showPlay && points[realCurrent] && (
-              <PaperButton
-                icon
-                tone="leaf"
-                className={styles.nodePlay}
-                style={{ left: points[realCurrent].x, top: points[realCurrent].y }}
-                onClick={() => open(currentNode)}
-                aria-label={t('map.start')}
-              >
-                <PlayIcon size={54} />
-              </PaperButton>
-            )}
           </div>
         )}
       </div>
@@ -410,6 +392,11 @@ export function MapScreen() {
 
       <TopBar name={profile.name} avatar={profile.avatar} />
       <Mascot />
+      {showPlay && (
+        <PaperButton icon tone="leaf" className={styles.nodePlay} onClick={() => open(currentNode)} aria-label={t('map.start')}>
+          <PlayIcon size={54} />
+        </PaperButton>
+      )}
       <ParentsButton />
     </Sky>
   );

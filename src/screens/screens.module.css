@@ -813,17 +813,19 @@
   }
 }
 
-/* Bouton « jouer » posé sous l'étape courante, à l'arrivée sur la carte quand
-   rien ne s'enchaîne tout seul : l'enfant décide de commencer. Il est en
-   dehors de la pastille (qui est déjà cliquable) pour rester visible et gros
-   au doigt, et il ne tourne pas avec le `--tilt` des pastilles. */
+/* Bouton « jouer » : c'est toujours l'enfant qui lance un jeu, rien ne s'ouvre
+   tout seul. Posé à côté de la mascotte (qui est calée à droite), donc juste à
+   sa gauche : la mascotte reste au bord de l'écran et le bouton à portée du
+   pouce. Hors du conteneur qui défile — il reste visible où que la carte soit
+   défilée. */
 .nodePlay {
   position: absolute;
-  margin: 62px 0 0 -44px;
-  width: 88px;
-  height: 88px;
+  right: 190px;
+  bottom: 52px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
-  z-index: 3;
+  z-index: 4;
   animation: nodePlayIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, floaty 3s ease-in-out 0.4s infinite;
 }
 @keyframes nodePlayIn {
@@ -842,10 +844,13 @@
     margin: -140px 0 0 -60px;
     width: 120px;
   }
+  /* En portrait la mascotte est plus petite et remonte au-dessus de la bande
+     de souffle : le bouton la suit, toujours à sa gauche. */
   .nodePlay {
-    margin: 58px 0 0 -38px;
-    width: 76px;
-    height: 76px;
+    right: 130px;
+    bottom: calc(146px + var(--safe-bottom));
+    width: 88px;
+    height: 88px;
   }
 }
 
