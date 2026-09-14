@@ -1,0 +1,19 @@
+.figure {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  pointer-events: none;
+  overflow: visible;
+}
+.inner {
+  position: absolute;
+  transform-origin: top left;
+  font-family: var(--font-body);
+}
+/* Confettis du prototype : uniquement en mode « bravo ». */
+.figure :global(.m-bravo) {
+  display: none;
+}
+.figure[data-mode='bravo'] :global(.m-bravo) {
+  display: contents;
+}

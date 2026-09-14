@@ -1,0 +1,26 @@
+/* Bateau Pirate — carte au trésor en papier découpé */
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #3f8fd6;
+}
+.canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* Vignette de la carte « Jeux » */
+.thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #4fa5e2;
+}
+.thumb canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

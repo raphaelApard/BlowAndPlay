@@ -1,0 +1,529 @@
+/* Souffle-Fusée — palette du design « Blast Off » */
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  font-family: 'Baloo 2', var(--font-display), sans-serif;
+  color: #fff;
+  --rocket-red: #ff6b5e;
+  --rocket-fin: #ffb03a;
+  --rocket-ring: #ffe08a;
+  --ink2: #2e2a24;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#8fd4f7 0%, #cdeeff 60%, #e9f8ff 100%);
+}
+
+/* ─── Étoiles ─────────────────────────────────────────────────────── */
+.stars {
+  position: absolute;
+  inset: -10% 0 0 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  animation: tw 2s ease-in-out infinite alternate;
+}
+@keyframes tw {
+  from {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── Lune ────────────────────────────────────────────────────────── */
+.moon {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fffdf3 0%, #efe6cf 55%, #d8cbaa 100%);
+  box-shadow: 0 0 90px rgba(255, 250, 220, 0.45);
+  opacity: 0;
+  transform: translateX(-50%) scale(0.3);
+  transform-origin: center;
+}
+.crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(190, 176, 142, 0.5);
+}
+
+/* ─── Nuages ──────────────────────────────────────────────────────── */
+.clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.95;
+  animation: drift 12s ease-in-out infinite alternate;
+}
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+}
+.cloud::before {
+  left: 18%;
+  top: -50%;
+  width: 48%;
+  aspect-ratio: 1;
+}
+.cloud::after {
+  left: 52%;
+  top: -30%;
+  width: 36%;
+  aspect-ratio: 1;
+}
+@keyframes drift {
+  from {
+    translate: -6% 0;
+  }
+  to {
+    translate: 6% 0;
+  }
+}
+
+/* ─── Sol ─────────────────────────────────────────────────────────── */
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  will-change: transform;
+}
+.hillL,
+.hillR {
+  position: absolute;
+  border-radius: 50% 50% 0 0;
+}
+.hillL {
+  left: -10%;
+  bottom: -14%;
+  width: 60%;
+  height: 70%;
+  background: #7ed07a;
+}
+.hillR {
+  right: -12%;
+  bottom: -16%;
+  width: 64%;
+  height: 82%;
+  background: #6ec46c;
+}
+.grass {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  background: #5cb95f;
+}
+.tree {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.crown {
+  border-radius: 50%;
+}
+.trunk {
+  background: #a97a4f;
+  border-radius: 0 0 4px 4px;
+}
+.pad {
+  position: absolute;
+  left: 50%;
+  bottom: 30%;
+  width: 140px;
+  height: 14px;
+  margin-left: -70px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Fusée ───────────────────────────────────────────────────────── */
+/* Posée sur l'aire (sol = 34 % de la hauteur, aire à 30 % du sol) ; la flamme dépasse dessous. */
+.rocketWrap {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  will-change: transform;
+}
+/* Toutes les cotes en em : `font-size` = largeur du corps. */
+.rocket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 1.5em;
+}
+.rocketBob {
+  animation: bob 3.2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-0.15em) rotate(1.5deg);
+  }
+}
+.nose {
+  width: 0;
+  height: 0;
+  border-left: 0.4em solid transparent;
+  border-right: 0.4em solid transparent;
+  border-bottom: 0.6em solid var(--rocket-red);
+}
+.body {
+  position: relative;
+  width: 1em;
+  height: 1.53em;
+  margin-top: -0.03em;
+  border-radius: 0.4em 0.4em 0.25em 0.25em;
+  background: #fffdf7;
+  box-shadow: inset -0.15em 0 0 rgba(0, 0, 0, 0.07);
+}
+.bodyStripe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0.62em;
+  border-radius: 0 0 0.25em 0.25em;
+  background: var(--rocket-red);
+}
+.porthole {
+  position: absolute;
+  left: 50%;
+  top: 0.22em;
+  width: 0.68em;
+  height: 0.68em;
+  margin-left: -0.34em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #dff6ff 0%, #a6dff5 100%);
+  box-shadow: inset 0 0 0 0.08em var(--rocket-ring);
+  overflow: hidden;
+}
+/* Pip */
+.pip {
+  position: absolute;
+  left: 50%;
+  top: 0.17em;
+  width: 0.46em;
+  height: 0.43em;
+  margin-left: -0.23em;
+}
+.earL,
+.earR {
+  position: absolute;
+  top: -0.17em;
+  width: 0.14em;
+  height: 0.3em;
+  border-radius: 999px;
+  background: #fff;
+}
+.earL {
+  left: 0.06em;
+  transform: rotate(-12deg);
+}
+.earR {
+  right: 0.06em;
+  transform: rotate(12deg);
+}
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+.eyeL,
+.eyeR {
+  position: absolute;
+  top: 0.15em;
+  width: 0.08em;
+  height: 0.08em;
+  border-radius: 50%;
+  background: var(--ink2);
+}
+.eyeL {
+  left: 0.1em;
+}
+.eyeR {
+  right: 0.1em;
+}
+.mouth {
+  position: absolute;
+  left: 50%;
+  top: 0.26em;
+  width: 0.1em;
+  height: 0.08em;
+  margin-left: -0.05em;
+  border-radius: 0 0 50% 50%;
+  background: #ff9aa8;
+}
+.finL,
+.finR {
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-top: 0.53em solid transparent;
+}
+.finL {
+  left: -0.31em;
+  border-right: 0.34em solid var(--rocket-fin);
+}
+.finR {
+  right: -0.31em;
+  border-left: 0.34em solid var(--rocket-fin);
+}
+.flame {
+  width: 0.53em;
+  height: 0.9em;
+  margin-top: -0.06em;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: linear-gradient(#ffd166, #ff8a3d 55%, rgba(255, 90, 60, 0));
+  transform-origin: top center;
+  transform: scaleY(0.12);
+  animation: flick 0.18s linear infinite;
+}
+@keyframes flick {
+  0%,
+  100% {
+    scale: 1 1;
+  }
+  50% {
+    scale: 1.12 0.78;
+  }
+}
+
+/* ─── Fête : anneaux, tour de la Lune, confettis ──────────────────── */
+.party {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.rings {
+  position: absolute;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  margin: -90px 0 0 -90px;
+}
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 6px solid #ffd166;
+  animation: ringOut 2.4s ease-out infinite;
+}
+@keyframes ringOut {
+  0% {
+    transform: scale(0.15);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+.glow {
+  position: absolute;
+  left: 50%;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 224, 138, 0.45) 0%, rgba(255, 224, 138, 0) 70%);
+  animation: glowPulse 2.6s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.7;
+  }
+}
+.orbits {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  /* Ellipse : le bas du tour reste au-dessus de la bande de souffle. */
+  transform: scaleY(0.68);
+}
+.orbit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  animation: orbit 5s linear infinite;
+}
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.trailDot {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: #ffe08a;
+  box-shadow: 0 0 10px #ffe08a;
+}
+/* Le nez pointe dans le sens de la marche (sens horaire → vers la droite au sommet). */
+.orbiter {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%) rotate(90deg);
+  animation: popIn 0.5s ease-out both;
+}
+@keyframes popIn {
+  from {
+    scale: 0.4;
+    opacity: 0;
+  }
+  to {
+    scale: 1;
+    opacity: 1;
+  }
+}
+.confetti {
+  position: absolute;
+  top: -40px;
+  animation: confettiFall 3s linear infinite;
+}
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(620deg);
+    opacity: 1;
+  }
+}
+
+/* ─── Étiquette de phase ──────────────────────────────────────────── */
+.phase {
+  position: absolute;
+  right: var(--edge);
+  top: calc(var(--edge) + var(--safe-top));
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink2);
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 20px;
+  font-weight: 700;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+/* ─── Vignette ────────────────────────────────────────────────────── */
+/* Statique : cotes en cqmin pour suivre la taille de la carte. */
+.thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  container-type: size;
+  --rocket-red: #ff6b5e;
+  --rocket-fin: #ffb03a;
+  --rocket-ring: #ffe08a;
+  --ink2: #2e2a24;
+  background: linear-gradient(#0f1f52 0%, #274f9e 34%, #5aa6e3 64%, #a9dcf7 100%);
+}
+.thumbStar {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 1.5cqmin rgba(255, 255, 255, 0.8);
+}
+.thumbMoon {
+  position: absolute;
+  right: -12cqmin;
+  top: -12cqmin;
+  width: 50cqmin;
+  height: 50cqmin;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fffdf3 0%, #efe6cf 55%, #d8cbaa 100%);
+  box-shadow: 0 0 10cqmin rgba(255, 250, 220, 0.45);
+}
+.thumbSmoke {
+  position: absolute;
+  border-radius: 50%;
+  background: #fffaf0;
+  translate: -50% 50%;
+}
+/* Inclinée vers la Lune ; la flamme, figée, est allumée. */
+.thumbRocket {
+  position: absolute;
+  left: 50%;
+  bottom: 32%;
+  transform: translateX(-50%) rotate(28deg);
+  filter: drop-shadow(0.8cqmin 1.2cqmin 0 rgba(0, 0, 0, 0.18));
+}
+.thumbRocket .flame {
+  transform: none;
+  animation: none;
+}
+/* Banc de nuages qui cache le sol : un rang arrière teinté, un rang avant. */
+.thumbClouds,
+.thumbCloudsBack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 7%;
+  background: var(--cloud);
+  --cloud: #f2f9ff;
+}
+.thumbCloudsBack {
+  height: 12%;
+  --cloud: #c7e4f8;
+}
+.thumbClouds > span,
+.thumbCloudsBack > span {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: var(--cloud);
+  translate: 0 45%;
+}

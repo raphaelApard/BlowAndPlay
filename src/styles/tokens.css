@@ -1,0 +1,49 @@
+/* Design tokens — piste « Papier découpé » (Souffle Aventure.dc.html, option 1c) */
+:root {
+  /* Palette */
+  --sky: #5ec2f0;
+  --sky-2: #8fd6f7;
+  --sky-3: #bfe7fb;
+  --paper: #ffffff;
+  --ink: #23324a;
+  --coral: #ff6b6b;
+  --sun: #ffd93d;
+  --leaf: #6bcb77;
+  --leaf-2: #9fe0a3;
+  --leaf-3: #4fb35f;
+  --earth: #d9a06c;
+  --earth-2: #b97d4f;
+  --skin-1: #ffb08a;
+  --skin-2: #c9a27e;
+  --mist: #e6edf3;
+  --mist-2: #f2f6fa;
+  --mist-ink: #5a6b80;
+  --mist-line: #8fa3b8;
+
+  /* Ombres franches (couches de papier) */
+  --ink-a15: rgba(35, 50, 74, 0.15);
+  --ink-a20: rgba(35, 50, 74, 0.2);
+  --ink-a22: rgba(35, 50, 74, 0.22);
+  --ink-a25: rgba(35, 50, 74, 0.25);
+  --shadow-1: 5px 5px 0 var(--ink-a20);
+  --shadow-2: 7px 7px 0 var(--ink-a22);
+  --shadow-3: 10px 10px 0 var(--ink-a20);
+  --text-shadow: 3px 3px 0 var(--ink-a25);
+
+  /* Typo */
+  --font-display: 'Lilita One', 'Baloo 2', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+
+  /* Rayons */
+  --r-card: 30px;
+  --r-tile: 26px;
+  --r-btn: 18px;
+
+  /* Cibles tactiles ≥ 72px */
+  --touch: 72px;
+
+  /* Espacement de bord d'écran */
+  --edge: clamp(16px, 2.7vw, 28px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}

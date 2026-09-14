@@ -1,0 +1,781 @@
+/* ─── Fond ciel : couches de papier ─────────────────────────────────── */
+.sky {
+  position: fixed;
+  inset: 0;
+  background: var(--sky);
+  overflow: hidden;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+.ground {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: block;
+}
+/* Arbres et buissons en papier découpé, posés sur la bande de terre. */
+.tree {
+  position: absolute;
+  bottom: 7%;
+  width: 22px;
+  height: 90px;
+  border-radius: 6px 6px 0 0;
+  background: var(--earth-2);
+}
+.tree::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 48px;
+  width: 110px;
+  height: 110px;
+  margin-left: -55px;
+  border-radius: 50%;
+  background: var(--leaf-3);
+  box-shadow: 6px 6px 0 var(--ink-a15);
+}
+.tree::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  width: 66px;
+  height: 66px;
+  margin-left: -46px;
+  border-radius: 50%;
+  background: var(--leaf);
+}
+.treeLeft {
+  left: 6%;
+}
+.treeRight {
+  right: 26%;
+  transform: scale(0.8);
+  transform-origin: bottom center;
+}
+.bush {
+  position: absolute;
+  bottom: 6%;
+  width: 92px;
+  height: 40px;
+  border-radius: 46px 46px 0 0;
+  background: var(--leaf-3);
+  box-shadow: 5px 4px 0 var(--ink-a15);
+}
+.bush::before {
+  content: '';
+  position: absolute;
+  left: 40%;
+  top: -14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--leaf-3);
+}
+.bushLeft {
+  left: 18%;
+}
+.bushRight {
+  right: 34%;
+  transform: scale(0.75);
+  transform-origin: bottom center;
+}
+.sun {
+  position: absolute;
+  right: 50px;
+  top: -30px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: var(--sun);
+  box-shadow: 8px 8px 0 var(--ink-a15);
+}
+.content {
+  position: absolute;
+  inset: 0;
+}
+/*
+ * Écrans qui doivent pouvoir défiler quand le contenu dépasse (accueil en
+ * portrait). `body` reste en overflow:hidden pour que les jeux gardent une
+ * scène fixe : le défilement est porté par le conteneur, pas par la page.
+ */
+.contentScroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+@media (orientation: portrait) {
+  .sun {
+    right: -30px;
+    width: 110px;
+    height: 110px;
+  }
+  .tree,
+  .bush {
+    transform: scale(0.6);
+    transform-origin: bottom center;
+  }
+  .treeRight,
+  .bushRight {
+    display: none;
+  }
+}
+
+/* ─── Nuage ────────────────────────────────────────────────────────── */
+.cloud {
+  position: absolute;
+  height: 58px;
+  width: 180px;
+  background: var(--paper);
+  border-radius: 58px;
+  box-shadow: 6px 6px 0 var(--ink-a15);
+}
+.cloud::before {
+  content: '';
+  position: absolute;
+  left: 17%;
+  top: -55%;
+  width: 39%;
+  aspect-ratio: 1;
+  background: var(--paper);
+  border-radius: 50%;
+}
+.cloud::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -35%;
+  width: 31%;
+  aspect-ratio: 1;
+  background: var(--paper);
+  border-radius: 50%;
+}
+
+/* ─── Montgolfière ─────────────────────────────────────────────────── */
+.balloon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140px;
+}
+.balloonEnvelope {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  border-radius: 50%;
+  background: var(--sun);
+  position: relative;
+  box-shadow: 6px 6px 0 var(--ink-a22);
+}
+.balloonEnvelope::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 34%;
+  width: 100%;
+  height: 20%;
+  background: var(--coral);
+}
+.balloonEnvelope::after {
+  content: '';
+  position: absolute;
+  right: -10%;
+  top: 20%;
+  width: 17%;
+  height: 60%;
+  background: var(--coral);
+  border-radius: 6px;
+}
+.balloonBasket {
+  width: 28%;
+  aspect-ratio: 2 / 1;
+  background: var(--ink);
+  border-radius: 4px;
+  margin-top: 10%;
+  position: relative;
+}
+/* Les deux cordes : une barre + son ombre décalée. */
+.balloonBasket::before {
+  content: '';
+  position: absolute;
+  left: 15%;
+  top: -70%;
+  width: 10%;
+  height: 70%;
+  background: var(--ink);
+  box-shadow: 24px 0 0 var(--ink);
+}
+
+/* ─── Bougie ───────────────────────────────────────────────────────── */
+.candle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 74px;
+}
+/* Hauteur réservée à la flamme : le corps ne bouge pas quand elle maigrit. */
+.candleFlameSlot {
+  height: 52px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+/*
+ * La flamme maigrit et se couche à mesure que le souffle monte.
+ * Pas d'animation de flottement : elle doit rester soudée à la mèche.
+ */
+.candleFlame {
+  width: 26px;
+  height: 44px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: var(--sun);
+  border: 3px solid var(--coral);
+  box-sizing: border-box;
+  transform-origin: 50% 100%;
+  transform: scale(calc(1 - 0.55 * var(--power, 0))) skewX(calc(-20deg * var(--power, 0)));
+  transition: transform 80ms linear;
+}
+.candleSmoke {
+  width: 10px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--mist-line);
+  opacity: 0.5;
+  animation: floaty 2.4s ease-in-out infinite;
+}
+.candleWick {
+  width: 5px;
+  height: 10px;
+  background: var(--ink);
+  border-radius: 3px;
+}
+/* Cire crème cerclée d'encre : lisible sur la carte blanche. */
+.candleBody {
+  width: 100%;
+  height: 96px;
+  background: var(--mist-2);
+  border: 4px solid var(--ink);
+  box-sizing: border-box;
+  border-radius: 12px 12px 8px 8px;
+  box-shadow: 6px 6px 0 var(--ink-a22);
+  position: relative;
+  overflow: hidden;
+}
+.candleStripe {
+  position: absolute;
+  left: 0;
+  top: 32%;
+  width: 100%;
+  height: 24%;
+  background: var(--coral);
+}
+
+/* ─── Avatar ───────────────────────────────────────────────────────── */
+.avatar {
+  border-radius: 50%;
+  position: relative;
+  flex: none;
+  background: var(--skin, var(--skin-1));
+  border: 0.083em solid var(--ring, var(--paper));
+  width: 1em;
+  height: 1em;
+}
+.avatar::before {
+  content: '';
+  position: absolute;
+  left: 25%;
+  top: 36%;
+  width: 11%;
+  height: 11%;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0.32em 0 0 var(--ink);
+}
+/* Bouche centrée sur la paire d'yeux, pas sur le visage : l'œil gauche
+   commence à 25 % et le droit est décalé de 0.32em, le milieu tombe donc à
+   46.5 %. On centre par transform plutôt qu'avec un `left` calculé — la
+   bordure (border-box, sans bord haut) rendrait le calcul fragile. */
+.avatar::after {
+  content: '';
+  position: absolute;
+  left: 46.5%;
+  top: 54%;
+  transform: translateX(-50%);
+  width: 30%;
+  height: 15%;
+  border: 0.045em solid var(--ink);
+  border-top: none;
+  border-radius: 0 0 1em 1em;
+}
+.avatarShadow {
+  box-shadow: 0.07em 0.07em 0 var(--ink-a20);
+}
+
+/* ─── Bouton papier ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--touch);
+  min-width: var(--touch);
+  padding: 12px 26px;
+  border-radius: var(--r-btn);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 24px;
+  box-shadow: var(--shadow-1);
+  transition:
+    transform 100ms,
+    box-shadow 100ms;
+  border: 0;
+  text-decoration: none;
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 var(--ink-a20);
+}
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.coral {
+  background: var(--coral);
+  color: var(--paper);
+  box-shadow: 5px 5px 0 var(--ink-a25);
+}
+.leaf {
+  background: var(--leaf);
+  color: var(--paper);
+  box-shadow: 5px 5px 0 var(--ink-a22);
+}
+.sunBtn {
+  background: var(--sun);
+  color: var(--paper);
+}
+.ghost {
+  background: rgba(35, 50, 74, 0.12);
+  box-shadow: none;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 15px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 16px 0 6px;
+  border-radius: 12px;
+}
+.ghost:active {
+  transform: none;
+}
+.icon {
+  padding: 0;
+  width: 128px;
+  height: 128px;
+  border-radius: 36px;
+  border: 6px solid var(--paper);
+  box-shadow: 8px 8px 0 var(--ink-a25);
+}
+.iconSm {
+  padding: 0;
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: 22px;
+}
+
+/* Pictos géométriques */
+.play {
+  width: 0;
+  height: 0;
+  border-left: 0.34em solid var(--paper);
+  border-top: 0.22em solid transparent;
+  border-bottom: 0.22em solid transparent;
+  margin-left: 0.08em;
+}
+.cross {
+  position: relative;
+  width: 0.5em;
+  height: 0.5em;
+}
+.cross::before,
+.cross::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 0.12em;
+  background: currentColor;
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.cross::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.arrow {
+  width: 0.3em;
+  height: 0.3em;
+  border-right: 0.1em solid currentColor;
+  border-top: 0.1em solid currentColor;
+  transform: rotate(45deg);
+  margin-left: -0.08em;
+}
+.arrowLeft {
+  transform: rotate(-135deg);
+  margin-left: 0.08em;
+}
+
+/* ─── Étoiles ──────────────────────────────────────────────────────── */
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--sun);
+  line-height: 1;
+  text-shadow: 2px 2px 0 var(--ink-a25);
+}
+.starOff {
+  opacity: 0.35;
+}
+.squares {
+  display: inline-flex;
+  gap: 6px;
+}
+.square {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--mist);
+}
+.squareOn {
+  background: var(--sun);
+}
+
+/* ─── Placeholder illustration ─────────────────────────────────────── */
+.placeholder {
+  border-radius: 18px;
+  background: repeating-linear-gradient(45deg, var(--mist) 0 8px, var(--mist-2) 8px 16px);
+  border: 2px dashed var(--mist-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font: 600 12px/1.3 ui-monospace, Menlo, monospace;
+  color: var(--mist-ink);
+}
+
+/* ─── Barre du haut ────────────────────────────────────────────────── */
+.topbar {
+  position: absolute;
+  left: var(--edge);
+  right: var(--edge);
+  top: calc(var(--edge) + var(--safe-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.topbar > * {
+  pointer-events: auto;
+}
+.who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.whoName {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--paper);
+  text-shadow: var(--text-shadow);
+}
+/* Coin haut droit : état du micro, puis sortie vers la liste des enfants. */
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Croix de sortie : même papier que le reste, carrée et discrète. */
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform 100ms,
+    box-shadow 100ms;
+}
+.closeBtn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 var(--ink-a20);
+}
+.closeGlyph span {
+  position: absolute;
+  width: 22px;
+  height: 5px;
+  border-radius: 3px;
+  background: currentColor;
+}
+.closeGlyph {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+.closeGlyph span:first-child {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%) rotate(45deg);
+}
+.closeGlyph span:last-child {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%) rotate(-45deg);
+}
+/* État du micro + niveau de souffle (remplace le compteur d'étoiles). */
+.micStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 8px 16px;
+  box-shadow: var(--shadow-1);
+}
+/* Micro en papier découpé : capsule + pied. Vert = capté, gris barré = non. */
+.micIcon {
+  position: relative;
+  width: 26px;
+  height: 32px;
+  color: var(--leaf-3);
+  flex: none;
+}
+.micIconOff {
+  color: var(--mist-line);
+}
+.micBody {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  width: 14px;
+  height: 20px;
+  border-radius: 7px;
+  background: currentColor;
+}
+.micStand {
+  position: absolute;
+  left: 2px;
+  top: 17px;
+  width: 22px;
+  height: 11px;
+  border: 4px solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+}
+.micStand::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 4px;
+  height: 5px;
+  background: currentColor;
+  transform: translateX(-50%);
+  border-radius: 0 0 2px 2px;
+}
+.micSlash {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--coral);
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+/* Témoin vertical, fin : il monte avec le souffle comme une petite jauge. */
+.micMeter {
+  display: block;
+  width: 6px;
+  height: 28px;
+  border-radius: 3px;
+  background: var(--mist);
+  overflow: hidden;
+}
+.micMeterFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--leaf);
+  transform-origin: center bottom;
+  transform: scaleY(0);
+}
+.tabs {
+  display: flex;
+  gap: 10px;
+}
+.tab {
+  composes: btn;
+}
+.tabDot {
+  display: inline-block;
+  width: 22px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.tabGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+.tabGrid span {
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  border-radius: 2px;
+}
+@media (orientation: portrait) {
+  .whoName {
+    font-size: 26px;
+  }
+  .micStatus {
+    gap: 9px;
+    padding: 6px 12px;
+  }
+  .micMeter {
+    height: 24px;
+  }
+  .tabs {
+    position: fixed;
+    left: 20px;
+    right: 20px;
+    bottom: calc(22px + var(--safe-bottom));
+    z-index: 5;
+  }
+  .tabs::before {
+    content: '';
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(118px + var(--safe-bottom));
+    background: var(--paper);
+    border-radius: 60px 60px 0 0;
+    box-shadow: 0 -6px 0 rgba(35, 50, 74, 0.08);
+    z-index: -1;
+  }
+  .tab {
+    flex: 1;
+    font-size: 22px;
+    padding: 0 10px;
+  }
+  .tabIdle {
+    background: var(--mist-2);
+    box-shadow: 5px 5px 0 rgba(35, 50, 74, 0.12);
+  }
+}
+
+/* ─── Bouton parents (appui long) ──────────────────────────────────── */
+.parents {
+  position: absolute;
+  left: var(--edge);
+  bottom: calc(var(--edge) + var(--safe-bottom));
+  z-index: 6;
+}
+/*
+ * Dans un écran qui défile (accueil en portrait), le bouton ne peut pas
+ * rester ancré : fixe ou absolu, les cartes passent dessous au défilement.
+ * Il reprend donc sa place dans le flux, à la fin du contenu. En paysage
+ * rien ne défile : il garde son ancrage en bas à gauche.
+ */
+@media (orientation: portrait) {
+  .contentScroll .parents {
+    position: static;
+    margin: 28px auto 0;
+    display: inline-flex;
+  }
+}
+.parentsIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.parentsIcon::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px dotted var(--ink);
+}
+.parentsFill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--coral);
+  height: 0;
+  opacity: 0.6;
+}
+.parentsPressing .parentsFill {
+  height: 100%;
+  transition: height 700ms linear;
+}
+@media (orientation: portrait) {
+  .parents {
+    bottom: calc(126px + var(--safe-bottom));
+  }
+}
+
+/* ─── Mascotte (placeholder) ───────────────────────────────────────── */
+.mascot {
+  position: absolute;
+  right: 40px;
+  bottom: 36px;
+  filter: drop-shadow(6px 6px 0 var(--ink-a15));
+}
+@media (orientation: portrait) {
+  .mascot {
+    right: 20px;
+    bottom: calc(130px + var(--safe-bottom));
+  }
+}
+
+/* ─── Sélecteur de langue ──────────────────────────────────────────── */
+.langSwitch {
+  display: inline-flex;
+  padding: 4px;
+  gap: 2px;
+  border-radius: 14px;
+  background: rgba(35, 50, 74, 0.12);
+}
+.langBtn {
+  min-width: 44px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+}
+.langOn {
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--ink-a15);
+}

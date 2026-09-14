@@ -1,0 +1,18 @@
+/* Mascottes : animations importées de Mascottes.dc.html (Claude Design). Généré par script, ne pas éditer à la main. */
+@keyframes antenna { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes armChin { 0%,100% { transform: rotate(6deg); } 50% { transform: rotate(-2deg); } }
+@keyframes armIdle { 0%,100% { transform: rotate(8deg); } 50% { transform: rotate(18deg); } }
+@keyframes armIdleL { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(-18deg); } }
+@keyframes armUp { 0%,100% { transform: rotate(14deg); } 30% { transform: rotate(-74deg); } 60% { transform: rotate(-52deg); } }
+@keyframes blink { 0%,93%,100% { transform: scaleY(1); } 96.5% { transform: scaleY(.08); } }
+@keyframes breathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-7px) scale(1.015); } }
+@keyframes celebrate { 0% { transform: translateY(0) rotate(0deg) scale(1); } 25% { transform: translateY(-46px) rotate(-9deg) scale(1.06); } 48% { transform: translateY(0) rotate(0deg) scale(.96); } 66% { transform: translateY(-20px) rotate(6deg) scale(1.03); } 100% { transform: translateY(0) rotate(0deg) scale(1); } }
+@keyframes earFlop { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(5deg); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes leanWave { 0%,100% { transform: rotate(0deg) translateY(0); } 20% { transform: rotate(-5deg) translateY(-8px); } 50% { transform: rotate(3deg) translateY(-2px); } 75% { transform: rotate(-4deg) translateY(-6px); } }
+@keyframes pop { 0% { transform: translateY(6px) scale(0); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(-64px) scale(1.15); opacity: 0; } }
+@keyframes ribbon { 0%,100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@keyframes tailSway { 0%,100% { transform: rotate(-14deg); } 50% { transform: rotate(10deg); } }
+@keyframes thinkSway { 0%,100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-3px); } }
+@keyframes tuft { 0%,100% { transform: rotate(-6deg) translateY(0); } 50% { transform: rotate(6deg) translateY(-3px); } }
+@keyframes wave { 0%,100% { transform: rotate(10deg); } 50% { transform: rotate(-58deg); } }

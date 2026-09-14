@@ -1,0 +1,26 @@
+/* Montgolfière — ciel et collines en papier découpé */
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #5ec2f0;
+}
+.canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* Vignette de la carte « Jeux » */
+.thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #8fd6f7;
+}
+.thumb canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
