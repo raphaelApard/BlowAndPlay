@@ -87,6 +87,18 @@ function segmentPoints(points: Point[], i: number, samples = 32): Point[] {
   });
 }
 
+/**
+ * Straight line between two nodes, sampled like `segmentPoints`. Used when the
+ * balloon goes back several steps at once (end of a round): following the
+ * curve would make it retrace the whole map backwards.
+ */
+function straightPoints(from: Point, to: Point, samples = 32): Point[] {
+  return Array.from({ length: samples + 1 }, (_, k) => {
+    const t = k / samples;
+    return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t };
+  });
+}
+
 interface Completed {
   gameId: string;
   levelId: string;
@@ -104,10 +116,14 @@ interface Completed {
  * strictly sequential chain would mean nearly six seconds of waiting, too
  * long for a child aged 3 to 6.
  *
- * Exception: once the adventure is over, the balloon goes back to the first
- * game for another round — nothing opens then. Relaunching the first game
- * straight away would trap the child in a loop they did not ask for; it is
- * up to them to choose their step (the play button or a dot on the map).
+ * Exceptions, at the two kinds of boundary — nothing opens by itself then:
+ *  - end of a round (every game passed at this level): the balloon comes back
+ *    to the first game, ready for the next level;
+ *  - end of the adventure (every level of every game passed): the balloon
+ *    stays on the final yellow star.
+ * Relaunching a game straight away would trap the child in a loop they did
+ * not ask for; it is up to them to choose their step (the play button or a
+ * dot on the map).
  */
 type Phase = 'hold' | 'stars' | 'party' | 'fly' | 'done';
 const HOLD_MS = 500;
@@ -185,11 +201,18 @@ export function MapScreen() {
   // True when every level is passed: the current step is the bonus star.
   const endReached = path[realCurrent]?.kind === 'bonus';
 
-  // Adventure finished (the current step is the bonus star): the balloon does
-  // not land on the star, it goes back to the first game — the child can
-  // replay whatever they want. No game opens for all that: they choose.
+  // End of a round: the child has just finished the last game of the map and
+  // the adventure goes back to the first game for the next level (the unlock
+  // order is interleaved, so `realCurrent` is already that first game). The
+  // balloon therefore comes back to the start of the map — but nothing opens
+  // by itself, as at the very end: the child chooses their step.
   const firstGameIdx = path.findIndex((n) => n.kind === 'game');
-  const restIdx = endReached && firstGameIdx >= 0 ? firstGameIdx : realCurrent;
+  const roundEnd = !endReached && animating && realCurrent === firstGameIdx && fromIdx > firstGameIdx;
+
+  // Where the balloon comes to rest. At the very end of the adventure it stays
+  // on the yellow star (the step it has just reached); otherwise on the
+  // current step, which at the end of a round is the first game again.
+  const restIdx = realCurrent;
   const balloonIdx = phase === 'done' ? restIdx : fromIdx;
 
   // Arrival celebration: every time the balloon has just landed on a step
@@ -257,7 +280,16 @@ export function MapScreen() {
     }
     if (phase === 'fly') {
       const el = balloonRef.current;
-      const curve = points[fromIdx + 1] ? segmentPoints(points, fromIdx) : [];
+      // Usually the next step along the path (one segment). At the end of a
+      // round the balloon goes back to the first game, several steps
+      // backwards: it then flies straight there rather than following the
+      // curve, which would make it retrace the whole map.
+      const curve =
+        restIdx === fromIdx + 1 && points[fromIdx + 1]
+          ? segmentPoints(points, fromIdx)
+          : points[restIdx] && points[fromIdx]
+            ? straightPoints(points[fromIdx], points[restIdx])
+            : [];
       if (!el || !curve.length) {
         setPhase('done');
         return;
@@ -294,19 +326,21 @@ export function MapScreen() {
 
   // The step the play button launches: the current step, except once the
   // adventure is over — the current step is then the bonus star, which cannot
-  // be played. The button therefore takes the step the balloon landed on
-  // (the first game), so as to stay usable on the next round.
-  const playNode = path[restIdx];
+  // be played. The button then falls back to the first game, so as to stay
+  // usable for another round (the balloon, meanwhile, stays on the star).
+  const playNode = endReached && firstGameIdx >= 0 ? path[firstGameIdx] : path[realCurrent];
 
   // Playable step: common ground for the automatic chaining and the button.
   const playable = playNode?.kind === 'game' && isNodeOpen(playNode, progress, order);
 
   // In adventure mode, the next game opens by itself once the balloon has
   // landed (`animating`: we really are arriving from a finished level, not
-  // from a plain return to the map). Exception, `endReached`: the adventure is
-  // over and the balloon is back at the first game — we relaunch nothing, the
-  // child chooses.
-  const autoOpen = playable && phase === 'done' && animating && !endReached;
+  // from a plain return to the map). Two exceptions, where the balloon comes
+  // back to the start of the map: the end of a round (`roundEnd`) and the end
+  // of the adventure (`endReached`). Sending the child straight back into the
+  // first game would trap them in a loop they did not ask for — it is up to
+  // them to choose their step (the play button or a dot on the map).
+  const autoOpen = playable && phase === 'done' && animating && !endReached && !roundEnd;
 
   // Play button: always present on the map as soon as there is a step to
   // launch — including during the arrival animation and when the automatic
