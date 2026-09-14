@@ -99,7 +99,7 @@ interface Completed {
  *  2. les cotillons tombent (`party`) ;
  *  3. le ballon s'envole vers l'étape suivante, pendant que les cotillons
  *     finissent de tomber ;
- *  4. l'étape suivante s'ouvre toute seule.
+ *  4. l'étape suivante s'ouvre aussitôt le ballon posé.
  * Le vol démarre avant la fin des cotillons (`PARTY_BEFORE_FLY_MS`) : un
  * enchaînement strictement séquentiel ferait près de six secondes d'attente,
  * trop long pour un enfant de 3 à 6 ans.
@@ -110,8 +110,6 @@ const STARS_MS = 900;
 const FLY_MS = 1500;
 /** Temps de cotillons seuls avant que le ballon ne parte. */
 const PARTY_BEFORE_FLY_MS = 1200;
-/** Petit temps de pose une fois le ballon arrivé, avant d'ouvrir le jeu. */
-const OPEN_AFTER_LAND_MS = 400;
 
 /** Durée des confettis de fin (accordée à l'animation `fall`). */
 const CONFETTI_MS = 3200;
@@ -295,15 +293,15 @@ export function MapScreen() {
     if (breathStatus === 'idle') void start();
   }, [breathStatus, start]);
 
-  // Le ballon vient de se poser sur une nouvelle étape : on ouvre le jeu.
-  // L'enfant n'a rien à viser ni à souffler — l'aventure enchaîne toute seule.
-  // Seulement après une animation d'arrivée (`animating`) : un simple retour
-  // sur la carte doit laisser l'enfant regarder le chemin.
+  // Le ballon vient de se poser sur une nouvelle étape : on ouvre le jeu
+  // aussitôt, sans temps mort. L'enfant n'a rien à viser ni à souffler —
+  // l'aventure enchaîne toute seule. Seulement après une animation d'arrivée
+  // (`animating`) : un simple retour sur la carte doit laisser l'enfant
+  // regarder le chemin.
   useEffect(() => {
     if (phase !== 'done' || !animating) return;
     if (currentNode?.kind !== 'game' || !isNodeOpen(currentNode, progress, order)) return;
-    const t = window.setTimeout(() => open(currentNode), OPEN_AFTER_LAND_MS);
-    return () => window.clearTimeout(t);
+    open(currentNode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, animating]);
 
