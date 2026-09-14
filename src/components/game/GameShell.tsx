@@ -168,6 +168,15 @@ export function GameShell({ game, level, profileId }: Props) {
         </PaperButton>
         <BreathStrip progress={progress} />
         <ParentsButton className={styles.parents} />
+        {/* Dev shortcut: finishes the level without blowing, to reach the map,
+            the reward screen or the next level quickly. `import.meta.env.DEV`
+            is replaced by `false` at build time, so this block is removed from
+            the production bundle entirely. */}
+        {import.meta.env.DEV && (
+          <PaperButton small tone="ghost" className={styles.devFinish} onClick={() => handleComplete({ stars: 3 })}>
+            Finish ★★★
+          </PaperButton>
+        )}
       </div>
 
       {ready && hint !== 'gone' && (

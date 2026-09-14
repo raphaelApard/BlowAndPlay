@@ -66,6 +66,17 @@
   bottom: calc(var(--edge) + var(--safe-bottom));
 }
 
+/* Dev-only shortcut (see GameShell): top right, clear of the exit button on
+   the left and of the strip, parents button and mascot at the bottom. */
+.devFinish {
+  position: absolute;
+  right: var(--edge);
+  top: calc(var(--edge) + var(--safe-top));
+  z-index: 4;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
 .paused {
   position: absolute;
   inset: 0;
