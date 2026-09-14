@@ -824,7 +824,9 @@
   bottom: 52px;
   width: 104px;
   height: 104px;
-  border-radius: 50%;
+  /* Carré arrondi, comme les pastilles de la carte et les boutons du kit
+     (papier découpé) — pas un rond. */
+  border-radius: 28px;
   z-index: 4;
   animation: nodePlayIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, floaty 3s ease-in-out 0.4s infinite;
 }
@@ -851,6 +853,7 @@
     bottom: calc(146px + var(--safe-bottom));
     width: 88px;
     height: 88px;
+    border-radius: 24px;
   }
 }
 
