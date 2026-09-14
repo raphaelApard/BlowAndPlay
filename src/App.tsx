@@ -9,7 +9,6 @@ import { HomeScreen } from './screens/HomeScreen';
 import { MapScreen } from './screens/MapScreen';
 import { ParentsScreen } from './screens/ParentsScreen';
 import { PlayScreen } from './screens/PlayScreen';
-import { RewardScreen } from './screens/RewardScreen';
 import { actions, getAppState, selectCurrentProfile, useAppState } from './store/store';
 
 /** Redirects to the home screen if no profile is selected. */
@@ -86,14 +85,6 @@ export default function App() {
             element={
               <RequireProfile>
                 <PlayScreen />
-              </RequireProfile>
-            }
-          />
-          <Route
-            path="/reward"
-            element={
-              <RequireProfile>
-                <RewardScreen />
               </RequireProfile>
             }
           />

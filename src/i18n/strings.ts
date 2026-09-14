@@ -73,12 +73,6 @@ const fr = {
   'games.blows': '{n} souffles',
   'games.finish': 'Terminer',
 
-  // ── Reward
-  'reward.bravo': 'Bravo !',
-  'reward.stars': '{n} étoiles',
-  'reward.replay': 'Rejouer',
-  'reward.next': 'Continuer',
-
   // ── Espace parents
   'parents.title': 'Espace parents',
   'parents.children': 'Enfants',
@@ -212,11 +206,6 @@ const en: Record<StringKey, string> = {
   'games.level': 'level {id}',
   'games.blows': '{n} blows',
   'games.finish': 'Finish',
-
-  'reward.bravo': 'Well done!',
-  'reward.stars': '{n} stars',
-  'reward.replay': 'Play again',
-  'reward.next': 'Continue',
 
   'parents.title': 'Parents area',
   'parents.children': 'Children',

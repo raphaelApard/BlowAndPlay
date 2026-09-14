@@ -111,7 +111,7 @@ const { intensity } = useBreathState();
 - HUD: quit button, level badge, paper strip (intensity + progress);
 - records stars + breath statistics in the profile's progress;
 - chains: in adventure mode, back to the map (animation towards the next step);
-  from the Games tab (`?mode=free`), reward screen then the game's next level.
+  from the Games tab (`?mode=free`), back to the list, which celebrates there.
 
 A game must **not**: mention anything medical, show text to the child
 (use pictos, shapes, colours), or handle navigation.

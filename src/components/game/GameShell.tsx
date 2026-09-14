@@ -27,8 +27,9 @@ interface Props {
  */
 export function GameShell({ game, level, profileId }: Props) {
   const navigate = useNavigate();
-  // `?mode=free`: launched from the Games tab (reward screen, back to the games).
-  // Otherwise: adventure (straight back to the map, which animates the move to the next step).
+  // `?mode=free`: launched from the Games tab (back to the games, which
+  // celebrates there). Otherwise: adventure (back to the map, which animates
+  // the move to the next step).
   const [search] = useSearchParams();
   const free = search.get('mode') === 'free';
   const playPath = `/play/${game.id}/${level.id}${free ? '?mode=free' : ''}`;
@@ -135,7 +136,10 @@ export function GameShell({ game, level, profileId }: Props) {
       const stats: BreathSessionStats = { ...rest, meanIntensity: samples ? intensitySum / samples : 0 };
       actions.recordResult(profileId, game.id, level.id, result, stats);
       const completed = { gameId: game.id, levelId: level.id, stars: result.stars };
-      if (free) navigate('/reward', { replace: true, state: completed });
+      // Both modes go back where the child came from, carrying what they have
+      // just finished: the games list celebrates on the spot, the map animates
+      // the move to the next step.
+      if (free) navigate('/games', { replace: true, state: { completed } });
       else navigate('/map', { replace: true, state: { completed } });
     },
     [profileId, game.id, level.id, navigate, free],
@@ -169,7 +173,7 @@ export function GameShell({ game, level, profileId }: Props) {
         <BreathStrip progress={progress} />
         <ParentsButton className={styles.parents} />
         {/* Dev shortcut: finishes the level without blowing, to reach the map,
-            the reward screen or the next level quickly. `import.meta.env.DEV`
+            the games list or the next level quickly. `import.meta.env.DEV`
             is replaced by `false` at build time, so this block is removed from
             the production bundle entirely. */}
         {import.meta.env.DEV && (

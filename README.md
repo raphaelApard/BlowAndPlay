@@ -18,7 +18,8 @@ pnpm test       # vitest: cross-game difficulty balance
 
 Home (profile) → Calibration (every session, ~5 s)
 → Adventure map → Game → back to the map (stars, and the balloon flying to the
-next step). Games tab → Game (`?mode=free`) → Reward → next level of the same game.
+next step). Games tab → Game (`?mode=free`) → back to the list, which welcomes
+the child with confetti.
 
 ![The Games tab: one card per game with its thumbnail, title, level dots and a play button](screenshots/game.png)
 
@@ -50,7 +51,7 @@ Games:
   from the "Souffle-Fusée" and "Blast Off - Screens" designs. DOM rendering
   driven by refs in a rAF loop; 3 levels (base altitude, reference time for the
   stars). End of game: landing on the round Moon, then a celebration (a lap
-  around the Moon with a trail, rings, confetti) before the reward screen.
+  around the Moon with a trail, rings, confetti) before leaving the game.
 
   ![Souffle-Fusée: the rocket climbing towards the Moon, the breath gauge at the bottom of the screen](screenshots/rocket.png)
 

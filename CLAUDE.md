@@ -46,7 +46,7 @@ src/
   audio/       8 Web-Audio-synthesized sounds (no audio assets)
 ```
 
-Routes (`src/App.tsx`): `/` → `/calibration` → `/map` | `/games` → `/play/:gameId/:levelId` → `/map` or `/reward`.
+Routes (`src/App.tsx`): `/` → `/calibration` → `/map` | `/games` → `/play/:gameId/:levelId` → back to `/map` or `/games`.
 Every route except `/` and `/parents` requires a selected profile.
 
 ### Games are a plugin system — this is the core design
