@@ -294,18 +294,19 @@ export function MapScreen() {
 
   // Étape courante jouable : socle commun à l'enchaînement automatique et au
   // bouton « jouer ».
-  const playable = phase === 'done' && currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
+  const playable = currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
 
   // En aventure, le jeu suivant s'ouvre tout seul une fois le ballon posé
   // (`animating` : on arrive bien d'un niveau terminé, pas d'un simple retour
   // sur la carte). Exception, `endReached` : l'aventure est finie et le ballon
   // est revenu au premier jeu — on ne relance rien, l'enfant choisit.
-  const autoOpen = playable && animating && !endReached;
+  const autoOpen = playable && phase === 'done' && animating && !endReached;
 
-  // Bouton « jouer » : quand rien ne s'enchaîne tout seul. C'est le cas d'un
-  // retour sur la carte hors animation, et du tour suivant une fois l'aventure
-  // terminée.
-  const showPlay = playable && !autoOpen;
+  // Bouton « jouer » : toujours présent sur la carte dès qu'il y a une étape à
+  // lancer — y compris pendant l'animation d'arrivée et quand l'enchaînement
+  // automatique va prendre la main. L'enfant a ainsi un repère stable, qui ne
+  // clignote pas d'un écran à l'autre.
+  const showPlay = playable;
 
   useEffect(() => {
     if (!autoOpen || currentNode?.kind !== 'game') return;
