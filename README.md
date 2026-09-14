@@ -139,7 +139,3 @@ declares none: it depends only on the global difficulty.
 Everything stays on the device (`localStorage`, key `souffle-aventure:v1`).
 No medical data; the parents area shows stars, and the number and duration of
 breaths per game.
-
-## Deployment
-
-Static SPA: `vercel.json` rewrites all routes to `index.html`.
