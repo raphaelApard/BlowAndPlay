@@ -5,7 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 "Souffle Aventure" — breath-controlled (microphone) therapeutic games for children aged 3–6.
-UI language is French/English; **the code, comments and docs are written in French** — match that when editing.
+UI language is French/English; **the code, comments and docs are written in English** — match that when editing.
+Identifiers that are also user-facing names or paths (game ids and folders like `souffle-fusee`,
+i18n FR dictionary values, `{ fr, en }` data) stay as they are — renaming them breaks the UI, the
+registry and saved progress.
 Tablet landscape (1024×640) first, mobile portrait supported. No backend: everything lives in `localStorage`.
 
 ## Commands
@@ -53,10 +56,10 @@ The user's explicit constraint: **build the system for adding games, don't restr
 `src/games/registry.ts` eagerly `import.meta.glob`s `./*/index.ts`. Any folder exporting a default
 `defineGame({...})` is registered at build time; folders prefixed `_` (`_template`, `_shared`) are skipped.
 The registry validates ids and level ids and **throws at load** on duplicates or empty levels.
-Adding a folder is all it takes — the Jeux tab, the adventure map (`src/adventure/path.ts` interleaves
+Adding a folder is all it takes — the Games tab, the adventure map (`src/adventure/path.ts` interleaves
 level 1 of every game, then level 2…, ordered by `order`), progress and the parents area all follow.
 
-To add a game: `cp -r src/games/_template src/games/mon-jeu`, then fill `index.ts` and write `Game.tsx`.
+To add a game: `cp -r src/games/_template src/games/my-game`, then fill `index.ts` and write `Game.tsx`.
 Read `src/games/README.md` for the full contract before doing this.
 
 A game folder holds:
@@ -99,7 +102,8 @@ by `migrateDifficulty`.
 
 Games must demand **comparable effort at equal difficulty** — the user's requirement, because a game much
 harder than the others frustrates the child. Every game therefore ships `simulate.ts`, replaying its loop
-against the shared "enfant type" model (`src/games/balance/child.ts`, a yardstick, not a real child) and
+against the shared "typical child" model (`TYPICAL_CHILD` in `src/games/balance/child.ts`, a yardstick,
+not a real child) and
 returning per-frame intent (`long` / `bursts` / `hold` / `rest`).
 
 `pnpm balance` simulates 7 games × 3 levels × 10 difficulties = 210 runs and asserts:

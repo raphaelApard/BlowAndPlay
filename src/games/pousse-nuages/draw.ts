@@ -1,14 +1,14 @@
 /**
- * Dessin « papier découpé » de Pousse-nuages : ciel, soleil à visage,
+ * Cut-paper drawing of Pousse-nuages: sky, sun with a face,
  * nuages boudeurs, collines fleuries. Fonctions pures sur un canvas 2D,
- * partagées entre le jeu et la vignette.
+ * shared between the game and the thumbnail.
  */
 
 import { seeded, mixHex } from '../_shared/math';
 import { cut } from '../_shared/canvas';
 
-// Réexportés pour que le jeu, sa simulation et sa vignette gardent
-// un seul point d'entrée : `./draw`.
+// Re-exported so that the game, its simulation and its thumbnail keep a
+// single entry point: `./draw`.
 export { clamp01, seeded, lerp, mixHex } from '../_shared/math';
 export { INK, cut } from '../_shared/canvas';
 
@@ -25,7 +25,7 @@ export const PETALS = ['#ff6b6b', '#ff9a4d', '#9d7bef', '#5ec2f0', '#ff7fb1'];
 
 // ─── Ciel et soleil ──────────────────────────────────────────────────
 
-/** Le ciel s'éclaircit avec `bright` (0 = couvert, 1 = grand soleil). */
+/** The sky brightens with `bright` (0 = overcast, 1 = bright sun). */
 export function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number, bright: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
   g.addColorStop(0, mixHex('#4aa3d8', SKY_TOP, bright));
@@ -35,8 +35,8 @@ export function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number, bri
 }
 
 /**
- * Soleil à visage. `bright` (0..1) : pâle et boudeur derrière les nuages,
- * éclatant et souriant à la fin. `spin` : rotation des rayons.
+ * Sun with a face. `bright` (0..1): pale and sulky behind the clouds,
+ * radiant and smiling at the end. `spin`: rotation of the rays.
  */
 export function drawSun(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, bright: number, spin: number, time: number) {
   ctx.save();
@@ -110,7 +110,7 @@ export function drawSun(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
 
 // ─── Nuages ──────────────────────────────────────────────────────────
 
-/** Silhouettes de nuages : joufflu, allongé, haut, orageux (dentelé). */
+/** Cloud silhouettes: chubby, elongated, tall, stormy (jagged). */
 export type CloudKind = 'puffy' | 'long' | 'tall' | 'storm';
 const CLOUD_KINDS: CloudKind[] = ['puffy', 'long', 'tall', 'storm'];
 
@@ -120,15 +120,15 @@ export const CLOUD_COLORS: [string, string][] = [
   ['#b9c6d4', '#94a5b8'], // gris orage
   ['#ffd6e0', '#f5b3c4'], // rose
   ['#e4d9ff', '#c7b8f5'], // lavande
-  ['#d6f0ff', '#b1dcf5'], // bleu pâle
-  ['#fff3c4', '#f5df95'], // crème
+  ['#d6f0ff', '#b1dcf5'], // pale blue
+  ['#fff3c4', '#f5df95'], // cream
 ];
 
-/** Bosses d'un nuage (positions relatives, rayons) — fixes pour une forme donnée. */
+/** A cloud's humps (relative positions, radii) — fixed for a given shape. */
 export interface CloudShape {
   kind: CloudKind;
   bumps: { x: number; y: number; r: number }[];
-  /** Largeur totale relative (pour le hors-écran). */
+  /** Total relative width (for off-screen handling). */
   w: number;
   h: number;
   color: string;
@@ -137,7 +137,7 @@ export interface CloudShape {
 
 /**
  * Forme et couleur du nuage n° `index` : silhouette et teinte tournent
- * pour que deux nuages qui se suivent soient toujours différents.
+ * so that two consecutive clouds are always different.
  */
 export function makeCloudShape(seed: number, index = 0): CloudShape {
   const rand = seeded(seed);
@@ -160,7 +160,7 @@ export function makeCloudShape(seed: number, index = 0): CloudShape {
         kind,
         bumps: series(6, (t) => {
           const b = bump(t, 1.8, 0.22, 0.24, 0.2);
-          // Dentelé : une bosse sur deux est plus haute et plus petite
+          // Jagged: every other hump is taller and smaller
           return t * 5 % 2 >= 1 ? { ...b, y: b.y - 0.18, r: b.r * 0.75 } : b;
         }),
         w: 2.3,
@@ -174,8 +174,8 @@ export function makeCloudShape(seed: number, index = 0): CloudShape {
 }
 
 /**
- * Nuage boudeur. `s` = échelle (px pour 1 unité de forme), `squash` (0..1)
- * l'écrase horizontalement quand on le pousse, `mood` : -1 grognon → +1 surpris.
+ * Sulky cloud. `s` = scale (px per 1 shape unit), `squash` (0..1) squashes
+ * it horizontally when pushed, `mood`: -1 grumpy → +1 surprised.
  */
 export function drawCloud(ctx: CanvasRenderingContext2D, shape: CloudShape, x: number, y: number, s: number, squash: number, mood: number, time: number) {
   ctx.save();
@@ -215,7 +215,7 @@ export function drawCloud(ctx: CanvasRenderingContext2D, shape: CloudShape, x: n
     ctx.arc(0, 0.26 * s, 0.06 * s * mood, 0, Math.PI * 2);
     ctx.stroke();
   } else {
-    // Grognon : sourcils froncés + moue
+    // Grumpy: furrowed brows + pout
     ctx.beginPath();
     ctx.moveTo(-0.3 * s, -0.12 * s);
     ctx.lineTo(-0.14 * s, -0.06 * s);
@@ -238,7 +238,7 @@ export function drawHills(ctx: CanvasRenderingContext2D, w: number, h: number, u
   void unit;
 }
 
-/** Fleur en papier : tige, pétales, cœur. `bloom` (0..1) = éclosion. */
+/** Paper flower: stem, petals, heart. `bloom` (0..1) = blossoming. */
 export function drawFlower(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, color: string, bloom: number, time: number) {
   if (bloom <= 0) return;
   ctx.save();

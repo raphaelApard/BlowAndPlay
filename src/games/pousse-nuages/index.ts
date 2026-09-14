@@ -4,16 +4,16 @@ import { simulate } from './simulate';
 import { Thumbnail } from './Thumbnail';
 
 /**
- * Pousse-nuages — le soleil boude derrière les nuages. Chaque souffle court
+ * Pousse-nuages — the sun sulks behind the clouds. Each short blow
  * pousse le nuage vers la droite ; il glisse, puis revient doucement si on
- * n'insiste pas. Une fois chassé, le suivant arrive, jusqu'au grand soleil.
- * Les souffles longs s'essoufflent : ce sont les souffles courts et répétés
+ * does not persist. Once chased away, the next one arrives, up to the big
+ * sun. Long blows run out of steam: it is the short, repeated blows
  * qui poussent le mieux.
  */
 export interface PousseNuagesLevel extends LevelBase {
-  /** Nombre de nuages à chasser. */
+  /** Number of clouds to chase away. */
   clouds: number;
-  /** Temps de référence pour 3 étoiles (ms). 2 étoiles jusqu'à 1,6×, sinon 1. */
+  /** Reference time for 3 stars (ms). 2 stars up to 1.6×, otherwise 1. */
   parMs: number;
 }
 

@@ -1,21 +1,21 @@
 import { clamp01 } from './draw';
 
-/** Règles du jeu partagées entre le composant et la simulation d'équilibrage. */
+/** Game rules shared between the component and the balance simulation. */
 
-/** Le hérisson entre chez lui : porte qui s'ouvre, il rétrécit dans l'embrasure. */
+/** The hedgehog goes inside: the door opens, it shrinks into the doorway. */
 export const ENTER_MS = 1400;
-/** Fête : fenêtre allumée, cœurs, feuilles qui tombent. */
+/** Celebration: lit window, hearts, falling leaves. */
 export const PARTY_MS = 3000;
-/** Feuilles envolées par frame à intensité 1. */
+/** Leaves blown away per frame at intensity 1. */
 export const BLOW_RATE = 0.28;
-/** Distance d'arrêt avant le tas (unités). */
+/** Stopping distance before the pile (units). */
 export const STOP_BEFORE = 82;
-/** Vitesse de marche du hérisson (px/frame, avant `unit`). */
+/** Walking speed of the hedgehog (px/frame, before `unit`). */
 export const WALK_SPEED = 1.7;
-/** Distance d'arrêt avant le terrier (unités). */
+/** Stopping distance before the burrow (units). */
 export const END_BEFORE = 30;
 
-/** Difficulté globale (0 → 1) → feuilles par tas ×1 → ×2,2. */
+/** Global difficulty (0 → 1) → leaves per pile ×1 → ×2.2. */
 export function tuning(difficulty: number) {
   return { leaves: 1 + clamp01(difficulty) * 1.2 };
 }

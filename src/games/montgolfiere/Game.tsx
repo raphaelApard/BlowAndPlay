@@ -50,9 +50,9 @@ type Phase = 'ground' | 'flight' | 'landing' | 'party';
 
 interface Sim {
   phase: Phase;
-  /** Défilement du monde (px monde). */
+  /** World scroll (world px). */
   worldX: number;
-  /** Centre de l'enveloppe (px écran). */
+  /** Centre of the envelope (screen px). */
   by: number;
   vy: number;
   power: number;
@@ -67,8 +67,8 @@ interface Sim {
 }
 
 /**
- * Montgolfière. Canvas 2D piloté par une boucle rAF, état de simulation
- * dans une ref. Le ballon reste à une abscisse fixe ; le décor défile.
+ * Montgolfière. Canvas 2D driven by a rAF loop, simulation state in a ref.
+ * The balloon stays at a fixed x; the scenery scrolls past.
  */
 export function Game({ level, breath, width, height, paused, difficulty, onProgress, onComplete }: GameProps<MontgolfiereLevel>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -135,7 +135,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       drawHills(ctx, width, groundY, wx * 0.5 + 300, unit, HILL_NEAR, 70, 300);
       drawGround(ctx, width, height, groundY, wx, unit);
 
-      // Plateforme de départ (sous le ballon au sol) et d'arrivée
+      // Starting platform (under the balloon on the ground) and arrival one
       drawPad(ctx, bx - wx, groundY, unit, false, 0, t);
       const padScreenX = bx + (padX * unit - wx);
       const flag = s.partyAt >= 0 ? clamp01((t - s.partyAt) / 700) : 0;
@@ -149,7 +149,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         drawObstacle(ctx, o.kind, x, groundY, o.w * unit, o.h * unit, wobble);
       }
 
-      // Ballon : petit balancement, secousse après un choc
+      // Balloon: slight swaying, a shake after an impact
       const sinceBump = t - s.lastBumpAt;
       const shake = sinceBump < 500 ? Math.sin(sinceBump / 30) * (1 - sinceBump / 500) * 0.12 : 0;
       const tilt = Math.sin(t / 900) * 0.03 + s.vy * 0.01 + shake;
@@ -189,7 +189,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
 
       switch (s.phase) {
         case 'ground': {
-          // Un souffle soutenu allume le brûleur : décollage.
+          // A sustained blow lights the burner: take-off.
           s.blowMs = raw > TAKEOFF_THRESHOLD ? s.blowMs + dt : Math.max(0, s.blowMs - dt * 2);
           if (s.blowMs >= TAKEOFF_MS) {
             s.phase = 'flight';
@@ -204,13 +204,13 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
           const ease = ramp * ramp * (3 - 2 * ramp);
           s.worldX += speed * ease * k;
 
-          // Souffler fait monter ; sinon le ballon redescend doucement vers le bas de l'écran.
+          // Blowing makes it rise; otherwise the balloon drifts back down towards the bottom of the screen.
           const target = s.power > 0.06 ? -(LIFT_BASE + s.power * LIFT_POWER) * unit : SINK * unit;
           s.vy += (target - s.vy) * Math.min(1, 0.09 * k);
           s.by = Math.max(ceilY, Math.min(floorY, s.by + s.vy * k));
           if (s.by === floorY && s.vy > 0) s.vy = 0;
 
-          // Chocs avec les obstacles (boîte de l'enveloppe + nacelle).
+          // Impacts with the obstacles (envelope box + basket).
           if (t - s.lastBumpAt > BUMP_COOLDOWN_MS) {
             const left = bx - R * 0.9;
             const right = bx + R * 0.9;

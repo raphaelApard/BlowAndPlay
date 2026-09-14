@@ -7,7 +7,7 @@ export function Thumbnail() {
   return <CanvasThumbnail className={styles.thumb} paint={paint} />;
 }
 
-/** Dessin de la vignette (voir `CanvasThumbnail` pour l'échafaudage). */
+/** Drawing of the thumbnail (see `CanvasThumbnail` for the scaffolding). */
 function paint(ctx: CanvasRenderingContext2D, w: number, h: number, unit: number) {
   const groundY = h * 0.86;
 

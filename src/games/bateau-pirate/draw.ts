@@ -1,14 +1,14 @@
 /**
- * Dessin « papier découpé » de la carte au trésor : mer, îles, bateau.
- * Fonctions pures sur un CanvasRenderingContext2D, partagées entre le jeu
+ * Cut-paper drawing of the treasure map: sea, islands, boat.
+ * Pure functions on a CanvasRenderingContext2D, shared between the game
  * et la vignette.
  */
 
 import { clamp01, seeded } from '../_shared/math';
 import { cut } from '../_shared/canvas';
 
-// Réexportés pour que le jeu, sa simulation et sa vignette gardent
-// un seul point d'entrée : `./draw`.
+// Re-exported so that the game, its simulation and its thumbnail keep a
+// single entry point: `./draw`.
 export { clamp01, seeded } from '../_shared/math';
 export { INK, cut } from '../_shared/canvas';
 
@@ -33,7 +33,7 @@ export const CORAL = '#ff6b6b';
 
 // ─── Chemin ──────────────────────────────────────────────────────────
 
-/** Positions (0..1) du port puis des points d'amarrage : zigzag de gauche à droite. */
+/** Positions (0..1) of the port then of the mooring points: a zigzag from left to right. */
 export function layoutIslands(count: number, seed: number): Pt[] {
   const rand = seeded(seed);
   const pts: Pt[] = [{ x: 0.09, y: 0.56 }];
@@ -46,17 +46,17 @@ export function layoutIslands(count: number, seed: number): Pt[] {
 }
 
 export interface Route {
-  /** Points échantillonnés (px). */
+  /** Sampled points (px). */
   samples: Pt[];
-  /** Longueur cumulée à chaque échantillon. */
+  /** Cumulative length at each sample. */
   cum: number[];
   /** Longueur totale. */
   total: number;
-  /** Distance (le long du chemin) de chaque point d'ancrage (port + îles). */
+  /** Distance (along the path) of each anchor point (port + islands). */
   anchorDist: number[];
 }
 
-/** Courbe de Catmull-Rom passant par les ancres, échantillonnée. */
+/** Catmull-Rom curve passing through the anchors, sampled. */
 export function buildRoute(anchors: Pt[], perSegment = 48): Route {
   const P = (i: number) => anchors[Math.max(0, Math.min(anchors.length - 1, i))];
   const samples: Pt[] = [];
@@ -87,7 +87,7 @@ export function buildRoute(anchors: Pt[], perSegment = 48): Route {
   return { samples, cum, total: cum[cum.length - 1], anchorDist: anchorIndex.map((i) => cum[i]) };
 }
 
-/** Position et direction (unitaire) à une distance donnée le long du chemin. */
+/** Position and (unit) direction at a given distance along the path. */
 export function routeAt(route: Route, d: number): { x: number; y: number; dx: number; dy: number } {
   const { samples, cum } = route;
   const dist = Math.max(0, Math.min(route.total, d));
@@ -108,7 +108,7 @@ export function routeAt(route: Route, d: number): { x: number; y: number; dx: nu
   return { x: a.x + ddx * t, y: a.y + ddy * t, dx: ddx / len, dy: ddy / len };
 }
 
-// ─── Décor ───────────────────────────────────────────────────────────
+// ─── Scenery ─────────────────────────────────────────────────────────
 
 export function drawSea(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -148,7 +148,7 @@ export function drawWaves(ctx: CanvasRenderingContext2D, waves: Wave[], w: numbe
   ctx.restore();
 }
 
-/** Pointillés de carte au trésor entre deux ancres (segment du chemin). */
+/** Treasure-map dashes between two anchors (a segment of the path). */
 export function drawRouteDashes(ctx: CanvasRenderingContext2D, route: Route, from: number, to: number, unit: number, color: string, alpha: number) {
   const { samples, cum } = route;
   const a = route.anchorDist[from];
@@ -176,7 +176,7 @@ function palm(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, le
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(s, s);
-  // Tronc courbé
+  // Curved trunk
   ctx.strokeStyle = TRUNK;
   ctx.lineWidth = 6;
   ctx.lineCap = 'round';
@@ -207,7 +207,7 @@ function palm(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, le
   ctx.restore();
 }
 
-/** Coffre au trésor (fermé ou ouvert, avec pièces). */
+/** Treasure chest (closed or open, with coins). */
 export function drawChest(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, open: number) {
   ctx.save();
   ctx.translate(x, y);
@@ -216,7 +216,7 @@ export function drawChest(ctx: CanvasRenderingContext2D, x: number, y: number, s
   ctx.fillStyle = HULL_STRIPE;
   ctx.fillRect(-18, -2, 36, 4);
   if (open > 0) {
-    // Or qui déborde
+    // Overflowing gold
     ctx.fillStyle = GOLD;
     ctx.beginPath();
     ctx.ellipse(0, -10, 16, 6 * open, 0, 0, Math.PI * 2);
@@ -234,7 +234,7 @@ export function drawChest(ctx: CanvasRenderingContext2D, x: number, y: number, s
 }
 
 export interface IslandStyle {
-  /** Échelle de base (1 = ~90px de large). */
+  /** Base scale (1 = ~90px wide). */
   s: number;
   /** Nombre de palmiers (1..2). */
   palms: number;
@@ -248,7 +248,7 @@ export function makeIslandStyles(count: number, seed: number): IslandStyle[] {
 
 export type IslandState = 'todo' | 'next' | 'done';
 
-/** Une île : sable, herbe, palmiers ; drapeau une fois visitée ; halo si c'est la prochaine. */
+/** An island: sand, grass, palm trees; a flag once visited; a halo if it is the next one. */
 export function drawIsland(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -275,7 +275,7 @@ export function drawIsland(
     ctx.restore();
   }
   ctx.scale(s, s);
-  // Écume autour de l'île
+  // Foam around the island
   ctx.fillStyle = 'rgba(255,255,255,0.45)';
   ctx.beginPath();
   ctx.ellipse(0, 6, 54, 30, 0, 0, Math.PI * 2);
@@ -296,7 +296,7 @@ export function drawIsland(
   }
 
   if (state === 'done') {
-    // Drapeau planté : l'île est conquise
+    // Flag planted: the island is conquered
     ctx.strokeStyle = FLAG;
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -318,7 +318,7 @@ export function drawIsland(
   ctx.restore();
 }
 
-/** Port de départ : îlot et ponton en bois, à gauche du bateau (ancre = position du bateau). */
+/** Starting port: islet and wooden jetty, to the left of the boat (anchor = the boat's position). */
 export function drawHarbor(ctx: CanvasRenderingContext2D, x: number, y: number, unit: number) {
   ctx.save();
   ctx.translate(x - 46 * unit, y);
@@ -335,7 +335,7 @@ export function drawHarbor(ctx: CanvasRenderingContext2D, x: number, y: number, 
 
 /**
  * Le bateau pirate. `power` (0..1) gonfle la voile ; `dx` donne le sens
- * (miroir si le bateau va vers la gauche), `tilt` un léger roulis.
+ * (mirrored if the boat is heading left), `tilt` a slight roll.
  */
 export function drawBoat(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, dx: number, dy: number, power: number, time: number) {
   ctx.save();
@@ -346,10 +346,10 @@ export function drawBoat(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   ctx.rotate(tilt);
   ctx.translate(0, Math.sin(time / 700) * 1.5);
 
-  // Mât
+  // Mast
   cut(ctx, () => ctx.rect(-2, -52, 4, 52), FLAG, 2);
 
-  // Voile, gonflée vers l'avant
+  // Sail, billowing forward
   const bulge = 8 + power * 22;
   cut(
     ctx,
@@ -361,7 +361,7 @@ export function drawBoat(ctx: CanvasRenderingContext2D, x: number, y: number, s:
     SAIL,
     3,
   );
-  // Bande rouge, découpée dans la voile
+  // Red band, cut out of the sail
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(3, -46);
@@ -372,7 +372,7 @@ export function drawBoat(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   ctx.fillRect(0, -33, 60, 6);
   ctx.restore();
 
-  // Pavillon noir à tête de mort
+  // Black skull-and-crossbones flag
   cut(
     ctx,
     () => {
@@ -419,7 +419,7 @@ export function drawBoat(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   ctx.restore();
 }
 
-/** Sillage : petites bulles blanches derrière le bateau. */
+/** Wake: small white bubbles behind the boat. */
 export function drawWake(ctx: CanvasRenderingContext2D, route: Route, dist: number, vel: number, unit: number, time: number) {
   if (vel < 0.15) return;
   ctx.save();
@@ -437,7 +437,7 @@ export function drawWake(ctx: CanvasRenderingContext2D, route: Route, dist: numb
   ctx.restore();
 }
 
-/** Souffle visible : petites lignes de vent qui poussent la voile, derrière le bateau. */
+/** Visible breath: small wind lines pushing the sail, behind the boat. */
 export function drawWind(ctx: CanvasRenderingContext2D, x: number, y: number, dx: number, dy: number, s: number, power: number, time: number) {
   if (power < 0.08) return;
   ctx.save();
@@ -445,7 +445,7 @@ export function drawWind(ctx: CanvasRenderingContext2D, x: number, y: number, dx
   ctx.lineCap = 'round';
   ctx.lineWidth = 3 * s;
   ctx.globalAlpha = Math.min(1, power * 1.5);
-  // Repère local : (dx, dy) = avant, (nx, ny) = travers.
+  // Local frame: (dx, dy) = forward, (nx, ny) = athwart.
   const nx = -dy;
   const ny = dx;
   const mastTop = 36 * s;

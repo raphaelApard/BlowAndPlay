@@ -23,8 +23,8 @@ export function HomeScreen() {
   const { profiles } = useAppState();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  // `?new=1` : arrivée depuis l'espace parents, qui renvoie ici pour créer
-  // un enfant plutôt que de dupliquer le formulaire.
+  // `?new=1`: arriving from the parents area, which sends us here to create
+  // a child rather than duplicating the form.
   const creating = params.get('new') === '1';
   const setCreating = (on: boolean) => setParams(on ? { new: '1' } : {}, { replace: true });
   const { t } = useT();
@@ -76,7 +76,7 @@ function NewProfileDialog({ onClose, onCreated }: { onClose(): void; onCreated(p
   const [skin, setSkin] = useState(AVATAR_SKINS[0]);
   const [ring, setRing] = useState(AVATAR_RINGS[0]);
   const [mascot, setMascot] = useState<MascotId>(DEFAULT_MASCOT);
-  // Jeux de l'aventure : tous cochés au départ, comme le défaut du store.
+  // Adventure games: all checked to begin with, like the store's default.
   const [games, setGames] = useState<string[]>(() => GAMES.map((g) => g.id));
   const { t } = useT();
 
@@ -84,8 +84,8 @@ function NewProfileDialog({ onClose, onCreated }: { onClose(): void; onCreated(p
     e.preventDefault();
     if (!name.trim()) return;
     const profile = actions.createProfile(name, { skin, ring }, mascot);
-    // Aucune sélection enregistrée = tous les jeux : on n'écrit que si
-    // l'adulte en a écarté, pour qu'un jeu ajouté plus tard apparaisse.
+    // No stored selection = every game: we only write if the adult has left
+    // some out, so that a game added later still appears.
     if (games.length < GAMES.length) {
       for (const g of GAMES) actions.setAdventureGame(profile.id, g.id, games.includes(g.id));
     }
@@ -167,9 +167,9 @@ function NewProfileDialog({ onClose, onCreated }: { onClose(): void; onCreated(p
 }
 
 /**
- * Choix des jeux de l'aventure, à la création : grille de vignettes à cocher.
- * Le dernier jeu coché ne peut pas être décoché — une aventure vide n'aurait
- * aucune étape (même règle que l'espace parents).
+ * Choice of the adventure's games, at creation time: a grid of checkable
+ * thumbnails. The last checked game cannot be unchecked — an empty adventure
+ * would have no step (the same rule as the parents area).
  */
 function GamePicker({
   value,
@@ -221,7 +221,7 @@ export function MascotPicker({
 }: {
   value: MascotId;
   onChange(id: MascotId): void;
-  /** id d'un libellé visible ; sinon un aria-label est posé. */
+  /** id of a visible label; otherwise an aria-label is set. */
   labelledBy?: string;
 }) {
   const { t, lang } = useT();

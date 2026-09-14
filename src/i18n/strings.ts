@@ -1,8 +1,8 @@
-/** Langues de l'interface. `fr` est la langue de référence : chaque clé y est définie. */
+/** UI languages. `fr` is the reference language: every key is defined in it. */
 export type Lang = 'fr' | 'en';
 export const LANGS: readonly Lang[] = ['fr', 'en'];
 
-/** Texte fourni dans chaque langue (titres de jeux, libellés de réglages, mascottes). */
+/** Text provided in each language (game titles, setting labels, mascots). */
 export type Localized = Readonly<Record<Lang, string>>;
 
 const fr = {
@@ -73,7 +73,7 @@ const fr = {
   'games.blows': '{n} souffles',
   'games.finish': 'Terminer',
 
-  // ── Récompense
+  // ── Reward
   'reward.bravo': 'Bravo !',
   'reward.stars': '{n} étoiles',
   'reward.replay': 'Rejouer',

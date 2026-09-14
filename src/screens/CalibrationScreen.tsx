@@ -14,7 +14,7 @@ const BLOW_MS = 3000;
 
 type Phase = 'intro' | 'silence' | 'blow' | 'done';
 
-/** Attitude de la mascotte à chaque étape. */
+/** The mascot's attitude at each step. */
 const MASCOT_MODE: Record<Phase, MascotMode> = {
   intro: 'hello',
   silence: 'think',
@@ -23,9 +23,9 @@ const MASCOT_MODE: Record<Phase, MascotMode> = {
 };
 
 /**
- * Calibrage à chaque session (~5 s) : 2 s de silence pour le bruit
- * ambiant, 3 s de souffle pour le maximum. Aucune valeur affichée.
- * Une seule page : les deux étapes restent visibles, l'étape en cours est mise en avant.
+ * Calibration on every session (~5 s): 2 s of silence for the ambient noise,
+ * 3 s of blowing for the maximum. No value is displayed.
+ * A single page: both steps stay visible, the current one is brought forward.
  */
 export function CalibrationScreen() {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ export function CalibrationScreen() {
     setPhase('silence');
   };
 
-  // Chronomètre des phases.
+  // Phase timer.
   useEffect(() => {
     if (phase !== 'silence' && phase !== 'blow') return;
     const duration = phase === 'silence' ? SILENCE_MS : BLOW_MS;
@@ -98,7 +98,7 @@ export function CalibrationScreen() {
     return 'todo';
   };
 
-  // Au doigt, « souffler » veut dire garder le doigt appuyé.
+  // With the finger, "blowing" means keeping the finger pressed down.
   const finger = sourceKind === 'keyboard';
   const explanation = t(
     phase === 'intro'
@@ -189,7 +189,7 @@ const STEP_CLASS: Record<StepState, string | undefined> = {
   done: styles.calibStepDone,
 };
 
-/** Une étape du calibrage : numéro, mot-clé, scène et jauge. Reste affichée quel que soit l'état. */
+/** One calibration step: number, keyword, scene and gauge. Stays displayed whatever the state. */
 function StepCard({ n, word, state, children }: { n: number; word: string; state: StepState; children: ReactNode }) {
   return (
     <section className={cx(styles.calibStep, STEP_CLASS[state])} aria-current={state === 'active' ? 'step' : undefined}>
@@ -202,7 +202,7 @@ function StepCard({ n, word, state, children }: { n: number; word: string; state
   );
 }
 
-/** Scène du souffle : la flamme de la bougie faiblit avec le niveau brut rapporté au défaut de la source. */
+/** Blow scene: the candle flame weakens with the raw level relative to the source's default. */
 function BlowStage({ active, done }: { active: boolean; done: boolean }) {
   const { raw } = useBreathState();
   const { engine } = useBreath();

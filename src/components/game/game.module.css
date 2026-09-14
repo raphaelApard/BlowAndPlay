@@ -26,7 +26,7 @@
   color: var(--ink);
 }
 
-/* Bande de papier : intensité du souffle + avancement */
+/* Paper strip: breath intensity + progress */
 .strip {
   position: absolute;
   left: 50%;
@@ -60,8 +60,8 @@
   transition: transform 200ms ease-out;
 }
 
-/* Bouton parents : à gauche de la bande en paysage, au-dessus en portrait.
-   Double classe : l'emporte sur la règle portrait du kit UI. */
+/* Parents button: to the left of the strip in landscape, above it in portrait.
+   Double class: wins over the UI kit's portrait rule. */
 .parents.parents {
   bottom: calc(var(--edge) + var(--safe-bottom));
 }
@@ -78,7 +78,7 @@
   text-shadow: var(--text-shadow);
 }
 
-/* Consigne : mascotte + bulle en bas à droite, glisse hors de l'écran au premier souffle. */
+/* Instruction: mascot + bubble at the bottom right, slides off screen on the first blow. */
 .hint {
   position: absolute;
   right: var(--edge);

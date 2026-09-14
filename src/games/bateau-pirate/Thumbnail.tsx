@@ -2,12 +2,12 @@ import { buildRoute, drawBoat, drawIsland, drawRouteDashes, drawSea, drawWaves, 
 import { CanvasThumbnail } from '../_shared/CanvasThumbnail';
 import styles from './pirate.module.css';
 
-/** Vignette de la carte « Jeux » : mini-carte, trois îles, bateau en route. */
+/** Games card thumbnail: a mini map, three islands, the boat under way. */
 export function Thumbnail() {
   return <CanvasThumbnail className={styles.thumb} paint={paint} />;
 }
 
-/** Dessin de la vignette (voir `CanvasThumbnail` pour l'échafaudage). */
+/** Drawing of the thumbnail (see `CanvasThumbnail` for the scaffolding). */
 function paint(ctx: CanvasRenderingContext2D, w: number, h: number, unit: number) {
   drawSea(ctx, w, h);
   drawWaves(ctx, makeWaves(8, 7), w, h, 0, unit * 0.8);

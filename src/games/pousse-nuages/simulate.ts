@@ -4,7 +4,7 @@ import { UNIT, VIEW, clamp01, type Simulate } from '../balance/types';
 import type { PousseNuagesLevel } from './index';
 import { CLOUD_S, ENTER_MS, MAX_VX, PUSH, blowEfficiency, tuning } from './rules';
 
-/** Pousse-nuages : souffles courts répétés dès que le nuage est en place. */
+/** Pousse-nuages: repeated short blows as soon as the cloud is in place. */
 export const simulate: Simulate<PousseNuagesLevel> = (level, difficulty, child) => {
   const unit = UNIT;
   const { pushDiv, pull } = tuning(difficulty);

@@ -1,13 +1,14 @@
 /**
- * Utilitaires canvas communs aux jeux et à leurs vignettes.
+ * Canvas helpers common to the games and their thumbnails.
  */
 
-/** Encre des ombres « papier découpé », commune à tous les jeux. */
+/** The cut-paper shadow ink, common to every game. */
 export const INK = 'rgba(35, 50, 74, 0.22)';
 
 /**
- * Cale le canvas sur la densité de l'écran et renvoie son contexte déjà
- * transformé : on dessine ensuite en pixels CSS, sans se soucier du `dpr`.
+ * Matches the canvas to the screen density and returns its already
+ * transformed context: we then draw in CSS pixels, without worrying about
+ * the `dpr`.
  */
 export function setupCanvas(canvas: HTMLCanvasElement, width: number, height: number): CanvasRenderingContext2D | null {
   const ctx = canvas.getContext('2d');
@@ -20,8 +21,8 @@ export function setupCanvas(canvas: HTMLCanvasElement, width: number, height: nu
 }
 
 /**
- * Forme découpée : l'ombre franche décalée, puis la forme elle-même.
- * C'est le geste de base du style « papier découpé » de tous les jeux.
+ * A cut-out shape: the hard offset shadow, then the shape itself.
+ * This is the basic gesture of the cut-paper style used by every game.
  */
 export function cut(ctx: CanvasRenderingContext2D, shape: () => void, fill: string, offset = 4) {
   ctx.save();

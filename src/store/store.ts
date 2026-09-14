@@ -8,12 +8,12 @@ import type { AppState, Avatar, Profile, ProfileProgress } from './types';
 
 const STORAGE_KEY = 'souffle-aventure:v1';
 
-/** Difficulté globale : entier de 1 (facile) à 10 (difficile). */
+/** Global difficulty: an integer from 1 (easy) to 10 (hard). */
 export const MIN_DIFFICULTY = 1;
 export const MAX_DIFFICULTY = 10;
 export const DEFAULT_DIFFICULTY = 5;
 
-/** Difficulté 1..10 → 0..1, ce que reçoivent les jeux (`GameProps.difficulty`). */
+/** Difficulty 1..10 → 0..1, what the games receive (`GameProps.difficulty`). */
 export function difficultyToUnit(difficulty: number): number {
   const d = clampDifficulty(difficulty);
   return (d - MIN_DIFFICULTY) / (MAX_DIFFICULTY - MIN_DIFFICULTY);
@@ -24,7 +24,7 @@ export function clampDifficulty(difficulty: number): number {
   return Math.round(Math.max(MIN_DIFFICULTY, Math.min(MAX_DIFFICULTY, difficulty)));
 }
 
-/** Anciennes sauvegardes : la difficulté allait de 0 à 100. */
+/** Old saves: difficulty used to range from 0 to 100. */
 export function migrateDifficulty(stored: unknown): number {
   if (typeof stored !== 'number' || !Number.isFinite(stored)) return DEFAULT_DIFFICULTY;
   if (stored > MAX_DIFFICULTY) return clampDifficulty(MIN_DIFFICULTY + (stored / 100) * (MAX_DIFFICULTY - MIN_DIFFICULTY));
@@ -65,7 +65,7 @@ function setState(update: (prev: AppState) => AppState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // stockage indisponible (navigation privée) : on continue en mémoire
+    // storage unavailable (private browsing): we carry on in memory
   }
   for (const cb of listeners) cb();
 }
@@ -83,7 +83,7 @@ export function getAppState(): AppState {
   return state;
 }
 
-// ─── Sélecteurs ────────────────────────────────────────────────────────
+// ─── Selectors ─────────────────────────────────────────────────────────
 
 export function selectCurrentProfile(s: AppState): Profile | null {
   return s.profiles.find((p) => p.id === s.currentProfileId) ?? null;
@@ -94,10 +94,10 @@ export function selectProgress(s: AppState, profileId: string | null): ProfilePr
 }
 
 /**
- * Jeux de l'aventure d'un enfant, dans l'ordre du registre.
- * Aucune sélection enregistrée = tous les jeux : un nouveau jeu ajouté au
- * registre apparaît donc chez les enfants qui n'ont jamais été configurés.
- * Les ids inconnus (jeu retiré depuis) sont ignorés.
+ * A child's adventure games, in registry order.
+ * No stored selection = every game: a new game added to the registry
+ * therefore appears for children who have never been configured.
+ * Unknown ids (a game removed since) are ignored.
  */
 export function selectAdventureGames(s: AppState, profileId: string | null): readonly AnyGameDefinition[] {
   const chosen = profileId ? s.adventureGames[profileId] : undefined;
@@ -105,7 +105,7 @@ export function selectAdventureGames(s: AppState, profileId: string | null): rea
   return GAMES.filter((g) => chosen.includes(g.id));
 }
 
-/** Vrai si le jeu fait partie de l'aventure de cet enfant. */
+/** True if the game is part of this child's adventure. */
 export function isAdventureGame(s: AppState, profileId: string | null, gameId: string): boolean {
   const chosen = profileId ? s.adventureGames[profileId] : undefined;
   return chosen ? chosen.includes(gameId) : true;
@@ -211,10 +211,10 @@ export const actions = {
   },
 
   /**
-   * Ajoute ou retire un jeu de l'aventure d'un enfant.
-   * Sans sélection enregistrée, l'enfant a tous les jeux : on matérialise
-   * alors la liste complète avant d'en retirer un. La progression du jeu
-   * écarté est conservée (elle revient s'il est remis).
+   * Adds or removes a game from a child's adventure.
+   * Without a stored selection, the child has every game: we then materialize
+   * the full list before removing one. The progress of the removed game is
+   * kept (it comes back if the game is restored).
    */
   setAdventureGame(profileId: string, gameId: string, enabled: boolean) {
     setState((s) => {
@@ -224,7 +224,7 @@ export const actions = {
     });
   },
 
-  /** Remet tous les jeux dans l'aventure de cet enfant. */
+  /** Puts every game back into this child's adventure. */
   resetAdventureGames(profileId: string) {
     setState((s) => {
       const { [profileId]: _removed, ...adventureGames } = s.adventureGames;

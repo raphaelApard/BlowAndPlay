@@ -1,19 +1,19 @@
 import { clamp01 } from './draw';
 
-/** Règles du jeu partagées entre le composant et la simulation d'équilibrage. */
+/** Game rules shared between the component and the balance simulation. */
 
-/** Pause à chaque île (drapeau planté, le bateau se balance). */
+/** Pause at each island (flag planted, the boat rocks). */
 export const DOCK_MS = 900;
-/** Fête au trésor : le coffre s'ouvre, les pièces jaillissent. */
+/** Celebration at the treasure: the chest opens, the coins burst out. */
 export const PARTY_MS = 4200;
 export const CHEST_OPEN_MS = 900;
-/** Poussée d'un souffle à intensité 1 (avant `unit` et difficulté). */
+/** Thrust of a blow at intensity 1 (before `unit` and difficulty). */
 export const PUSH = 0.28;
 export const MAX_VEL = 3.8;
 
 /**
- * Difficulté globale (0 → 1) → navigation :
- *  - poussée de chaque souffle : ÷1 (facile) → ÷1,8 (difficile) ;
+ * Global difficulty (0 → 1) → sailing:
+ *  - thrust of each blow: ÷1 (easy) → ÷1.8 (hard);
  *  - freinage par frame : 0,975 → 0,955 (le bateau glisse moins loin).
  */
 export function tuning(difficulty: number) {

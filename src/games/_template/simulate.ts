@@ -3,16 +3,16 @@ import type { Simulate } from '../balance/types';
 import type { TemplateLevel } from './index';
 
 /**
- * Simulation sans écran du niveau, jouée par « l'enfant type » (voir
- * `src/games/balance/`). Elle doit reproduire les équations de `Game.tsx`
+ * Headless simulation of the level, played by the "typical child" (see
+ * `src/games/balance/`). It must reproduce the equations of `Game.tsx`
  * (mettre les constantes en commun dans un `rules.ts`), et renvoyer un
- * `Intent` : ce que le jeu demande à l'enfant à cet instant.
+ * `Intent`: what the game asks of the child at this instant.
  *
- * Le test `src/games/balance/balance.test.ts` s'en sert pour vérifier que
- * ce jeu demande le même effort que les autres à difficulté égale.
+ * The `src/games/balance/balance.test.ts` test uses it to check that this
+ * game demands the same effort as the others at equal difficulty.
  */
 export const simulate: Simulate<TemplateLevel> = (level, difficulty, child) => {
-  // Même formule que Game.tsx (réglage parents « vitesse » à sa valeur par défaut).
+  // Same formula as Game.tsx ("speed" parents setting at its default value).
   const targetMs = level.targetMs * (0.7 + difficulty * 0.8);
   let accumulated = 0;
   let elapsed = 0;

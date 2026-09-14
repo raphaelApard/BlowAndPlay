@@ -1,28 +1,28 @@
 import { getAppState } from '../store/store';
 
 /**
- * Effets sonores synthétisés (Web Audio) : aucun fichier audio à charger,
- * timbre « jouet en bois » cohérent avec le papier découpé. Chaque son dure
- * moins d'une seconde et reste doux pour ne pas polluer le micro.
+ * Synthesized sound effects (Web Audio): no audio file to load, a "wooden
+ * toy" timbre consistent with the cut-paper look. Each sound lasts less than
+ * a second and stays gentle so as not to pollute the mic.
  *
- * Le contexte audio n'est créé qu'au premier geste (voir `unlockAudio`).
+ * The audio context is only created on the first gesture (see `unlockAudio`).
  */
 export type SfxName =
-  /** Appui sur un bouton. */
+  /** Press on a button. */
   | 'tap'
-  /** Choix dans une grille (mascotte, couleur). */
+  /** Choice in a grid (mascot, colour). */
   | 'pop'
-  /** Étape réussie dans un jeu (île, bulle, nuage…). */
+  /** Step passed in a game (island, bubble, cloud…). */
   | 'step'
-  /** Raté doux (bulle éclatée, choc). */
+  /** Gentle miss (popped bubble, impact). */
   | 'thud'
-  /** Fin de calibrage, petite réussite. */
+  /** End of calibration, a small success. */
   | 'success'
-  /** Étoile qui apparaît. */
+  /** A star appearing. */
   | 'star'
-  /** Niveau terminé. */
+  /** Level finished. */
   | 'fanfare'
-  /** Départ (ballon qui vole, fusée). */
+  /** Departure (balloon flying off, rocket). */
   | 'whoosh';
 
 let ctx: AudioContext | null = null;
@@ -42,7 +42,7 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
-/** À appeler sur le premier geste utilisateur : les navigateurs bloquent l'audio avant. */
+/** To be called on the first user gesture: browsers block audio before that. */
 export function unlockAudio() {
   const c = getCtx();
   if (!c) return;
@@ -56,7 +56,7 @@ export function soundEnabled(): boolean {
 
 type Wave = OscillatorType;
 
-/** Une note : oscillateur + enveloppe, éventuellement glissando. */
+/** One note: oscillator + envelope, optionally a glissando. */
 function tone(c: AudioContext, out: AudioNode, opts: { freq: number; to?: number; wave?: Wave; at: number; dur: number; gain: number; attack?: number }) {
   const o = c.createOscillator();
   const g = c.createGain();
@@ -135,11 +135,10 @@ const SOUNDS: Record<SfxName, (c: AudioContext, out: AudioNode, t: number) => vo
 let muted = 0;
 
 /**
- * Coupe les sons tant que la fonction rendue n'est pas appelée. Utilisé par
- * l'espace adulte : les bruitages accompagnent le jeu de l'enfant, pas les
- * réglages. Le compteur (plutôt qu'un booléen) laisse deux écrans muets se
- * chevaucher pendant une transition sans que le premier à partir rétablisse
- * le son du second.
+ * Mutes the sounds until the returned function is called. Used by the adult
+ * area: the sound effects accompany the child's play, not the settings. The
+ * counter (rather than a boolean) lets two muted screens overlap during a
+ * transition without the first one to leave restoring the sound of the second.
  */
 export function muteSfx(): () => void {
   muted++;
@@ -151,7 +150,7 @@ export function muteSfx(): () => void {
   };
 }
 
-/** Joue un son (silencieux si les sons sont coupés ou l'audio pas encore débloqué). */
+/** Plays a sound (silent if sounds are off or audio is not unlocked yet). */
 export function play(name: SfxName) {
   if (muted > 0 || !soundEnabled()) return;
   const c = getCtx();
@@ -159,6 +158,6 @@ export function play(name: SfxName) {
   try {
     SOUNDS[name](c, master, c.currentTime + 0.005);
   } catch {
-    // pas de son : jamais bloquant
+    // no sound: never blocking
   }
 }

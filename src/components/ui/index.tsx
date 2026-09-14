@@ -13,17 +13,17 @@ export function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-// ─── Fond ──────────────────────────────────────────────────────────────
+// ─── Background ────────────────────────────────────────────────────────
 
 interface SkyProps {
   children: ReactNode;
-  /** Position du premier relief (0..1 de la hauteur). */
+  /** Position of the first hill (0..1 of the height). */
   horizon?: number;
   clouds?: boolean;
   sun?: boolean;
-  /** Laisse le contenu défiler s'il dépasse (accueil en portrait). */
+  /** Lets the content scroll if it overflows (home screen in portrait). */
   scroll?: boolean;
-  /** Classe posée sur le conteneur de contenu. */
+  /** Class applied to the content container. */
   contentClassName?: string;
 }
 
@@ -51,7 +51,7 @@ export function Sky({ children, horizon = 0.62, clouds = true, sun = true, scrol
   );
 }
 
-/* Relief en papier découpé : prés verts sur le ciel, bande de terre. */
+/* Cut-paper hills: green meadows against the sky, a strip of earth. */
 const HILLS: ReadonlyArray<{ d: string; fill: string }> = [
   { d: 'M0 150 C 190 104, 360 176, 560 138 S 850 168, 1000 122 L1000 300 L0 300 Z', fill: 'var(--leaf-2)' },
   { d: 'M0 212 C 170 176, 330 236, 520 204 S 820 232, 1000 184 L1000 300 L0 300 Z', fill: 'var(--leaf)' },
@@ -97,8 +97,8 @@ export function Balloon({ style, className }: { style?: CSSProperties; className
 }
 
 /**
- * Bougie d'anniversaire : la flamme rétrécit quand on souffle et s'éteint à
- * `lit === false`. `power` (0..1) est l'intensité du souffle.
+ * Birthday candle: the flame shrinks when you blow and goes out at
+ * `lit === false`. `power` (0..1) is the breath intensity.
  */
 export function Candle({
   power = 0,
@@ -145,7 +145,7 @@ export function Avatar({ avatar, size = 72, shadow = true }: { avatar: AvatarDat
 export const AVATAR_SKINS = ['#ffb08a', '#c9a27e', '#f3c9b1', '#8d5a3b', '#ffd6c2', '#5c3a21'];
 export const AVATAR_RINGS = ['#ffd93d', '#6bcb77', '#ff6b6b', '#5ec2f0', '#ffffff'];
 
-// ─── Boutons ───────────────────────────────────────────────────────────
+// ─── Buttons ───────────────────────────────────────────────────────────
 
 type Tone = 'paper' | 'coral' | 'leaf' | 'sun' | 'ghost';
 
@@ -153,7 +153,7 @@ interface PaperButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   tone?: Tone;
   icon?: boolean;
   small?: boolean;
-  /** Pas de son d'appui (bouton déclenché par appui long, etc.). */
+  /** No press sound (button triggered by a long press, etc.). */
   silent?: boolean;
 }
 
@@ -189,7 +189,7 @@ export function ArrowIcon({ size = 64, left }: { size?: number; left?: boolean }
   return <span className={cx(styles.arrow, left && styles.arrowLeft)} style={{ fontSize: size }} aria-hidden />;
 }
 
-// ─── Étoiles ───────────────────────────────────────────────────────────
+// ─── Stars ─────────────────────────────────────────────────────────────
 
 export function StarRow({ stars, size = 22 }: { stars: number; size?: number }) {
   const { t } = useT();
@@ -204,7 +204,7 @@ export function StarRow({ stars, size = 22 }: { stars: number; size?: number }) 
   );
 }
 
-/** Carrés de progression : un par niveau, allumé si réussi. */
+/** Progress squares: one per level, lit when passed. */
 export function LevelSquares({ done, total }: { done: boolean[]; total: number }) {
   const { t } = useT();
   return (
@@ -216,7 +216,7 @@ export function LevelSquares({ done, total }: { done: boolean[]; total: number }
   );
 }
 
-// ─── Placeholder & mascotte ────────────────────────────────────────────
+// ─── Placeholder & mascot ──────────────────────────────────────────────
 
 export function Placeholder({ label, className, style }: { label: ReactNode; className?: string; style?: CSSProperties }) {
   return (
@@ -227,15 +227,15 @@ export function Placeholder({ label, className, style }: { label: ReactNode; cla
 }
 
 /**
- * Vignette d'un jeu, avec repli quand le jeu n'en fournit pas.
- * Source unique : carte d'aventure, onglet « Jeux » et espace parents
- * passent tous par ici, pour que la même vignette s'affiche partout.
+ * A game's thumbnail, with a fallback when the game does not provide one.
+ * Single source: the adventure map, the Games tab and the parents area all
+ * go through here, so that the same thumbnail is shown everywhere.
  */
 export function GameThumbnail({
   game,
   className,
 }: {
-  /** Jeu à illustrer ; `undefined` (id inconnu) donne le repli. */
+  /** Game to illustrate; `undefined` (unknown id) yields the fallback. */
   game: AnyGameDefinition | undefined;
   className?: string;
 }) {
@@ -261,14 +261,14 @@ export function GameThumbnail({
   );
 }
 
-/** Mascotte du profil courant (ou celle par défaut), posée en bas à droite. */
+/** Current profile's mascot (or the default one), placed at the bottom right. */
 export function Mascot({
   style,
   className,
   mode = 'idle',
 }: {
   style?: CSSProperties;
-  /** Classe de l'écran, pour ajuster la place de la mascotte (voir `.mapMascot`). */
+  /** The screen's class, to adjust the mascot's placement (see `.mapMascot`). */
   className?: string;
   mode?: MascotMode;
 }) {
@@ -293,7 +293,7 @@ function useMediaQuery(query: string): boolean {
   );
 }
 
-// ─── Barre du haut : profil, onglets, état du micro ────────────────────
+// ─── Top bar: profile, tabs, mic status ────────────────────────────────
 
 interface TopBarProps {
   name: string;
@@ -341,9 +341,9 @@ export function TopBar({ name, avatar, tabs = true }: TopBarProps) {
 }
 
 /**
- * Sortie vers la liste des enfants : on désélectionne le profil, ce qui
- * renvoie l'écran d'accueil. Les routes de jeu exigent un profil, donc on
- * navigue explicitement plutôt que de compter sur la redirection.
+ * Exit to the list of children: we deselect the profile, which brings back
+ * the home screen. The game routes require a profile, so we navigate
+ * explicitly rather than relying on the redirect.
  */
 function CloseButton() {
   const navigate = useNavigate();
@@ -368,15 +368,15 @@ function CloseButton() {
 }
 
 /**
- * État du micro et niveau de souffle, en haut à droite.
- * L'icône dit si le souffle est capté (micro vert) ou non (micro barré) ;
- * la barre suit l'intensité, pour qu'un adulte voie d'un coup d'œil que
- * souffler produit bien quelque chose.
+ * Mic status and breath level, at the top right.
+ * The icon says whether the breath is picked up (green mic) or not (crossed
+ * out mic); the bar follows the intensity, so that an adult can see at a
+ * glance that blowing really does produce something.
  */
 export function MicStatus() {
   const { status, sourceKind } = useBreath();
   const { t } = useT();
-  // Au doigt, il n'y a pas de micro à surveiller : l'appui se voit à l'écran.
+  // With the finger, there is no mic to watch: the press is visible on screen.
   if (sourceKind === 'keyboard') return null;
   const on = status === 'running';
   return (
@@ -402,15 +402,15 @@ function MicIcon({ off }: { off: boolean }) {
 }
 
 /**
- * Barre de niveau. Composant à part : `useBreathState` re-rend à chaque
- * image, on garde ce coût sur une feuille plutôt que sur toute la barre
- * du haut (et donc sur l'écran qui la contient).
+ * Level bar. A separate component: `useBreathState` re-renders on every
+ * frame, so we keep that cost on a leaf rather than on the whole top bar
+ * (and therefore on the screen that contains it).
  */
 function BreathMeter({ active }: { active: boolean }) {
   const { intensity } = useBreathState();
-  // Courbe d'affichage seulement : un souffle faible doit se voir bouger.
-  // La racine relève surtout le bas de l'échelle (0,04 → 0,2). On ne touche
-  // pas aux seuils du moteur, qui règlent la détection et les jeux.
+  // Display curve only: a weak breath must be seen to move. The square root
+  // mostly lifts the bottom of the scale (0.04 → 0.2). We do not touch the
+  // engine's thresholds, which govern detection and the games.
   const level = active ? Math.sqrt(Math.min(1, Math.max(0, intensity))) : 0;
   return (
     <span
@@ -425,11 +425,11 @@ function BreathMeter({ active }: { active: boolean }) {
   );
 }
 
-// ─── Accès parents : appui long 700 ms ─────────────────────────────────
+// ─── Parents access: 700 ms long press ─────────────────────────────────
 
-/** Appui long ouvrant l'espace parents (ms). */
+/** Long press that opens the parents area (ms). */
 const PARENTS_PRESS_MS = 700;
-/** Durée d'affichage de la bulle quand l'appui a été trop court (ms). */
+/** How long the bubble is shown when the press was too short (ms). */
 const PARENTS_TIP_MS = 2600;
 
 export function ParentsButton({ label, className }: { label?: string; className?: string }) {
@@ -438,16 +438,16 @@ export function ParentsButton({ label, className }: { label?: string; className?
   const timer = useRef(0);
   const tipTimer = useRef(0);
   const [pressing, setPressing] = useState(false);
-  // Appui en cours, suivi en ref et non en état : sur un appui bref, `pointerdown`
-  // et `pointerup` tombent dans le même lot de rendu et l'état serait encore
-  // `false` au relâchement — la bulle ne s'afficherait jamais sur les appuis
-  // les plus courts, ceux-là mêmes qu'elle doit expliquer.
+  // Press in progress, tracked in a ref rather than in state: on a brief press,
+  // `pointerdown` and `pointerup` fall in the same render batch and the state
+  // would still be `false` on release — the bubble would never show on the
+  // shortest presses, the very ones it is meant to explain.
   const pressingRef = useRef(false);
-  // Bulle affichée quand l'adulte a relâché avant la fin de l'appui long :
-  // sans elle, un appui trop court ne produit rien et ne s'explique pas.
+  // Bubble shown when the adult released before the end of the long press:
+  // without it, too short a press does nothing and explains nothing.
   const [tip, setTip] = useState(false);
 
-  // Les minuteurs ne doivent pas survivre au démontage de l'écran.
+  // The timers must not outlive the unmounting of the screen.
   useEffect(
     () => () => {
       window.clearTimeout(timer.current);
@@ -468,9 +468,9 @@ export function ParentsButton({ label, className }: { label?: string; className?
   };
 
   /**
-   * Fin de l'appui. `earlyRelease` distingue un vrai relâchement (doigt levé
-   * sur le bouton, donc appui trop court : on explique) d'un pointeur qui
-   * quitte simplement le bouton — là, rien à expliquer.
+   * End of the press. `earlyRelease` distinguishes a real release (finger
+   * lifted on the button, so too short a press: we explain) from a pointer
+   * that simply leaves the button — nothing to explain there.
    */
   const endPress = (earlyRelease: boolean) => {
     const wasPressing = pressingRef.current;
@@ -508,11 +508,11 @@ export function ParentsButton({ label, className }: { label?: string; className?
   );
 }
 
-// ─── Langue ────────────────────────────────────────────────────────────
+// ─── Language ──────────────────────────────────────────────────────────
 
 const LANG_LABEL: Record<Lang, string> = { fr: 'FR', en: 'EN' };
 
-/** Sélecteur FR / EN. Le choix est mémorisé ; sans choix, l'app suit le navigateur. */
+/** FR / EN switch. The choice is remembered; without one, the app follows the browser. */
 export function LangSwitch({ className }: { className?: string }) {
   const { lang, t } = useT();
   return (

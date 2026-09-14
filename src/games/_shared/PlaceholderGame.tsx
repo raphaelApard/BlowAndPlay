@@ -4,11 +4,11 @@ import type { GameProps, Stars } from '../types';
 import styles from './PlaceholderGame.module.css';
 
 /**
- * Jeu de substitution : occupe tout l'écran (le shell n'ajoute que le bouton
+ * Stand-in game: takes up the whole screen (the shell only adds the quit
  * quitter et le curseur de souffle). Compte les souffles et permet de
- * terminer avec 1 à 3 étoiles pour tester le parcours.
+ * finish with 1 to 3 stars in order to test the flow.
  *
- * À remplacer par le vrai composant dans `<jeu>/index.ts`.
+ * To be replaced by the real component in `<game>/index.ts`.
  */
 export function PlaceholderGame({ level, breath, paused, onProgress, onComplete }: GameProps) {
   const [blows, setBlows] = useState(0);

@@ -4,17 +4,18 @@ import { simulate } from './simulate';
 import { Thumbnail } from './Thumbnail';
 
 /**
- * Feuilles d'automne — un hérisson rentre chez lui par un petit chemin, mais
+ * Feuilles d'automne — a hedgehog heads home along a small path, but
  * des tas de feuilles le bloquent. Souffler, n'importe comment, envoie les
- * feuilles voler ; tas dégagé, le hérisson repart. Aucune contrainte de
- * pattern : idéal en fin de séance. La difficulté globale grossit les tas.
+ * the leaves flying; pile cleared, the hedgehog sets off again. No pattern
+ * constraint: ideal at the end of a session. The global difficulty enlarges
+ * the piles.
  */
 export interface FeuillesLevel extends LevelBase {
   /** Nombre de tas de feuilles sur le chemin. */
   piles: number;
-  /** Feuilles par tas (avant multiplication par la difficulté). */
+  /** Leaves per pile (before multiplication by the difficulty). */
   leaves: number;
-  /** Temps de référence pour 3 étoiles (ms). 2 étoiles jusqu'à 1,6×, sinon 1. */
+  /** Reference time for 3 stars (ms). 2 stars up to 1.6×, otherwise 1. */
   parMs: number;
 }
 

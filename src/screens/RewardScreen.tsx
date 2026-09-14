@@ -25,8 +25,8 @@ const CONFETTI = [
 ];
 
 /**
- * Écran de récompense du mode « Jeux » (sélection libre). En aventure, le
- * jeu revient directement sur la map, qui anime le passage à l'étape suivante.
+ * Reward screen for the Games mode (free selection). In adventure mode, the
+ * game goes straight back to the map, which animates the move to the next step.
  */
 export function RewardScreen() {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ export function RewardScreen() {
   const state = useLocation().state as RewardState | null;
   const stars = state?.stars ?? 0;
 
-  // Une étoile qui tinte par étoile gagnée, en décalé, comme l'animation.
+  // One chime per star earned, staggered, like the animation.
   useEffect(() => {
     const timers = Array.from({ length: stars }, (_, i) => window.setTimeout(() => play('star'), 300 + i * 350));
     return () => timers.forEach((id) => window.clearTimeout(id));

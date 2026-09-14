@@ -7,15 +7,15 @@ import type {
 } from './types';
 
 export interface BreathEngineOptions {
-  /** Vitesse de montée du lissage (0..1 par frame). */
+  /** Rise speed of the smoothing (0..1 per frame). */
   attack: number;
-  /** Vitesse de descente du lissage (0..1 par frame). */
+  /** Fall speed of the smoothing (0..1 per frame). */
   release: number;
-  /** Intensité normalisée au-dessus de laquelle un souffle commence. */
+  /** Normalized intensity above which a blow starts. */
   onThreshold: number;
-  /** Intensité en dessous de laquelle un souffle se termine (hystérésis). */
+  /** Intensity below which a blow ends (hysteresis). */
   offThreshold: number;
-  /** Souffles plus courts que ceci sont ignorés (ms). */
+  /** Blows shorter than this are ignored (ms). */
   minBlowMs: number;
 }
 
@@ -31,13 +31,13 @@ type StateListener = (state: BreathState) => void;
 type EventListener = (event: BreathEvent) => void;
 
 /**
- * Moteur de souffle : normalise le niveau brut d'une source selon le
- * calibrage, le lisse, et émet des événements blowStart / blowEnd.
+ * Breath engine: normalizes a source's raw level against the calibration,
+ * smooths it, and emits blowStart / blowEnd events.
  *
- * Les jeux consomment le moteur de deux façons :
- *  - `subscribe(cb)` : état à chaque frame (boucles canvas / rAF) ;
- *  - `on(cb)`        : événements discrets (souffles courts, comptage).
- * Le hook `useBreathState()` (BreathProvider) l'expose aussi en React.
+ * Games consume the engine in two ways:
+ *  - `subscribe(cb)`: state on every frame (canvas / rAF loops);
+ *  - `on(cb)`       : discrete events (short blows, counting).
+ * The `useBreathState()` hook (BreathProvider) also exposes it in React.
  */
 export class BreathEngine {
   private readonly options: BreathEngineOptions;
@@ -47,7 +47,7 @@ export class BreathEngine {
   private running = false;
 
   private smooth = 0;
-  /** Vrai tant qu'on attend que le souffle oublié soit réellement relâché. */
+  /** True while we wait for the forgotten blow to actually be released. */
   private ignoringBlow = false;
   private blowStartedAt: number | null = null;
   private blowPeak = 0;
@@ -75,12 +75,12 @@ export class BreathEngine {
     return this.source;
   }
 
-  /** Remplace la source (arrête l'ancienne, démarre la nouvelle si le moteur tourne). */
+  /** Replaces the source (stops the old one, starts the new one if the engine is running). */
   async setSource(source: BreathSource): Promise<void> {
     const wasRunning = this.running;
     this.stop();
     this.source = source;
-    // Le calibrage est propre à une source : on repart du défaut.
+    // The calibration is specific to a source: we start again from the default.
     this.calibration = null;
     if (wasRunning) await this.start();
   }
@@ -104,7 +104,7 @@ export class BreathEngine {
     return this.running;
   }
 
-  // ─── Calibrage ────────────────────────────────────────────────────────
+  // ─── Calibration ──────────────────────────────────────────────────────
 
   isCalibrated(): boolean {
     return this.calibration !== null;
@@ -119,8 +119,8 @@ export class BreathEngine {
   }
 
   /**
-   * Collecte les niveaux bruts jusqu'à l'appel de `stop()`.
-   * Utilisé par l'écran de calibrage (phase silence, phase souffle).
+   * Collects raw levels until `stop()` is called.
+   * Used by the calibration screen (silence phase, blow phase).
    */
   sampleRaw(): { stop: () => number[] } {
     const samples: number[] = [];
@@ -133,7 +133,7 @@ export class BreathEngine {
     };
   }
 
-  // ─── Abonnements ──────────────────────────────────────────────────────
+  // ─── Subscriptions ────────────────────────────────────────────────────
 
   getState(): BreathState {
     return this.state;
@@ -150,21 +150,21 @@ export class BreathEngine {
   }
 
   /**
-   * Oublie le souffle en cours sans arrêter la source : le souffle qui a lancé
-   * le jeu depuis la carte ne doit pas faire décoller la fusée à la première
-   * frame. Aucun `blowEnd` n'est émis pour celui-ci.
+   * Forgets the current blow without stopping the source: the blow that
+   * launched the game from the map must not make the rocket take off on the
+   * first frame. No `blowEnd` is emitted for that one.
    *
-   * Remettre le lissage à zéro ne suffit pas : l'enfant souffle encore, et le
-   * niveau brut repasse le seuil en deux ou trois frames, ce qui relancerait
-   * aussitôt un `blowStart`. On ignore donc tout souffle jusqu'à ce que le
-   * niveau redescende réellement sous le seuil de relâchement.
+   * Resetting the smoothing to zero is not enough: the child is still blowing,
+   * and the raw level crosses the threshold again within two or three frames,
+   * which would immediately trigger another `blowStart`. So we ignore any blow
+   * until the level actually falls back below the release threshold.
    */
   resetBlow(): void {
     this.resetEnvelope();
     this.ignoringBlow = true;
   }
 
-  // ─── Traitement ──────────────────────────────────────────────────────
+  // ─── Processing ───────────────────────────────────────────────────────
 
   private readonly handleLevel = (raw: number) => {
     const t = performance.now();
@@ -175,8 +175,8 @@ export class BreathEngine {
     this.smooth += (normalized - this.smooth) * k;
     if (this.smooth < 0.001) this.smooth = 0;
 
-    // Souffle oublié (`resetBlow`) : on reste muet tant qu'il dure, et on ne
-    // réarme qu'une fois le niveau retombé sous le seuil de relâchement.
+    // Forgotten blow (`resetBlow`): we stay silent for as long as it lasts, and
+    // only re-arm once the level has fallen back below the release threshold.
     if (this.ignoringBlow) {
       if (this.smooth < this.options.offThreshold) {
         this.ignoringBlow = false;
@@ -245,8 +245,8 @@ function clamp01(v: number): number {
 }
 
 /**
- * Déduit un calibrage de deux séries d'échantillons bruts :
- * une phase de silence et une phase de souffle.
+ * Derives a calibration from two series of raw samples:
+ * a silence phase and a blow phase.
  */
 export function computeCalibration(
   silence: number[],
@@ -256,7 +256,7 @@ export function computeCalibration(
   if (!silence.length || !blow.length) return fallback;
   const noiseFloor = percentile(silence, 0.9) * 1.25;
   let peak = percentile(blow, 0.85);
-  // Si l'enfant n'a pas soufflé assez fort, on garde une plage exploitable.
+  // If the child did not blow hard enough, we keep a usable range.
   const minRange = Math.max(fallback.peak - fallback.noiseFloor, 1e-3) * 0.3;
   if (peak - noiseFloor < minRange) peak = noiseFloor + minRange;
   return { noiseFloor, peak };

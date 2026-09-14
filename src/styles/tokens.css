@@ -1,4 +1,4 @@
-/* Design tokens — piste « Papier découpé » (Souffle Aventure.dc.html, option 1c) */
+/* Design tokens — the "cut paper" direction (Souffle Aventure.dc.html, option 1c) */
 :root {
   /* Palette */
   --sky: #5ec2f0;
@@ -42,7 +42,7 @@
   /* Cibles tactiles ≥ 72px */
   --touch: 72px;
 
-  /* Espacement de bord d'écran */
+  /* Screen edge spacing */
   --edge: clamp(16px, 2.7vw, 28px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

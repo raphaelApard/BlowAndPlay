@@ -1,14 +1,14 @@
 /**
- * Dessin « papier découpé » de la Montgolfière : ciel, collines, sol,
- * obstacles, ballon, plateforme d'arrivée. Fonctions pures sur un canvas 2D,
- * partagées entre le jeu et la vignette.
+ * Cut-paper drawing of Montgolfière: sky, hills, ground, obstacles, balloon,
+ * arrival platform. Pure functions on a 2D canvas, shared between the game
+ * and the thumbnail.
  */
 
 import { seeded } from '../_shared/math';
 import { INK, cut } from '../_shared/canvas';
 
-// Réexportés pour que le jeu, sa simulation et sa vignette gardent
-// un seul point d'entrée : `./draw`.
+// Re-exported so that the game, its simulation and its thumbnail keep a
+// single entry point: `./draw`.
 export { clamp01, seeded } from '../_shared/math';
 export { INK, cut } from '../_shared/canvas';
 
@@ -30,7 +30,7 @@ export const ROOF = '#ff8a65';
 export const FLAME = '#ff9a4d';
 export const FLAME_CORE = '#fff1a8';
 
-// ─── Décor ───────────────────────────────────────────────────────────
+// ─── Scenery ─────────────────────────────────────────────────────────
 
 export function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -68,7 +68,7 @@ export function drawCloud(ctx: CanvasRenderingContext2D, x: number, y: number, s
   );
 }
 
-/** Collines lointaines : bosses répétées, défilent en parallaxe. */
+/** Distant hills: repeated humps, scrolling in parallax. */
 export function drawHills(ctx: CanvasRenderingContext2D, w: number, groundY: number, offset: number, unit: number, color: string, amp: number, period: number) {
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -106,8 +106,9 @@ export type ObstacleKind = 'tree' | 'rock' | 'house' | 'tower';
 export const OBSTACLE_KINDS: ObstacleKind[] = ['tree', 'rock', 'house', 'tower'];
 
 /**
- * Un obstacle posé au sol, dessiné dans un repère dont l'origine est le pied
- * (centre bas). `w` et `h` en px ; `wobble` en radians (secoué après un choc).
+ * An obstacle standing on the ground, drawn in a frame whose origin is its
+ * foot (bottom centre). `w` and `h` in px; `wobble` in radians (shaken after
+ * an impact).
  */
 export function drawObstacle(ctx: CanvasRenderingContext2D, kind: ObstacleKind, x: number, groundY: number, w: number, h: number, wobble: number) {
   ctx.save();
@@ -169,7 +170,7 @@ export function drawObstacle(ctx: CanvasRenderingContext2D, kind: ObstacleKind, 
     }
     case 'tower': {
       cut(ctx, () => ctx.rect(-hw * 0.6, -h * 0.88, hw * 1.2, h * 0.88), ROCK);
-      // Créneaux
+      // Battlements
       for (let i = -1; i <= 1; i++) cut(ctx, () => ctx.rect(i * hw * 0.42 - hw * 0.14, -h, hw * 0.28, h * 0.14), ROCK, 2);
       ctx.fillStyle = INK_SOLID;
       ctx.beginPath();
@@ -192,9 +193,9 @@ export function drawObstacle(ctx: CanvasRenderingContext2D, kind: ObstacleKind, 
   ctx.restore();
 }
 
-// ─── Plateforme d'arrivée ────────────────────────────────────────────
+// ─── Arrival platform ────────────────────────────────────────────────
 
-/** Ponton en bois ; avec `pole`, un mât dont le drapeau se hisse avec `flag` (0..1). */
+/** Wooden jetty; with `pole`, a mast whose flag is raised by `flag` (0..1). */
 export function drawPad(ctx: CanvasRenderingContext2D, x: number, groundY: number, unit: number, pole: boolean, flag: number, time: number) {
   ctx.save();
   ctx.translate(x, groundY);
@@ -202,7 +203,7 @@ export function drawPad(ctx: CanvasRenderingContext2D, x: number, groundY: numbe
   cut(ctx, () => ctx.roundRect(-70, -12, 140, 16, 5), WOOD);
   ctx.fillStyle = WOOD_DARK;
   for (let i = -2; i <= 2; i++) ctx.fillRect(i * 28 - 2, -12, 4, 16);
-  // Mât et drapeau
+  // Mast and flag
   if (!pole) {
     ctx.restore();
     return;
@@ -233,7 +234,7 @@ export function drawPad(ctx: CanvasRenderingContext2D, x: number, groundY: numbe
 export const BASKET_DROP = 2.4;
 
 /**
- * La montgolfière : enveloppe jaune à rayures, cordes, nacelle, flamme.
+ * The hot-air balloon: striped yellow envelope, ropes, basket, flame.
  * Origine = centre de l'enveloppe. `r` = rayon ; `power` (0..1) = flamme ;
  * `tilt` = inclinaison (radians).
  */
@@ -250,7 +251,7 @@ export function drawBalloon(ctx: CanvasRenderingContext2D, x: number, y: number,
     ctx.closePath();
   };
 
-  // Cordes (derrière la nacelle)
+  // Ropes (behind the basket)
   ctx.strokeStyle = INK_SOLID;
   ctx.lineWidth = Math.max(1.5, r * 0.06);
   ctx.beginPath();
@@ -260,7 +261,7 @@ export function drawBalloon(ctx: CanvasRenderingContext2D, x: number, y: number,
   ctx.lineTo(r * 0.38, r * 2.05);
   ctx.stroke();
 
-  // Enveloppe + rayures découpées
+  // Envelope + cut-out stripes
   cut(ctx, envelope, SUN, Math.max(3, r * 0.1));
   ctx.save();
   ctx.beginPath();

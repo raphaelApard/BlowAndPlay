@@ -2,12 +2,12 @@ import { FOLIAGE, LEAF_COLORS, buildRoute, drawGround, drawHedgehog, drawHome, d
 import { CanvasThumbnail } from '../_shared/CanvasThumbnail';
 import styles from './feuilles.module.css';
 
-/** Vignette de la carte « Jeux » : le hérisson devant un tas de feuilles, le terrier au bout. */
+/** Games card thumbnail: the hedgehog in front of a pile of leaves, the burrow at the end. */
 export function Thumbnail() {
   return <CanvasThumbnail className={styles.thumb} paint={paint} />;
 }
 
-/** Dessin de la vignette (voir `CanvasThumbnail` pour l'échafaudage). */
+/** Drawing of the thumbnail (see `CanvasThumbnail` for the scaffolding). */
 function paint(ctx: CanvasRenderingContext2D, w: number, h: number, unit: number) {
   drawSky(ctx, w, h);
   drawGround(ctx, w, h, h * 0.42);

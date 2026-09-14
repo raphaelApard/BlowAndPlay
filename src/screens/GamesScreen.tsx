@@ -7,7 +7,7 @@ import { selectProgress, useAppState } from '../store/store';
 import { useCurrentProfile } from './useCurrentProfile';
 import styles from './screens.module.css';
 
-/** Sélection libre : un jeu, on lance le premier niveau non réussi. */
+/** Free selection: pick a game, we launch the first level not yet passed. */
 export function GamesScreen() {
   const navigate = useNavigate();
   const profile = useCurrentProfile();

@@ -6,7 +6,7 @@ export { LANGS } from './strings';
 
 type Params = Record<string, string | number>;
 
-/** Langue du navigateur ramenée à une langue de l'app ; anglais par défaut. */
+/** The browser language mapped to one of the app's languages; English by default. */
 export function detectLang(): Lang {
   const candidates = typeof navigator === 'undefined' ? [] : navigator.languages?.length ? navigator.languages : [navigator.language];
   for (const tag of candidates) {
@@ -38,19 +38,19 @@ function interpolate(text: string, params?: Params): string {
   return text.replace(/\{(\w+)\}/g, (m, k: string) => (k in params ? String(params[k]) : m));
 }
 
-/** Chaîne traduite. Repli sur le français si la clé manque dans la langue demandée. */
+/** Translated string. Falls back to French if the key is missing in the requested language. */
 export function t(lang: Lang, key: StringKey, params?: Params): string {
   return interpolate(STRINGS[lang][key] ?? STRINGS.fr[key], params);
 }
 
-/** Texte localisé fourni par une donnée (jeu, mascotte, réglage). */
+/** Localized text provided by data (game, mascot, setting). */
 export function tr(text: Localized, lang: Lang): string {
   return text[lang] ?? text.fr;
 }
 
 export type Translate = (key: StringKey, params?: Params) => string;
 
-/** `const { t, tr, lang } = useT()` : traduction liée à la langue courante. */
+/** `const { t, tr, lang } = useT()`: translation bound to the current language. */
 export function useT(): { t: Translate; tr: (text: Localized) => string; lang: Lang } {
   const lang = useLang();
   return { lang, t: (key, params) => t(lang, key, params), tr: (text) => tr(text, lang) };

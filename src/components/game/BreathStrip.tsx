@@ -2,7 +2,7 @@ import { useBreathState } from '../../breath/BreathProvider';
 import { cx } from '../ui';
 import styles from './game.module.css';
 
-/** Bande de papier qui se remplit avec le souffle. Même métaphore partout. */
+/** Paper strip that fills with the breath. The same metaphor everywhere. */
 export function BreathStrip({ progress }: { progress?: number }) {
   const { intensity, isBlowing } = useBreathState();
   return (

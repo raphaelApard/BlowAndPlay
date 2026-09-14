@@ -5,7 +5,7 @@ import { buildRoute, layoutIslands } from './draw';
 import type { BateauPirateLevel } from './index';
 import { DOCK_MS, MAX_VEL, PUSH, tuning } from './rules';
 
-/** Bateau Pirate : souffles courts répétés, le bateau glisse d'île en île. */
+/** Bateau Pirate: repeated short blows, the boat glides from island to island. */
 export const simulate: Simulate<BateauPirateLevel> = (level, difficulty, child) => {
   const unit = UNIT;
   const n = level.islands;

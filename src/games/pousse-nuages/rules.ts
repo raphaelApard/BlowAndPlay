@@ -1,27 +1,27 @@
 import { clamp01 } from './draw';
 
-/** Règles du jeu partagées entre le composant et la simulation d'équilibrage. */
+/** Game rules shared between the component and the balance simulation. */
 
-/** Arrivée d'un nuage depuis la gauche jusqu'au soleil. */
+/** Arrival of a cloud from the left up to the sun. */
 export const ENTER_MS = 1300;
-/** Fête finale : grand soleil, rayons qui tournent, pétales. */
+/** Final celebration: big sun, turning rays, petals. */
 export const PARTY_MS = 3200;
-/** Poussée d'un souffle à intensité 1 (avant `unit` et difficulté). */
+/** Thrust of a blow at intensity 1 (before `unit` and difficulty). */
 export const PUSH = 0.85;
 export const MAX_VX = 14;
 export const CLOUD_S = 118;
 
 /**
- * Un souffle long s'essouffle : pleine poussée jusqu'à 700 ms, puis elle
- * décroît jusqu'à 25 % à 1,6 s. Les souffles courts répétés poussent mieux.
+ * A long blow runs out of steam: full thrust up to 700 ms, then it decreases
+ * to 25 % at 1.6 s. Repeated short blows push better.
  */
 export function blowEfficiency(blowMs: number) {
   return Math.max(0.25, 1 - Math.max(0, blowMs - 700) / 900);
 }
 
 /**
- * Difficulté globale (0 → 1) → nuages :
- *  - poids : poussée ÷1 (facile) → ÷2 ;
+ * Global difficulty (0 → 1) → clouds:
+ *  - weight: thrust ÷1 (easy) → ÷2;
  *  - retour vers le soleil quand on ne souffle plus : 0 → 0,1 px/frame.
  */
 export function tuning(difficulty: number) {

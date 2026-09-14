@@ -1,6 +1,6 @@
 import type { MascotId } from './mascots.data';
 
-/** Textes anglais des mascottes ; `mascots.data.ts` (généré) reste la source française. */
+/** English mascot texts; `mascots.data.ts` (generated) remains the French source. */
 export const MASCOTS_EN: Record<MascotId, { tagline: string; description: string }> = {
   miko: {
     tagline: 'the friendly cat',

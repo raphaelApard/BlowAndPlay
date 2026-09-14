@@ -1,13 +1,13 @@
 /**
- * Dessin « papier découpé » des Bulles de savon : jardin, baguette à bulles,
- * bulles irisées. Fonctions pures sur un canvas 2D, partagées entre le jeu
+ * Cut-paper drawing of Bulles de savon: garden, bubble wand, iridescent
+ * bubbles. Pure functions on a 2D canvas, shared between the game
  * et la vignette.
  */
 
 import { cut } from '../_shared/canvas';
 
-// Réexportés pour que le jeu, sa simulation et sa vignette gardent
-// un seul point d'entrée : `./draw`.
+// Re-exported so that the game, its simulation and its thumbnail keep a
+// single entry point: `./draw`.
 export { clamp01, seeded } from '../_shared/math';
 export { INK, cut } from '../_shared/canvas';
 
@@ -25,7 +25,7 @@ export const SHIRT = '#6bcb77';
 export const RAINBOW = ['#ff6b6b', '#ff9a4d', '#ffd93d', '#6bcb77', '#5ec2f0', '#9d7bef'];
 export const PETALS = ['#ff6b6b', '#ff9a4d', '#9d7bef', '#ff7fb1', '#5ec2f0'];
 
-// ─── Décor ───────────────────────────────────────────────────────────
+// ─── Scenery ─────────────────────────────────────────────────────────
 
 export function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -103,7 +103,7 @@ export function drawFlower(ctx: CanvasRenderingContext2D, x: number, y: number, 
 // ─── Enfant et baguette ──────────────────────────────────────────────
 
 /**
- * L'enfant de profil, en bas à gauche, qui tient la baguette devant sa
+ * The child in profile, at the bottom left, holding the wand in front of
  * bouche. Origine = pieds. Renvoie le centre de l'anneau de la baguette.
  */
 export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, blowing: number, time: number): { x: number; y: number; r: number } {
@@ -143,7 +143,7 @@ export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: 
   cut(ctx, () => ctx.arc(32, 0, 8, 0, Math.PI * 2), SKIN, 2);
   ctx.restore();
   ctx.restore();
-  // Baguette (en coordonnées écran)
+  // Wand (in screen coordinates)
   const hx = x + (14 + Math.cos(-0.55) * 32) * s;
   const hy = y + (-66 + bob + Math.sin(-0.55) * 32) * s;
   const ringX = x + 62 * s;
@@ -168,8 +168,8 @@ export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: 
 // ─── Bulles ──────────────────────────────────────────────────────────
 
 /**
- * Bulle irisée : disque translucide, liseré arc-en-ciel, reflet.
- * `wobble` (0..1) la déforme ; `face` dessine un petit visage content.
+ * Iridescent bubble: translucent disc, rainbow rim, highlight.
+ * `wobble` (0..1) deforms it; `face` draws a small happy face.
  */
 export function drawBubble(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, wobble: number, time: number, face = false) {
   if (r <= 2) return;
@@ -214,7 +214,7 @@ export function drawBubble(ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.restore();
 }
 
-/** Cible : cercle pointillé de la taille à atteindre. */
+/** Target: dashed circle of the size to reach. */
 export function drawTarget(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, reached: number, time: number) {
   ctx.save();
   ctx.setLineDash([8, 10]);
@@ -227,7 +227,7 @@ export function drawTarget(ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.restore();
 }
 
-/** Éclatement : anneau qui s'élargit + gouttelettes. */
+/** Pop: widening ring + droplets. */
 export function drawPop(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, u: number) {
   ctx.save();
   ctx.globalAlpha = 1 - u;

@@ -17,7 +17,7 @@ interface Floating {
   vy: number;
   ok: boolean;
   bornAt: number;
-  /** Emplacement de rangement (bulles réussies). */
+  /** Storage slot (successful bubbles). */
   slot: number;
   fromX: number;
   fromY: number;
@@ -44,18 +44,18 @@ interface Sim {
   floating: Floating[];
   pops: Pop[];
   success: number;
-  /** Durée de la partie (ms), hors fête finale : base des étoiles. */
+  /** Duration of the game (ms), excluding the final celebration: the basis for the stars. */
   elapsed: number;
-  /** Instant où la fête doit commencer (dernière bulle rangée). */
+  /** Moment when the celebration should start (last bubble stored). */
   partyDue: number;
   partyAt: number;
   done: boolean;
 }
 
 /**
- * Bulles de savon. Canvas 2D piloté par une boucle rAF, état dans une ref.
- * La bulle en formation est accrochée à la baguette ; les bulles détachées
- * flottent, et les réussies vont se ranger en haut à droite.
+ * Bulles de savon. Canvas 2D driven by a rAF loop, state in a ref.
+ * The bubble being formed is attached to the wand; detached bubbles float,
+ * and the successful ones go and line up at the top right.
  */
 export function Game({ level, breath, width, height, paused, difficulty, onProgress, onComplete }: GameProps<BullesLevel>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,7 +98,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       drawSun(ctx, width * 0.9, height * 0.16, 44 * unit);
       drawCloud(ctx, width * 0.4 + Math.sin(t / 5000) * 20 * unit, height * 0.12, unit * 0.9);
       drawCloud(ctx, width * 0.7 + Math.sin(t / 6000) * 15 * unit, height * 0.3, unit * 0.6);
-      // Emplacements de rangement (cercles vides), puis bulles rangées.
+      // Storage slots (empty circles), then stored bubbles.
       for (let i = 0; i < n; i++) {
         ctx.save();
         ctx.strokeStyle = 'rgba(255,255,255,0.6)';
@@ -149,11 +149,11 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       const st = breath.getState();
       s.prevPower = s.power;
       s.power += (st.intensity - s.power) * Math.min(1, 0.25 * k);
-      // Instabilité : variations rapides de l'intensité.
+      // Instability: rapid variations in the intensity.
       const jitter = Math.abs(s.power - s.prevPower) / Math.max(0.5, k);
       s.wobble += (clamp01(jitter * 25) - s.wobble) * Math.min(1, 0.15 * k);
 
-      // Bulles détachées : flottent (ou rejoignent leur emplacement).
+      // Detached bubbles: they float (or make their way to their slot).
       s.floating = s.floating.filter((f) => {
         if (f.poppedAt >= 0) return true;
         if (f.ok) {
@@ -176,7 +176,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       }
 
       if (s.partyAt >= 0) {
-        // Fête : les bulles rangées éclatent une à une.
+        // Celebration: the stored bubbles pop one by one.
         const idx = Math.floor((t - s.partyAt) / 350);
         s.floating.forEach((f, i) => {
           if (f.ok && f.poppedAt < 0 && i <= idx) {
@@ -199,14 +199,14 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       const ringX = kidX + 62 * kidS;
       const ringY = groundY + 4 * unit - 91 * kidS;
       if (st.isBlowing) {
-        // La bulle ne peut pas éclater : souffler fort ne fait que la gonfler.
+        // The bubble cannot pop: blowing hard only inflates it.
         if (s.power > 0.08) {
           s.r = Math.min(targetR * 1.25, s.r + growPerFrame * (0.5 + s.power) * (1 - s.wobble * 0.6) * k);
         }
       }
-      // La bulle est prête : elle se détache et part se ranger. Elle attend
+      // The bubble is ready: it detaches and goes to its slot. It waits
       // sinon le souffle suivant en gardant sa taille — reprendre son souffle
-      // ne coûte rien, il faut seulement plusieurs respirations.
+      // costs nothing, it just takes several breaths.
       if (s.r >= targetR) {
         const fx = ringX + s.r * 0.9;
         const fy = ringY - s.r * 0.15;

@@ -27,7 +27,7 @@ import { BLOW_RATE, END_BEFORE, ENTER_MS, PARTY_MS, STOP_BEFORE, WALK_SPEED, lea
 
 
 interface Leaf {
-  /** Position relative au centre du tas (unités). */
+  /** Position relative to the centre of the pile (units). */
   dx: number;
   dy: number;
   s: number;
@@ -52,7 +52,7 @@ interface Pile {
 
 interface Sim {
   dist: number;
-  /** Position en fraction du chemin, pour survivre à un redimensionnement. */
+  /** Position as a fraction of the path, so as to survive a resize. */
   frac: number;
   walk: number;
   power: number;
@@ -66,8 +66,8 @@ interface Sim {
 }
 
 /**
- * Feuilles d'automne. Canvas 2D piloté par une boucle rAF, état dans une
- * ref. Le hérisson avance le long du chemin et s'arrête devant chaque tas ;
+ * Feuilles d'automne. Canvas 2D driven by a rAF loop, state in a ref.
+ * The hedgehog moves along the path and stops in front of each pile;
  * le souffle envoie les feuilles voler.
  */
 export function Game({ level, breath, width, height, paused, difficulty, onProgress, onComplete }: GameProps<FeuillesLevel>) {
@@ -162,7 +162,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       const light = s.partyAt >= 0 ? clamp01((t - s.partyAt) / 500) : 0;
       const door = s.enterAt >= 0 ? clamp01((t - s.enterAt) / (ENTER_MS * 0.4)) : 0;
       items.push({ y: homeAnchor.y, draw: () => drawHome(ctx, homeAnchor.x, homeAnchor.y, unit * 0.9, light, s.partyAt >= 0 ? 0 : door) });
-      // Hérisson
+      // Hedgehog
       if (s.partyAt < 0) {
         let scale = unit * 0.9;
         let hx = hh.x;
@@ -186,7 +186,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       for (const f of s.flying) drawLeaf(ctx, f.x, f.y, f.s * unit, f.rot, f.color);
 
       if (s.partyAt >= 0) {
-        // Cœurs qui montent de la maison
+        // Hearts rising from the house
         for (let i = 0; i < 3; i++) {
           const a = ((t - s.partyAt) / 1400 + i * 0.33) % 1;
           ctx.save();
@@ -276,7 +276,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
           }
         } else s.target += 1;
       } else {
-        // Plus de tas : le hérisson rentre.
+        // No more piles: the hedgehog goes home.
         const endAt = route.total - END_BEFORE * unit;
         if (s.dist < endAt) {
           s.dist = Math.min(endAt, s.dist + walkSpeed * k);

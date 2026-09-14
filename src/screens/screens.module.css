@@ -100,9 +100,9 @@
 }
 @media (orientation: portrait) {
   /*
-   * En portrait, l'accueil passe en flux normal et défile : empilés, les
-   * enfants + le bouton « ajouter » dépassent vite la hauteur de l'écran.
-   * Le titre et la montgolfière défilent avec le reste.
+   * In portrait, the home screen switches to normal flow and scrolls: stacked,
+   * the children + the "add" button quickly exceed the screen height.
+   * The title and the balloon scroll with the rest.
    */
   .title {
     position: static;
@@ -146,8 +146,8 @@
     height: 36px;
   }
   /*
-   * Le sélecteur de langue (en haut) et le bouton Parents (en bas) restent
-   * fixes au-dessus du contenu : on leur réserve la place en haut et en bas
+   * The language switch (top) and the Parents button (bottom) stay fixed
+   * above the content: we reserve room for them at the top and bottom
    * pour qu'ils ne recouvrent jamais le titre ni une carte enfant.
    */
   .homeScroll {
@@ -168,10 +168,10 @@
   inset: 0;
   background: rgba(35, 50, 74, 0.45);
   display: grid;
-  /* `center` seul rogne des deux côtés dès que le dialogue dépasse l'écran :
-     le haut ET le bas deviennent inatteignables (la page ne défile pas,
-     `body` est en `overflow: hidden`). `safe-center` centre tant que ça tient
-     et bascule en `start` sinon, pour que le dialogue reste entièrement
+  /* `center` alone crops on both sides as soon as the dialog exceeds the
+     screen: the top AND the bottom become unreachable (the page does not
+     scroll, `body` is `overflow: hidden`). `safe-center` centres while it
+     fits and switches to `start` otherwise, so that the dialog stays fully
      accessible. */
   place-items: safe center;
   padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
@@ -186,7 +186,7 @@
   flex-direction: column;
   gap: 20px;
   font-weight: 600;
-  /* Plus haut que l'écran : c'est le corps du dialogue qui défile. */
+  /* Taller than the screen: it is the dialog's body that scrolls. */
   max-height: 100%;
   min-height: 0;
 }
@@ -232,8 +232,8 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
-/* Sans nom sous la figure : la mascotte se reconnaît à son dessin, et le
-   nom reste porté par l'aria-label pour les lecteurs d'écran. */
+/* No name under the figure: the mascot is recognized by its drawing, and the
+   name is still carried by the aria-label for screen readers. */
 .mascotChoice {
   display: flex;
   align-items: center;
@@ -251,7 +251,7 @@
   background: var(--paper);
   box-shadow: 3px 3px 0 var(--ink-a15);
 }
-/* Choix des jeux à la création d'un enfant : vignettes cochables. */
+/* Choice of games when creating a child: checkable thumbnails. */
 .gamePicker {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -273,7 +273,7 @@
   text-align: center;
   color: var(--ink);
   cursor: pointer;
-  /* Décoché : le jeu reste reconnaissable, mais visiblement en retrait. */
+  /* Unchecked: the game stays recognizable, but visibly set back. */
   opacity: 0.5;
 }
 .gameChoiceOn {
@@ -327,10 +327,10 @@
   font-weight: 400;
   color: var(--ink);
 }
-/* Corps défilant : le titre et les boutons restent visibles, seul le
-   contenu du milieu défile quand le dialogue dépasse l'écran.
+/* Scrolling body: the title and the buttons stay visible, only the middle
+   content scrolls when the dialog exceeds the screen.
    `min-height: 0` est indispensable — sans lui, un enfant flex refuse de
-   rétrécir sous sa taille naturelle et rien ne défile. */
+   shrink below its natural size and nothing scrolls. */
 .dialogBody {
   flex: 1;
   min-height: 0;
@@ -345,16 +345,16 @@
   display: flex;
   justify-content: flex-end;
   gap: 16px;
-  /* Toujours atteignable : ne rétrécit pas quand le corps déborde. */
+  /* Always reachable: does not shrink when the body overflows. */
   flex: none;
 }
-/* Même gabarit que « Créer », en papier gris. */
+/* Same template as "Créer", in grey paper. */
 .cancel {
   background: var(--mist);
   box-shadow: 5px 5px 0 var(--ink-a15);
 }
 
-/* ─── Écran centré (récompense) ────────────────────────────────────── */
+/* ─── Centred screen (reward) ──────────────────────────────────────── */
 .slide {
   position: absolute;
   inset: 0;
@@ -418,13 +418,13 @@
   }
 }
 
-/* Bouton parents sur les écrans sans barre d'onglets (même position en portrait).
-   Double classe : l'emporte sur la règle portrait du kit UI quel que soit l'ordre des CSS. */
+/* Parents button on screens without a tab bar (same position in portrait).
+   Double class: wins over the UI kit's portrait rule whatever the CSS order. */
 .parentsFlat.parentsFlat {
   bottom: calc(var(--edge) + var(--safe-bottom));
 }
 
-/* ─── Calibrage (une seule page, deux étapes côte à côte) ─────────── */
+/* ─── Calibration (a single page, two steps side by side) ─────────── */
 .calib {
   position: absolute;
   inset: 0;
@@ -446,7 +446,7 @@
   width: 100%;
   justify-content: center;
 }
-/* Le bouton de départ se pose par-dessus les deux cartes, au centre. */
+/* The start button sits over the two cards, in the centre. */
 .calibStartOverlay {
   position: absolute;
   inset: 0;
@@ -470,7 +470,7 @@
     transform 250ms,
     box-shadow 250ms;
 }
-/* Avant le départ, les deux étapes sont présentées à plat. */
+/* Before the start, both steps are presented flat. */
 .calibBoardIdle .calibStep,
 .calibStepActive {
   opacity: 1;
@@ -551,7 +551,7 @@
   text-shadow: 5px 5px 0 var(--ink-a25);
   letter-spacing: 1px;
 }
-/* Mascotte + bulle d'explication, au-dessus des deux étapes. */
+/* Mascot + explanation bubble, above the two steps. */
 .calibCoach {
   display: flex;
   align-items: center;
@@ -575,7 +575,7 @@
   line-height: 1.2;
   color: var(--ink);
 }
-/* Pointe vers la mascotte, à gauche. */
+/* Points towards the mascot, on the left. */
 .calibBubble::before {
   content: '';
   position: absolute;
@@ -675,20 +675,20 @@
   overflow: hidden;
   padding: 0;
 }
-/* Vignette du jeu : elle remplit la pastille, découpée par le rayon. */
-/* La vignette remplit toute la pastille ; c'est `.node` qui arrondit et découpe. */
+/* The game's thumbnail: it fills the dot, clipped by the radius. */
+/* The thumbnail fills the whole dot; it is `.node` that rounds and clips. */
 .nodeThumb {
   width: 100%;
   height: 100%;
   overflow: hidden;
   pointer-events: none;
 }
-/* Étape pas encore atteinte : vignette en sourdine, le jeu reste devinable. */
+/* Step not yet reached: muted thumbnail, the game stays guessable. */
 .nodeLocked .nodeThumb {
   filter: grayscale(0.7) brightness(1.06);
   opacity: 0.55;
 }
-/* Étape terminée : en retrait, pour que l'étape courante ressorte. */
+/* Step done: set back, so that the current step stands out. */
 .nodeDone .nodeThumb {
   opacity: 0.55;
 }
@@ -730,8 +730,8 @@
   animation: pulse 2.4s ease-out infinite;
   pointer-events: none;
 }
-/* Compteur de niveaux, centré sous la vignette (pastille de 96px, centrée par
-   sa propre marge de -48px : son bas est donc à +48px du point du nœud). */
+/* Level counter, centred under the thumbnail (96px dot, centred by its own
+   -48px margin: its bottom is therefore +48px from the node's point). */
 .nodeStars {
   position: absolute;
   margin: 58px 0 0 -48px;
@@ -746,7 +746,7 @@
   height: 0;
   pointer-events: none;
 }
-/* Posé juste au-dessus de la pastille courante (la courbe à 7 étapes est plate). */
+/* Placed just above the current dot (the 7-step curve is flat). */
 .nodeBalloon {
   position: absolute;
   margin: -150px 0 0 -70px;
@@ -765,7 +765,7 @@
     transform: rotate(6deg);
   }
 }
-/* Compteur d'étoiles cumulées du jeu, posé au-dessus de la pastille. */
+/* Counter of the game's cumulative stars, placed above the dot. */
 .nodeStarsCount {
   display: inline-flex;
   align-items: center;
@@ -781,11 +781,11 @@
 }
 .nodeStarsPop {
   animation: pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  /* Le compteur est sous la vignette : il grandit depuis son haut, côté pastille. */
+  /* The counter is under the thumbnail: it grows from its top, on the dot's side. */
   transform-origin: 48px 0;
 }
-/* Confettis d'arrivée sur l'étoile finale. `fixed` (et non `absolute`) : la
-   carte défile, la fête doit rester devant les yeux de l'enfant. */
+/* Arrival confetti on the final star. `fixed` (and not `absolute`): the map
+   scrolls, the celebration must stay in front of the child's eyes. */
 .mapConfetti {
   position: fixed;
   inset: 0;
@@ -799,9 +799,9 @@
   width: 18px;
   height: 26px;
   border-radius: 3px;
-  /* Keyframes locales : dans un module CSS, `animation: fall` est renommé en
-     un nom scopé et ne retrouve pas le `@keyframes fall` global — les
-     confettis restaient alors figés en haut de l'écran. */
+  /* Local keyframes: in a CSS module, `animation: fall` is renamed to a
+     scoped name and no longer finds the global `@keyframes fall` — the
+     confetti then stayed frozen at the top of the screen. */
   animation: mapFall 3.2s linear forwards;
 }
 @keyframes mapFall {
@@ -814,28 +814,28 @@
 }
 
 /* Bouton « jouer » : c'est toujours l'enfant qui lance un jeu, rien ne s'ouvre
-   tout seul. Posé à côté de la mascotte (qui est calée à droite), donc juste à
-   sa gauche : la mascotte reste au bord de l'écran et le bouton à portée du
-   pouce. Hors du conteneur qui défile — il reste visible où que la carte soit
-   défilée. */
+   by itself. Placed next to the mascot (which is set to the right), so just
+   to its left: the mascot stays at the edge of the screen and the button
+   within thumb's reach. Outside the scrolling container — it stays visible
+   wherever the map is scrolled. */
 .nodePlay {
   position: absolute;
-  /* Permuté avec la mascotte : le bouton est au bord, la mascotte en retrait
-     (voir `.mapMascot`). Le bouton étant l'élément agissant, il prend le coin
+  /* Swapped with the mascot: the button is at the edge, the mascot set back
+     (see `.mapMascot`). The button being the acting element, it takes the corner
      le plus accessible au pouce. */
   right: 40px;
   bottom: 44px;
   width: 104px;
   height: 104px;
-  /* Carré arrondi, comme les pastilles de la carte et les boutons du kit
-     (papier découpé) — pas un rond. */
+  /* Rounded square, like the map's dots and the kit's buttons (cut paper) —
+     not a circle. */
   border-radius: 28px;
   z-index: 4;
   animation: nodePlayIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, floaty 3s ease-in-out 0.4s infinite;
 }
-/* Mascotte de l'aventure : décalée vers l'intérieur pour laisser le bord au
-   bouton « jouer ». Classe propre à la carte — sur l'onglet « Jeux », la
-   mascotte garde sa place au bord de l'écran. */
+/* The adventure's mascot: shifted inwards to leave the edge to the play
+   button. A class specific to the map — on the Games tab, the mascot keeps
+   its place at the edge of the screen. */
 .mapMascot {
   right: 186px;
 }
@@ -884,8 +884,8 @@
 .gamesRow::-webkit-scrollbar {
   display: none;
 }
-/* Les cartes passent à la ligne, centrées dans les deux sens ; les marges auto
-   (plutôt que justify-content) gardent le haut atteignable quand ça défile. */
+/* The cards wrap, centred in both directions; the auto margins (rather than
+   justify-content) keep the top reachable when it scrolls. */
 .gamesInner {
   display: flex;
   flex-wrap: wrap;
@@ -962,7 +962,7 @@
     gap: 14px;
     border-radius: var(--r-tile);
   }
-  /* Rangées très larges : une faible inclinaison suffit à ne pas se chevaucher. */
+  /* Very wide rows: a slight tilt is enough to avoid overlapping. */
   .gameCard:nth-child(3n + 1) {
     transform: rotate(-0.6deg);
   }
@@ -993,7 +993,7 @@
   }
 }
 
-/* ─── Récompense ───────────────────────────────────────────────────── */
+/* ─── Reward ───────────────────────────────────────────────────────── */
 .rewardSlide {
   composes: slide;
   padding-bottom: 180px;
@@ -1164,7 +1164,7 @@
   height: 24px;
   accent-color: var(--coral);
 }
-/* Vignette du jeu dans la liste des jeux de l'aventure : même visuel que la
+/* The game's thumbnail in the adventure games list: the same visual as the
    carte et l'onglet « Jeux », en petit. */
 .advThumb {
   width: 64px;

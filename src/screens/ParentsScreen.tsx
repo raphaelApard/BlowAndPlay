@@ -25,8 +25,8 @@ function fmtDuration(ms: number) {
 }
 
 /**
- * Choix du micro. Les libellés n'apparaissent qu'après la permission :
- * un bouton « Détecter » l'obtient si besoin. Suit les branchements.
+ * Mic picker. The labels only appear once permission has been granted: a
+ * "Detect" button obtains it if needed. Follows plugging and unplugging.
  */
 function MicrophonePicker() {
   const { micDeviceId, setMicDeviceId, engine } = useBreath();
@@ -37,7 +37,7 @@ function MicrophonePicker() {
 
   const refresh = useCallback(() => listMicrophones().then(setMics), []);
 
-  // Liste au montage, puis suit les branchements / débranchements.
+  // Lists on mount, then follows plugging / unplugging.
   useEffect(() => {
     void refresh();
     const md = navigator.mediaDevices;
@@ -100,7 +100,7 @@ function MicrophonePicker() {
   );
 }
 
-/** Réglages déclarés par un jeu (`GameDefinition.settings`), rendus génériquement. */
+/** Settings declared by a game (`GameDefinition.settings`), rendered generically. */
 function GameSettingsPanel({ game, stored }: { game: AnyGameDefinition; stored: Record<string, SettingValue> | undefined }) {
   const defs = game.settings as Record<string, SettingDef>;
   const values = resolveSettings(defs, stored);
@@ -166,10 +166,10 @@ function GameSettingsPanel({ game, stored }: { game: AnyGameDefinition; stored: 
 }
 
 /**
- * Choix des jeux qui composent l'aventure d'un enfant.
- * Aucune sélection enregistrée = tous les jeux ; décocher n'efface rien et
- * laisse le jeu accessible depuis l'onglet « Jeux ». On empêche de tout
- * décocher : une aventure vide n'aurait plus aucune étape.
+ * Choice of the games that make up a child's adventure.
+ * No stored selection = every game; unchecking erases nothing and leaves the
+ * game reachable from the Games tab. We prevent unchecking everything: an
+ * empty adventure would no longer have a single step.
  */
 function AdventureGamesPanel({ profile, chosen }: { profile: Profile; chosen: string[] | undefined }) {
   const { t, tr } = useT();
@@ -183,8 +183,8 @@ function AdventureGamesPanel({ profile, chosen }: { profile: Profile; chosen: st
       <div className={styles.difficulty}>
         {GAMES.map((game) => {
           const on = enabled(game.id);
-          // Le dernier jeu coché ne peut pas être décoché : l'aventure garderait
-          // une carte sans étape.
+          // The last checked game cannot be unchecked: the adventure would
+          // keep a map with no step.
           const last = on && count === 1;
           return (
             <label key={game.id} htmlFor={`adv-${game.id}`} className={styles.checkRow}>
@@ -218,7 +218,7 @@ function AdventureGamesPanel({ profile, chosen }: { profile: Profile; chosen: st
   );
 }
 
-/** Espace adulte : profils, progression, sessions, réglages. Texte autorisé. */
+/** Adult area: profiles, progress, sessions, settings. Text is allowed here. */
 export function ParentsScreen() {
   const navigate = useNavigate();
   const state = useAppState();
@@ -228,9 +228,9 @@ export function ParentsScreen() {
   const [confirm, setConfirm] = useState<'reset' | 'delete' | null>(null);
   const { t, tr, lang } = useT();
 
-  // Aucun bruitage dans l'espace adulte : les sons sont faits pour le jeu de
-  // l'enfant, pas pour des réglages. Couvre tout l'écran (boutons, langue…),
-  // sans avoir à marquer chaque bouton un à un.
+  // No sound effects in the adult area: the sounds are made for the child's
+  // play, not for settings. Covers the whole screen (buttons, language…),
+  // without having to mark each button one by one.
   useEffect(() => muteSfx(), []);
 
   const sessions = state.sessions
@@ -272,8 +272,8 @@ export function ParentsScreen() {
               </div>
             ))}
             <div className={styles.row}>
-              {/* L'ajout d'un enfant se fait sur l'accueil (avatar, mascotte,
-                  jeux) : on y emmène, plutôt que de dupliquer le formulaire. */}
+              {/* Adding a child happens on the home screen (avatar, mascot,
+                  games): we take them there, rather than duplicating the form. */}
               <PaperButton className={styles.smallBtn} tone="leaf" onClick={() => navigate('/?new=1')}>
                 {t('parents.addChild')}
               </PaperButton>

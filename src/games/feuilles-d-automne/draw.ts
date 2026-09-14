@@ -1,14 +1,14 @@
 /**
- * Dessin « papier découpé » des Feuilles d'automne : ciel doré, arbres roux,
- * chemin, feuilles, hérisson et son terrier. Fonctions pures sur un canvas
- * 2D, partagées entre le jeu et la vignette.
+ * Cut-paper drawing of Feuilles d'automne: golden sky, russet trees, path,
+ * leaves, the hedgehog and its burrow. Pure functions on a 2D canvas, shared
+ * between the game and the thumbnail.
  */
 
 import { clamp01, seeded } from '../_shared/math';
 import { INK, cut } from '../_shared/canvas';
 
-// Réexportés pour que le jeu, sa simulation et sa vignette gardent
-// un seul point d'entrée : `./draw`.
+// Re-exported so that the game, its simulation and its thumbnail keep a
+// single entry point: `./draw`.
 export { clamp01, seeded } from '../_shared/math';
 export { INK, cut } from '../_shared/canvas';
 
@@ -43,7 +43,7 @@ export interface Route {
   anchorDist: number[];
 }
 
-/** Courbe de Catmull-Rom passant par les ancres, échantillonnée. */
+/** Catmull-Rom curve passing through the anchors, sampled. */
 export function buildRoute(anchors: Pt[], perSegment = 40): Route {
   const P = (i: number) => anchors[Math.max(0, Math.min(anchors.length - 1, i))];
   const samples: Pt[] = [];
@@ -92,11 +92,11 @@ export function routeAt(route: Route, d: number): { x: number; y: number; dx: nu
 }
 
 /**
- * Positions (0..1) des ancres du chemin : départ, un point par tas, terrier.
+ * Positions (0..1) of the path's anchors: start, one point per pile, burrow.
  *
  * En paysage le chemin va de la gauche vers la droite ; en portrait (mobile)
  * il monte du bas vers le haut, sinon les tas se tasseraient sur une largeur
- * trop étroite. Le hérisson reste dessiné de profil dans les deux cas.
+ * too narrow. The hedgehog is still drawn in profile in both cases.
  */
 export function layoutPath(piles: number, seed: number, portrait = false): Pt[] {
   const rand = seeded(seed);
@@ -118,7 +118,7 @@ export function layoutPath(piles: number, seed: number, portrait = false): Pt[] 
   return pts;
 }
 
-// ─── Décor ───────────────────────────────────────────────────────────
+// ─── Scenery ─────────────────────────────────────────────────────────
 
 export function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -169,7 +169,7 @@ export function drawTree(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   cut(ctx, () => ctx.arc(x, y - 96 * s, 30 * s, 0, Math.PI * 2), color);
 }
 
-/** Le terrier : gros arbre avec une porte ronde et une fenêtre. `light` (0..1) allume la fenêtre, `door` (0..1) ouvre la porte. */
+/** The burrow: a big tree with a round door and a window. `light` (0..1) lights the window, `door` (0..1) opens the door. */
 export function drawHome(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, light: number, door: number) {
   cut(ctx, () => ctx.roundRect(x - 40 * s, y - 150 * s, 80 * s, 150 * s, 18 * s), TRUNK);
   ctx.fillStyle = TRUNK_DARK;
@@ -178,7 +178,7 @@ export function drawHome(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   cut(ctx, () => ctx.arc(x - 44 * s, y - 150 * s, 40 * s, 0, Math.PI * 2), FOLIAGE[0]);
   cut(ctx, () => ctx.arc(x + 46 * s, y - 156 * s, 40 * s, 0, Math.PI * 2), FOLIAGE[2]);
   cut(ctx, () => ctx.arc(x, y - 190 * s, 46 * s, 0, Math.PI * 2), FOLIAGE[1]);
-  // Fenêtre
+  // Window
   cut(ctx, () => ctx.arc(x, y - 96 * s, 12 * s, 0, Math.PI * 2), light > 0 ? WINDOW : '#5c3a21', 2);
   if (light > 0) {
     ctx.save();
@@ -189,7 +189,7 @@ export function drawHome(ctx: CanvasRenderingContext2D, x: number, y: number, s:
     ctx.fill();
     ctx.restore();
   }
-  // Porte ronde (s'ouvre vers l'intérieur : elle s'assombrit)
+  // Round door (opens inwards: it darkens)
   ctx.save();
   ctx.beginPath();
   ctx.arc(x, y - 22 * s, 24 * s, Math.PI, 0);
@@ -237,10 +237,10 @@ export function drawLeaf(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   ctx.restore();
 }
 
-// ─── Hérisson ────────────────────────────────────────────────────────
+// ─── Hedgehog ────────────────────────────────────────────────────────
 
 /**
- * Hérisson de profil (regarde à droite). Origine = pieds (centre).
+ * Hedgehog in profile (facing right). Origin = feet (centre).
  * `walk` (phase 0..1) anime les pattes ; `sniff` fait remuer le museau.
  */
 export function drawHedgehog(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, walk: number, sniff: number, time: number) {
@@ -268,7 +268,7 @@ export function drawHedgehog(ctx: CanvasRenderingContext2D, x: number, y: number
   );
   // Corps
   cut(ctx, () => ctx.ellipse(-4, -12, 30, 16, 0, 0, Math.PI * 2), HEDGE_BODY, 3);
-  // Tête / museau
+  // Head / snout
   cut(
     ctx,
     () => {
