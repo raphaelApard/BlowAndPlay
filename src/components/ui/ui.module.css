@@ -423,6 +423,40 @@
   transform: rotate(-135deg);
   margin-left: 0.08em;
 }
+/* Replay: a nearly closed ring with an arrow head at its opening.
+   Drawn in CSS like the other icons — the kit carries no image assets.
+   Only the top-right quarter is cut, and the head sits on the ring's own
+   top edge, so the whole reads as an arrow turning back on itself. */
+.replay {
+  position: relative;
+  /* `block`, and not the default `inline` of a span: on an inline box the
+     width/height below are ignored and the ring collapses. The other
+     pictograms get away with it (zero-sized boxes, or dimensions in % of a
+     box that the flex container blockifies) — this one does not. */
+  display: block;
+  /* As visually strong as the neighbouring arrow: a wide ring and a thick
+     stroke, otherwise the icon looks frail inside a 128px button. */
+  width: 0.72em;
+  height: 0.72em;
+  border: 0.13em solid currentColor;
+  border-radius: 50%;
+  border-right-color: transparent;
+  transform: rotate(45deg);
+}
+.replayHead {
+  position: absolute;
+  /* Caps the stroke where the ring stops (its top end), pointing the way the
+     arrow turns. Centred on that end, so it reads as one continuous arrow
+     rather than a nub floating in the ring's opening. */
+  top: -0.065em;
+  right: -0.075em;
+  width: 0;
+  height: 0;
+  border-top: 0.13em solid transparent;
+  border-bottom: 0.13em solid transparent;
+  border-left: 0.2em solid currentColor;
+  transform: rotate(-45deg);
+}
 
 /* ─── Stars ────────────────────────────────────────────────────────── */
 .stars {

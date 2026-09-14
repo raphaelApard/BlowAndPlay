@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { play } from '../audio/sfx';
-import { getGame } from '../games/registry';
-import { ArrowIcon, PaperButton, ParentsButton, PlayIcon, Sky, cx } from '../components/ui';
+import { ArrowIcon, PaperButton, ParentsButton, ReplayIcon, Sky, cx } from '../components/ui';
 import { useT } from '../i18n';
 import { MascotFigure } from '../mascots/MascotFigure';
 import { selectCurrentProfile, useAppState } from '../store/store';
-import type { LevelBase, Stars } from '../games/types';
+import type { Stars } from '../games/types';
 import styles from './screens.module.css';
 
 interface RewardState {
@@ -15,13 +14,19 @@ interface RewardState {
   stars: Stars;
 }
 
+/**
+ * Arrival confetti. The delays are positive and short: the child arrives on
+ * the screen and the pieces fall from the top. Negative delays would start
+ * them mid-flight, already scattered down the screen — the celebration would
+ * be half over before it was seen.
+ */
 const CONFETTI = [
   { left: '9%', color: '#ff6b6b', delay: '0s', round: false },
-  { left: '22%', color: '#ffd93d', delay: '-2s', round: true },
-  { left: '37%', color: '#6bcb77', delay: '-1s', round: false },
-  { left: '62%', color: '#ff6b6b', delay: '-3s', round: true },
-  { left: '77%', color: '#ffd93d', delay: '-0.5s', round: false },
-  { left: '91%', color: '#6bcb77', delay: '-2.5s', round: true },
+  { left: '22%', color: '#ffd93d', delay: '0.35s', round: true },
+  { left: '37%', color: '#6bcb77', delay: '0.15s', round: false },
+  { left: '62%', color: '#ff6b6b', delay: '0.5s', round: true },
+  { left: '77%', color: '#ffd93d', delay: '0.25s', round: false },
+  { left: '91%', color: '#6bcb77', delay: '0.45s', round: true },
 ];
 
 /**
@@ -42,13 +47,6 @@ export function RewardScreen() {
   }, [stars]);
 
   if (!state) return <Navigate to="/games" replace />;
-
-  const levels = (getGame(state.gameId)?.levels ?? []) as readonly LevelBase[];
-  const next = levels[levels.findIndex((l) => l.id === state.levelId) + 1];
-  const goNext = () => {
-    if (next) navigate(`/play/${state.gameId}/${next.id}?mode=free`, { replace: true });
-    else navigate('/games', { replace: true });
-  };
 
   return (
     <Sky horizon={0.66} clouds={false} sun={false}>
@@ -74,11 +72,19 @@ export function RewardScreen() {
         <MascotFigure id={profile?.mascot} size={170} mode="bravo" style={{ justifySelf: 'center' }} />
       </div>
       <div className={styles.rewardActions}>
-        <PaperButton icon onClick={() => navigate(`/play/${state.gameId}/${state.levelId}?mode=free`, { replace: true })} aria-label={t('reward.replay')}>
+        {/* Left: leave the reward screen for the games list. Right: play the
+            same level again — from the Games tab the child picks what they
+            do next, the screen no longer chains on to the next level. */}
+        <PaperButton icon onClick={() => navigate('/games', { replace: true })} aria-label={t('common.back')}>
           <ArrowIcon size={80} left />
         </PaperButton>
-        <PaperButton icon tone="leaf" onClick={goNext} aria-label={t('reward.next')}>
-          <PlayIcon size={90} />
+        <PaperButton
+          icon
+          tone="leaf"
+          onClick={() => navigate(`/play/${state.gameId}/${state.levelId}?mode=free`, { replace: true })}
+          aria-label={t('reward.replay')}
+        >
+          <ReplayIcon size={72} />
         </PaperButton>
       </div>
       <ParentsButton className={styles.parentsFlat} />

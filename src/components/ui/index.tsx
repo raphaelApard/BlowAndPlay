@@ -188,6 +188,14 @@ export function CrossIcon({ size = 44 }: { size?: number }) {
 export function ArrowIcon({ size = 64, left }: { size?: number; left?: boolean }) {
   return <span className={cx(styles.arrow, left && styles.arrowLeft)} style={{ fontSize: size }} aria-hidden />;
 }
+/** Circular arrow: replay the level just finished. */
+export function ReplayIcon({ size = 64 }: { size?: number }) {
+  return (
+    <span className={styles.replay} style={{ fontSize: size }} aria-hidden>
+      <span className={styles.replayHead} />
+    </span>
+  );
+}
 
 // ─── Stars ─────────────────────────────────────────────────────────────
 

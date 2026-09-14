@@ -1000,13 +1000,25 @@
   grid-template-rows: auto auto 1fr;
   align-items: center;
 }
+/* Arrival confetti. The keyframes are declared here, in the module: the
+   `animation` shorthand rewrites the name to a scoped one, which no longer
+   matches a global `@keyframes fall` — the pieces then stay frozen at the top
+   of the screen (the same trap as `mapFall` above). */
 .confetti {
   position: absolute;
   top: 0;
   width: 18px;
   height: 26px;
   border-radius: 3px;
-  animation: fall 4.4s linear infinite;
+  animation: rewardFall 4.4s linear infinite;
+}
+@keyframes rewardFall {
+  from {
+    transform: translateY(-80px) rotate(0);
+  }
+  to {
+    transform: translateY(110vh) rotate(360deg);
+  }
 }
 .rewardActions {
   position: absolute;
