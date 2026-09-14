@@ -113,9 +113,14 @@ returning per-frame intent (`long` / `bursts` / `hold` / `rest`).
 - effort monotonic with difficulty (d10 ≥ 1.3× d1, never dropping below 0.95× the previous step) and
   rising from one level to the next.
 
-A game without `simulate` fails the suite. The report test asserts the 210 count — **update it when adding
-or removing a game.** When retuning, change `rules.ts` / levels and re-run; never tune the child model to
-make one game pass.
+A game without `simulate` fails the suite. The report test derives the run count from the registry and
+asserts the number of games separately — **update that number when adding or removing a game.** When
+retuning, change `rules.ts` / levels and re-run; never tune the child model to make one game pass.
+
+Alongside the balance suite, `src/**/*.test.ts` covers the store, the adventure path, the breath engine,
+the game contract (data-driven over the registry, so a new game is checked automatically), each game's
+`tuning` endpoints, i18n and the shared helpers. There is no DOM test environment: components and screens
+are untested until jsdom + testing-library are added.
 
 ### Store
 
