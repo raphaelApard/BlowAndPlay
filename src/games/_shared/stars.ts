@@ -1,12 +1,12 @@
 import type { Stars } from '../types';
 
 /**
- * Barème d'étoiles au temps, commun aux jeux qui se jouent « à la montre »
- * (fusée, bateau, nuages, feuilles, bulles) : 3 étoiles dans le temps de
- * référence du niveau, 2 jusqu'à 1,6×, sinon 1.
+ * Time-based star scale, common to the games played "against the clock"
+ * (rocket, boat, clouds, leaves, bubbles): 3 stars within the level's
+ * reference time, 2 up to 1.6×, otherwise 1.
  *
- * Source unique : `Game.tsx` et `simulate.ts` doivent noter à l'identique,
- * sinon le tableau d'équilibrage ne décrit plus le jeu réellement joué.
+ * Single source: `Game.tsx` and `simulate.ts` must score identically,
+ * otherwise the balance table no longer describes the game actually played.
  */
 export const PAR_TWO_STARS = 1.6;
 

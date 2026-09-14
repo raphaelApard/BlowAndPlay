@@ -4,15 +4,15 @@ import { simulate } from './simulate';
 import { Thumbnail } from './Thumbnail';
 
 /**
- * Souffle-Fusée — souffler fait monter la fusée jusqu'à la Lune.
- * Importé du design « Souffle-Fusée.dc.html » + « Blast Off - Screens ».
- * La difficulté globale (réglage parents) fixe la distance (×1 → ×2) et
- * la gravité (0,05 → 0,15) ; le niveau fixe la distance de base.
+ * Souffle-Fusée — blowing makes the rocket climb to the Moon.
+ * Ported from the "Souffle-Fusée.dc.html" + "Blast Off - Screens" designs.
+ * The global difficulty (parents setting) sets the distance (×1 → ×2) and
+ * the gravity (0.05 → 0.15); the level sets the base distance.
  */
 export interface SouffleFuseeLevel extends LevelBase {
-  /** Altitude de base (unités de jeu) à atteindre, avant multiplication par la difficulté. */
+  /** Base altitude (game units) to reach, before multiplication by the difficulty. */
   maxAltitude: number;
-  /** Temps de référence pour 3 étoiles (ms). 2 étoiles jusqu'à 1,6×, sinon 1. */
+  /** Reference time for 3 stars (ms). 2 stars up to 1.6×, otherwise 1. */
   parMs: number;
 }
 

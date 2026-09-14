@@ -3,9 +3,9 @@ import type { AnyGameDefinition, LevelBase } from '../games/types';
 import type { ProfileProgress } from '../store/types';
 
 /**
- * Une étape de l'aventure = un jeu (sa vignette sur la carte), ou le bonus final.
- * Les niveaux d'un jeu sont regroupés dans la même étape ; l'ordre de
- * déverrouillage reste entrelacé (voir `unlockOrder`).
+ * An adventure step = a game (its thumbnail on the map), or the final bonus.
+ * A game's levels are grouped into the same step; the unlock order stays
+ * interleaved (see `unlockOrder`).
  */
 export type AdventureNode =
   | { kind: 'game'; id: string; gameId: string; levelIds: readonly string[] }
@@ -13,15 +13,15 @@ export type AdventureNode =
 
 export type NodeStatus = 'done' | 'current' | 'locked';
 
-/** Un niveau dans l'ordre de déverrouillage. */
+/** One level in the unlock order. */
 export interface UnlockStep {
   gameId: string;
   levelId: string;
 }
 
 /**
- * Étapes de la carte : un jeu par étape, dans l'ordre du registre (`order`).
- * Un jeu ajouté au registre apparaît automatiquement.
+ * Map steps: one game per step, in registry order (`order`).
+ * A game added to the registry appears automatically.
  */
 export function buildAdventurePath(games: readonly AnyGameDefinition[] = GAMES): AdventureNode[] {
   const nodes: AdventureNode[] = games.map((game) => ({
@@ -35,10 +35,10 @@ export function buildAdventurePath(games: readonly AnyGameDefinition[] = GAMES):
 }
 
 /**
- * Ordre de déverrouillage : niveau 1 de chaque jeu, puis niveau 2, etc.
- * L'enfant rencontre ainsi tous les jeux avant d'en approfondir un —
- * c'est l'entrelacement d'origine, conservé même si la carte regroupe
- * désormais les niveaux par jeu.
+ * Unlock order: level 1 of every game, then level 2, and so on.
+ * This way the child meets every game before going deeper into one —
+ * it is the original interleaving, kept even though the map now groups
+ * levels by game.
  */
 export function buildUnlockOrder(games: readonly AnyGameDefinition[] = GAMES): UnlockStep[] {
   const steps: UnlockStep[] = [];
@@ -59,32 +59,32 @@ function isLevelDone(step: UnlockStep, progress: ProfileProgress): boolean {
   return (progress[step.gameId]?.[step.levelId]?.stars ?? 0) > 0;
 }
 
-/** Tous les niveaux d'une étape sont réussis. */
+/** All the levels of a step are passed. */
 export function isNodeDone(node: AdventureNode, progress: ProfileProgress): boolean {
   if (node.kind !== 'game') return false;
   return node.levelIds.every((levelId) => isLevelDone({ gameId: node.gameId, levelId }, progress));
 }
 
-/** Total des étoiles gagnées sur les niveaux d'une étape (3 par niveau). */
+/** Total stars earned on a step's levels (3 per level). */
 export function nodeStarsTotal(node: AdventureNode, progress: ProfileProgress): number {
   if (node.kind !== 'game') return 0;
   return node.levelIds.reduce((sum, levelId) => sum + (progress[node.gameId]?.[levelId]?.stars ?? 0), 0);
 }
 
-/** Nombre de niveaux réussis dans une étape (au moins une étoile chacun). */
+/** Number of levels passed in a step (at least one star each). */
 export function nodeLevelsDone(node: AdventureNode, progress: ProfileProgress): number {
   if (node.kind !== 'game') return 0;
   return node.levelIds.filter((levelId) => isLevelDone({ gameId: node.gameId, levelId }, progress)).length;
 }
 
-/** Premier niveau non réussi dans l'ordre entrelacé (le niveau « courant »). */
+/** First level not yet passed in the interleaved order (the "current" level). */
 export function currentStep(progress: ProfileProgress, order = UNLOCK_ORDER): UnlockStep | undefined {
   return order.find((step) => !isLevelDone(step, progress));
 }
 
 /**
- * Niveau à lancer pour une étape : son premier niveau non réussi,
- * à défaut le dernier (le jeu est terminé, on le rejoue).
+ * Level to launch for a step: its first level not yet passed,
+ * failing that the last one (the game is finished, we replay it).
  */
 export function nextLevelOf(node: AdventureNode, progress: ProfileProgress): string | undefined {
   if (node.kind !== 'game') return undefined;
@@ -94,7 +94,7 @@ export function nextLevelOf(node: AdventureNode, progress: ProfileProgress): str
   );
 }
 
-/** Index de l'étape contenant le niveau courant (le bonus si tout est réussi). */
+/** Index of the step containing the current level (the bonus if everything is passed). */
 export function currentNodeIndex(progress: ProfileProgress, path = ADVENTURE_PATH, order = UNLOCK_ORDER): number {
   const step = currentStep(progress, order);
   if (!step) return path.length - 1;
@@ -103,9 +103,9 @@ export function currentNodeIndex(progress: ProfileProgress, path = ADVENTURE_PAT
 }
 
 /**
- * État d'une étape. Une étape est « courante » si elle contient le niveau
- * courant, « terminée » si tous ses niveaux sont réussis, sinon verrouillée.
- * Une étape déjà entamée mais pas courante reste jouable (voir `isNodeOpen`).
+ * A step's status. A step is "current" if it contains the current level,
+ * "done" if all its levels are passed, otherwise locked.
+ * A step already started but not current stays playable (see `isNodeOpen`).
  */
 export function nodeStatus(index: number, progress: ProfileProgress, path = ADVENTURE_PATH): NodeStatus {
   const node = path[index];
@@ -116,8 +116,8 @@ export function nodeStatus(index: number, progress: ProfileProgress, path = ADVE
 }
 
 /**
- * Étape accessible : elle contient au moins un niveau déverrouillé, c'est-à-dire
- * qui précède ou égale le niveau courant dans l'ordre entrelacé.
+ * An accessible step: it contains at least one unlocked level, that is, one
+ * that precedes or equals the current level in the interleaved order.
  */
 export function isNodeOpen(node: AdventureNode, progress: ProfileProgress, order = UNLOCK_ORDER): boolean {
   if (node.kind !== 'game') return false;
@@ -127,7 +127,7 @@ export function isNodeOpen(node: AdventureNode, progress: ProfileProgress, order
   return order.some((s, i) => i <= currentIdx && s.gameId === node.gameId);
 }
 
-/** Index de l'étape d'un jeu (−1 s'il n'en fait pas partie). */
+/** Index of a game's step (−1 if it is not part of it). */
 export function nodeIndexOf(gameId: string, path = ADVENTURE_PATH): number {
   return path.findIndex((n) => n.kind === 'game' && n.gameId === gameId);
 }

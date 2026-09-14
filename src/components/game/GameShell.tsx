@@ -11,8 +11,12 @@ import { CrossIcon, PaperButton, ParentsButton, cx } from '../ui';
 import { BreathStrip } from './BreathStrip';
 import styles from './game.module.css';
 
-/** Durée maximale d'affichage de la consigne si l'enfant ne souffle pas. */
+/** Maximum time the instruction is shown if the child does not blow. */
 const HINT_MAX_MS = 8000;
+/** Hold time to skip the level (the same as the parents button). */
+const SKIP_PRESS_MS = 700;
+/** How long the "keep holding" bubble stays. */
+const SKIP_TIP_MS = 2600;
 
 interface Props {
   game: AnyGameDefinition;
@@ -21,14 +25,15 @@ interface Props {
 }
 
 /**
- * Héberge un jeu : mesure la zone, fournit le moteur de souffle, agrège les
- * statistiques de souffle et enregistre le résultat. Le HUD se limite au
- * bouton quitter et au curseur de souffle : tout l'écran est au jeu.
+ * Hosts a game: measures the area, provides the breath engine, aggregates the
+ * breath statistics and records the result. The HUD is limited to the quit
+ * button and the breath strip: the whole screen belongs to the game.
  */
 export function GameShell({ game, level, profileId }: Props) {
   const navigate = useNavigate();
-  // `?mode=free` : lancé depuis l'onglet Jeux (écran de récompense, retour aux jeux).
-  // Sinon : aventure (retour direct à la map, qui anime le passage à l'étape suivante).
+  // `?mode=free`: launched from the Games tab (back to the games, which
+  // celebrates there). Otherwise: adventure (back to the map, which animates
+  // the move to the next step).
   const [search] = useSearchParams();
   const free = search.get('mode') === 'free';
   const playPath = `/play/${game.id}/${level.id}${free ? '?mode=free' : ''}`;
@@ -44,7 +49,7 @@ export function GameShell({ game, level, profileId }: Props) {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [progress, setProgress] = useState<number | undefined>(undefined);
   const [paused, setPaused] = useState(document.hidden);
-  // Consigne : la mascotte la montre dans une bulle, puis s'en va au premier souffle (ou après un délai).
+  // Instruction: the mascot shows it in a bubble, then leaves on the first blow (or after a delay).
   const [hint, setHint] = useState<'shown' | 'leaving' | 'gone'>('shown');
   const statsRef = useRef<BreathSessionStats & { intensitySum: number; samples: number }>({
     blows: 0,
@@ -56,7 +61,7 @@ export function GameShell({ game, level, profileId }: Props) {
   });
   const completedRef = useRef(false);
 
-  // Pas de calibrage → on passe par l'écran de calibrage puis on revient ici.
+  // No calibration → we go through the calibration screen, then come back here.
   useEffect(() => {
     if (!engine.isCalibrated()) {
       navigate(`/calibration?returnTo=${encodeURIComponent(playPath)}`, { replace: true });
@@ -65,13 +70,13 @@ export function GameShell({ game, level, profileId }: Props) {
     }
   }, [engine, status, start, navigate, playPath]);
 
-  // Le souffle qui a lancé le jeu depuis la carte est encore en cours : on
-  // l'oublie, sinon la fusée décolle toute seule. Il faut un nouveau souffle.
+  // The blow that launched the game from the map is still in progress: we
+  // forget it, otherwise the rocket takes off by itself. A new blow is needed.
   useEffect(() => {
     engine.resetBlow();
   }, [engine]);
 
-  // Taille de la zone de jeu.
+  // Size of the play area.
   useLayoutEffect(() => {
     const el = stageRef.current;
     if (!el) return;
@@ -83,7 +88,7 @@ export function GameShell({ game, level, profileId }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // Pause quand l'onglet est caché.
+  // Pause when the tab is hidden.
   useEffect(() => {
     const onVisibility = () => setPaused(document.hidden);
     document.addEventListener('visibilitychange', onVisibility);
@@ -92,7 +97,7 @@ export function GameShell({ game, level, profileId }: Props) {
 
   const ready = size.width > 0 && status === 'running';
 
-  // La mascotte part dès que l'enfant souffle, ou au bout de quelques secondes.
+  // The mascot leaves as soon as the child blows, or after a few seconds.
   useEffect(() => {
     if (!ready || hint !== 'shown') return;
     const leave = () => setHint('leaving');
@@ -106,7 +111,7 @@ export function GameShell({ game, level, profileId }: Props) {
     };
   }, [ready, hint, engine]);
 
-  // Statistiques de souffle de la partie.
+  // Breath statistics for the game.
   useEffect(() => {
     const offEvents = engine.on((e) => {
       if (e.type !== 'blowEnd') return;
@@ -127,6 +132,28 @@ export function GameShell({ game, level, profileId }: Props) {
     };
   }, [engine]);
 
+  // Skip: held down, not tapped. A child who cannot manage a level moves on
+  // rather than being stuck, but a brush against the screen does nothing.
+  // The level counts as passed with a single star: it unlocks what follows
+  // without claiming a performance that did not happen.
+  const skipTimer = useRef(0);
+  const skipTipTimer = useRef(0);
+  const [skipPressing, setSkipPressing] = useState(false);
+  const [skipTip, setSkipTip] = useState(false);
+  // Press tracked in a ref as well: on a brief press `pointerdown` and
+  // `pointerup` fall in the same render batch, so the state would still read
+  // `false` on release and the bubble would never show on the shortest
+  // presses — the very ones it is there to explain.
+  const skipPressingRef = useRef(false);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(skipTimer.current);
+      window.clearTimeout(skipTipTimer.current);
+    },
+    [],
+  );
+
   const handleComplete = useCallback(
     (result: GameResult) => {
       if (completedRef.current) return;
@@ -135,11 +162,41 @@ export function GameShell({ game, level, profileId }: Props) {
       const stats: BreathSessionStats = { ...rest, meanIntensity: samples ? intensitySum / samples : 0 };
       actions.recordResult(profileId, game.id, level.id, result, stats);
       const completed = { gameId: game.id, levelId: level.id, stars: result.stars };
-      if (free) navigate('/reward', { replace: true, state: completed });
+      // Both modes go back where the child came from, carrying what they have
+      // just finished: the games list celebrates on the spot, the map animates
+      // the move to the next step.
+      if (free) navigate('/games', { replace: true, state: { completed } });
       else navigate('/map', { replace: true, state: { completed } });
     },
     [profileId, game.id, level.id, navigate, free],
   );
+
+  const startSkip = () => {
+    setSkipTip(false);
+    window.clearTimeout(skipTipTimer.current);
+    skipPressingRef.current = true;
+    setSkipPressing(true);
+    skipTimer.current = window.setTimeout(() => {
+      setSkipPressing(false);
+      skipPressingRef.current = false;
+      handleComplete({ stars: 1 });
+    }, SKIP_PRESS_MS);
+  };
+
+  /**
+   * End of the press. `earlyRelease` distinguishes a real release (finger
+   * lifted on the button, so too short a press: we explain) from a pointer
+   * that simply leaves the button — nothing to explain there.
+   */
+  const endSkip = (earlyRelease: boolean) => {
+    const wasPressing = skipPressingRef.current;
+    skipPressingRef.current = false;
+    window.clearTimeout(skipTimer.current);
+    setSkipPressing(false);
+    if (!earlyRelease || !wasPressing) return;
+    setSkipTip(true);
+    skipTipTimer.current = window.setTimeout(() => setSkipTip(false), SKIP_TIP_MS);
+  };
 
   const Game = game.Game;
 
@@ -168,6 +225,29 @@ export function GameShell({ game, level, profileId }: Props) {
         </PaperButton>
         <BreathStrip progress={progress} />
         <ParentsButton className={styles.parents} />
+        <PaperButton
+          small
+          tone="ghost"
+          silent
+          className={cx(styles.skip, skipPressing && styles.skipPressing)}
+          onPointerDown={startSkip}
+          onPointerUp={() => endSkip(true)}
+          onPointerLeave={() => endSkip(false)}
+          onPointerCancel={() => endSkip(false)}
+          onContextMenu={(e) => e.preventDefault()}
+          aria-label={t('game.skipLongPress')}
+          data-no-blow
+        >
+          <span className={styles.skipIcon}>
+            <span className={styles.skipFill} />
+          </span>
+          {t('game.skip')}
+          {skipTip && (
+            <span className={styles.skipTip} role="status" aria-live="polite">
+              {t('game.skipHint')}
+            </span>
+          )}
+        </PaperButton>
       </div>
 
       {ready && hint !== 'gone' && (

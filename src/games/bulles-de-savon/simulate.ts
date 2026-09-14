@@ -5,9 +5,9 @@ import type { BullesLevel } from './index';
 import { BUBBLES, PARK_MS, growPerFrame, targetR as targetRadius, tuning } from './rules';
 
 /**
- * Bulles de savon : l'enfant souffle longuement ; à la fin de chaque souffle
- * la bulle se détache, réussie si elle a atteint la taille cible. Elle ne
- * peut pas éclater : les étoiles dépendent du temps mis.
+ * Bulles de savon: the child blows for a long time; at the end of each blow
+ * the bubble detaches, successful if it has reached the target size. It
+ * cannot pop: the stars depend on the time taken.
  */
 export const simulate: Simulate<BullesLevel> = (level, difficulty, child) => {
   const { blow } = tuning(difficulty);
@@ -38,7 +38,7 @@ export const simulate: Simulate<BullesLevel> = (level, difficulty, child) => {
       r = 0;
       if (success >= BUBBLES) partyDue = f.t + PARK_MS;
     }
-    // L'anneau cible est plein : l'enfant arrête de souffler, la bulle se détache.
+    // The target ring is full: the child stops blowing, the bubble detaches.
     return { kind: r >= targetR ? 'rest' : 'long' };
   });
 };

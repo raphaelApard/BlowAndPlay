@@ -9,17 +9,16 @@ import { HomeScreen } from './screens/HomeScreen';
 import { MapScreen } from './screens/MapScreen';
 import { ParentsScreen } from './screens/ParentsScreen';
 import { PlayScreen } from './screens/PlayScreen';
-import { RewardScreen } from './screens/RewardScreen';
 import { actions, getAppState, selectCurrentProfile, useAppState } from './store/store';
 
-/** Redirige vers l'accueil si aucun profil n'est sélectionné. */
+/** Redirects to the home screen if no profile is selected. */
 function RequireProfile({ children }: { children: ReactNode }) {
   const profile = selectCurrentProfile(useAppState());
   if (!profile) return <Navigate to="/" replace />;
   return children;
 }
 
-/** Reflète la langue courante sur <html lang> (lecteurs d'écran, césure). */
+/** Reflects the current language on <html lang> (screen readers, hyphenation). */
 function HtmlLang() {
   const lang = useLang();
   useEffect(() => {
@@ -28,7 +27,7 @@ function HtmlLang() {
   return null;
 }
 
-/** Les navigateurs n'autorisent l'audio qu'après un geste : on débloque au premier. */
+/** Browsers only allow audio after a gesture: we unlock on the first one. */
 function AudioUnlock() {
   useEffect(() => {
     const unlock = () => unlockAudio();
@@ -86,14 +85,6 @@ export default function App() {
             element={
               <RequireProfile>
                 <PlayScreen />
-              </RequireProfile>
-            }
-          />
-          <Route
-            path="/reward"
-            element={
-              <RequireProfile>
-                <RewardScreen />
               </RequireProfile>
             }
           />

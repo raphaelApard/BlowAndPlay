@@ -4,17 +4,16 @@ import { simulate } from './simulate';
 import { Thumbnail } from './Thumbnail';
 
 /**
- * Bulles de savon — un souffle long et régulier gonfle une bulle. Elle
- * n'éclate jamais et garde sa taille entre deux souffles : l'enfant peut
- * reprendre sa respiration autant de fois qu'il veut. Arrivée à la taille
- * cible, elle se détache et va se ranger en haut de l'écran : il en faut
- * toujours trois. La difficulté globale allonge le souffle nécessaire et
- * grossit la bulle à atteindre.
+ * Bulles de savon — one long, steady blow inflates a bubble. It never pops
+ * and keeps its size between blows: the child can catch their breath as many
+ * times as they like. Once at the target size, it detaches and goes to line
+ * up at the top of the screen: three are always needed. The global difficulty
+ * lengthens the breath required and enlarges the bubble to reach.
  */
 export interface BullesLevel extends LevelBase {
-  /** Durée de souffle (ms, à intensité moyenne) pour atteindre la taille cible. */
+  /** Breath duration (ms, at average intensity) to reach the target size. */
   blowMs: number;
-  /** Temps de référence pour 3 étoiles (ms). 2 étoiles jusqu'à 1,6×, sinon 1. */
+  /** Reference time for 3 stars (ms). 2 stars up to 1.6×, otherwise 1. */
   parMs: number;
 }
 

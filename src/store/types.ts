@@ -14,7 +14,7 @@ export interface Profile {
   id: string;
   name: string;
   avatar: Avatar;
-  /** Mascotte choisie ; absent sur les anciens profils = mascotte par défaut. */
+  /** Chosen mascot; absent on old profiles = the default mascot. */
   mascot?: MascotId;
   createdAt: number;
 }
@@ -39,9 +39,9 @@ export interface SessionLog extends BreathSessionStats {
 
 export interface Settings {
   inputSource: BreathSourceKind;
-  /** Difficulté globale, entier 1 (facile) → 10 (difficile). Les jeux la reçoivent ramenée à 0..1. */
+  /** Global difficulty, an integer 1 (easy) → 10 (hard). The games receive it scaled to 0..1. */
   difficulty: number;
-  /** `deviceId` du micro choisi ; null = micro par défaut du système. */
+  /** `deviceId` of the chosen mic; null = the system's default mic. */
   micDeviceId: string | null;
   /** Langue choisie ; null = suivre la langue du navigateur. */
   lang: Lang | null;
@@ -56,12 +56,12 @@ export interface AppState {
   progress: Record<string, ProfileProgress>;
   sessions: SessionLog[];
   settings: Settings;
-  /** Réglages parents par jeu : gameSettings[gameId][key]. Absent = défaut du jeu. */
+  /** Parents settings per game: gameSettings[gameId][key]. Absent = the game's default. */
   gameSettings: Record<string, Record<string, SettingValue>>;
   /**
-   * Jeux retenus dans l'aventure, par enfant : adventureGames[profileId] = ids activés.
-   * Absent = tous les jeux (le cas par défaut, et celui des anciennes sauvegardes).
-   * Un jeu écarté disparaît de la carte et de l'ordre de déverrouillage, mais
+   * Games kept in the adventure, per child: adventureGames[profileId] = enabled ids.
+   * Absent = every game (the default case, and that of old saves).
+   * A game left out disappears from the map and from the unlock order, but
    * reste jouable depuis l'onglet « Jeux » et garde sa progression.
    */
   adventureGames: Record<string, string[]>;

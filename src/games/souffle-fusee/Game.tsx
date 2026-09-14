@@ -9,7 +9,7 @@ import type { SouffleFuseeLevel } from './index';
 import styles from './fusee.module.css';
 import { DRAG, MAX_VEL, MIN_VEL, THRUST, clamp01, tuning } from './rules';
 
-/** Dégradé du ciel selon l'altitude (0 = sol, 1 = Lune). */
+/** Sky gradient according to altitude (0 = ground, 1 = Moon). */
 const SKY_STOPS = [
   { p: 0, top: '#8fd4f7', mid: '#cdeeff', bot: '#e9f8ff' },
   { p: 0.35, top: '#4d9fdd', mid: '#8fd4f7', bot: '#cdeeff' },
@@ -19,9 +19,9 @@ const SKY_STOPS = [
 ];
 
 const LANDING_MS = 2200;
-/** Fête après l'atterrissage : tour de la Lune, anneaux, confettis. */
+/** Celebration after landing: a lap around the Moon, rings, confetti. */
 const PARTY_MS = 5200;
-/** Diamètre de la Lune en fin de vol (220px × scale 2.2), cf. fusee.module.css. */
+/** Moon diameter at the end of the flight (220px × scale 2.2), cf. fusee.module.css. */
 const MOON_BASE = 220;
 const MOON_SCALE = 2.2;
 /** Hauteur de la flamme sous le corps (0.9em − 0.06em de chevauchement), cf. .flame. */
@@ -88,13 +88,13 @@ function makeConfetti(count: number, seed: number): Confetti[] {
   });
 }
 
-/** Traînée du tour de la Lune : points de plus en plus pâles, en retard sur la fusée. */
+/** Trail of the lap around the Moon: increasingly pale dots, lagging behind the rocket. */
 const TRAIL = [0.55, 0.45, 0.36, 0.28, 0.2, 0.13, 0.08].map((opacity, i) => ({ opacity, delay: -(0.12 * (i + 1)) }));
 
 /**
- * Souffle-Fusée. Rendu DOM piloté par refs dans une boucle rAF (pas de
- * re-rendu React par frame). Le souffle vient du moteur (déjà calibré et
- * lissé) ; la source clavier/doigt fournit l'« assistance » du prototype.
+ * Souffle-Fusée. DOM rendering driven by refs in a rAF loop (no React
+ * re-render per frame). The breath comes from the engine (already calibrated
+ * and smoothed); the keyboard/finger source provides the prototype's "assist".
  */
 export function Game({ level, breath, height, paused, difficulty, onProgress, onComplete }: GameProps<SouffleFuseeLevel>) {
   const skyRef = useRef<HTMLDivElement>(null);
@@ -106,7 +106,7 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
   const flameRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<HTMLDivElement>(null);
 
-  // État de simulation, hors React.
+  // Simulation state, outside React.
   const sim = useRef({ alt: 0, vel: 0, power: 0, elapsed: 0, landingAt: -1, done: false });
   const [phase, setPhase] = useState<'flight' | 'landing' | 'party'>('flight');
 
@@ -121,8 +121,8 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
     const { distance, gravity } = tuning(difficulty);
     const MAX = level.maxAltitude * distance;
 
-    // Géométrie de l'atterrissage : la Lune descend pour montrer son sommet,
-    // la fusée vient s'y poser (base du corps sur le bord haut du disque).
+    // Landing geometry: the Moon comes down to show its top, and the rocket
+    // settles on it (base of the body on the top edge of the disc).
     const moonRadius = (MOON_BASE * MOON_SCALE) / 2;
     const moonCenterFlight = height * 0.08 + MOON_BASE / 2;
     const moonCenterLanded = height * 0.62;
@@ -163,8 +163,8 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
       const k = dt / 16.67;
 
       if (s.landingAt >= 0) {
-        // Atterrissage sur la Lune ronde : elle descend, la fusée monte s'y poser
-        // (léger rebond), la flamme s'éteint.
+        // Landing on the round Moon: it comes down, the rocket rises to settle
+        // on it (a slight bounce), the flame goes out.
         const u = clamp01((t - s.landingAt) / LANDING_MS);
         const ease = 1 - Math.pow(1 - u, 3);
         const settle = 1 + Math.sin(u * Math.PI) * 0.06;
@@ -177,7 +177,7 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
         }
         if (flameRef.current) flameRef.current.style.transform = `scaleY(${(0.12 + s.power) * (1 - ease)})`;
         if (u >= 1) {
-          // Posée : place à la fête (gérée par CSS + minuteur).
+          // Landed: time for the celebration (handled by CSS + a timer).
           setPhase('party');
           play('fanfare');
           return;
@@ -210,7 +210,7 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
     return () => cancelAnimationFrame(raf);
   }, [breath, level, height, paused, difficulty, phase, onProgress]);
 
-  // Fête : la Lune remonte au centre pour que tout le tour reste visible.
+  // Celebration: the Moon rises back to the centre so the whole lap stays visible.
   useEffect(() => {
     if (phase !== 'party' || !moonRef.current) return;
     const moon = moonRef.current;
@@ -222,7 +222,7 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
     };
   }, [phase, height]);
 
-  // Fin de la fête → résultat (une seule fois).
+  // End of the celebration → result (once only).
   useEffect(() => {
     if (phase !== 'party' || paused) return;
     const t = window.setTimeout(() => {
@@ -294,7 +294,7 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
 
       {phase === 'party' && (
         <div className={styles.party} aria-hidden>
-          {/* Anneaux qui s'élargissent depuis la Lune */}
+          {/* Rings widening out from the Moon */}
           <div className={styles.rings} style={{ top: partyCenter }}>
             <span className={styles.ring} style={{ borderColor: '#ffd166' }} />
             <span className={styles.ring} style={{ borderColor: '#ff9a4d', animationDelay: '.8s' }} />
@@ -302,7 +302,7 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
           </div>
           <div className={styles.glow} style={{ top: partyCenter }} />
 
-          {/* Tour de la Lune (ellipse aplatie pour rester au-dessus de la bande) avec traînée lumineuse */}
+          {/* Lap around the Moon (flattened ellipse to stay above the strip) with a glowing trail */}
           <div className={styles.orbits} style={{ top: partyCenter }}>
             {TRAIL.map((t, i) => (
               <div key={i} className={styles.orbit} style={{ width: orbitRadius * 2, height: orbitRadius * 2, animationDelay: `${t.delay}s` }}>

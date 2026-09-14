@@ -1,4 +1,4 @@
-/* Souffle-Fusée — palette du design « Blast Off » */
+/* Souffle-Fusée — palette from the "Blast Off" design */
 .root {
   position: absolute;
   inset: 0;
@@ -17,7 +17,7 @@
   background: linear-gradient(#8fd4f7 0%, #cdeeff 60%, #e9f8ff 100%);
 }
 
-/* ─── Étoiles ─────────────────────────────────────────────────────── */
+/* ─── Stars ───────────────────────────────────────────────────────── */
 .stars {
   position: absolute;
   inset: -10% 0 0 0;
@@ -163,8 +163,8 @@
   background: rgba(0, 0, 0, 0.12);
 }
 
-/* ─── Fusée ───────────────────────────────────────────────────────── */
-/* Posée sur l'aire (sol = 34 % de la hauteur, aire à 30 % du sol) ; la flamme dépasse dessous. */
+/* ─── Rocket ──────────────────────────────────────────────────────── */
+/* Standing on the pad (ground = 34 % of the height, pad at 30 % of the ground); the flame sticks out below. */
 .rocketWrap {
   position: absolute;
   left: 50%;
@@ -321,7 +321,7 @@
   }
 }
 
-/* ─── Fête : anneaux, tour de la Lune, confettis ──────────────────── */
+/* ─── Celebration: rings, lap around the Moon, confetti ───────────── */
 .party {
   position: absolute;
   inset: 0;
@@ -441,11 +441,16 @@
   }
 }
 
-/* ─── Étiquette de phase ──────────────────────────────────────────── */
+/* ─── Phase label ─────────────────────────────────────────────────── */
+/* Altitude reached, at the top centre: the corners belong to the shell (quit
+   on the left, parents/dev on the right), and the middle is the one place a
+   badge can sit at any width without colliding with them. */
 .phase {
   position: absolute;
-  right: var(--edge);
+  left: 50%;
+  transform: translateX(-50%);
   top: calc(var(--edge) + var(--safe-top));
+  white-space: nowrap;
   background: rgba(255, 255, 255, 0.9);
   color: var(--ink2);
   border-radius: 999px;
@@ -492,7 +497,7 @@
   background: #fffaf0;
   translate: -50% 50%;
 }
-/* Inclinée vers la Lune ; la flamme, figée, est allumée. */
+/* Tilted towards the Moon; the flame, frozen, is lit. */
 .thumbRocket {
   position: absolute;
   left: 50%;
@@ -504,7 +509,7 @@
   transform: none;
   animation: none;
 }
-/* Banc de nuages qui cache le sol : un rang arrière teinté, un rang avant. */
+/* Cloud bank hiding the ground: a tinted back row, a front row. */
 .thumbClouds,
 .thumbCloudsBack {
   position: absolute;

@@ -73,9 +73,9 @@ interface Sim {
 }
 
 /**
- * Cerf-volant. Canvas 2D piloté par une boucle rAF, état dans une ref.
- * L'altitude suit l'intensité du souffle (avec l'inertie du cerf-volant) ;
- * la bande de vent est la zone à tenir.
+ * Cerf-volant. Canvas 2D driven by a rAF loop, state in a ref.
+ * The altitude follows the breath intensity (with the kite's inertia); the
+ * wind band is the zone to hold.
  */
 export function Game({ level, breath, width, height, paused, difficulty, onProgress, onComplete }: GameProps<CerfVolantLevel>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -148,7 +148,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         drawWindBand(ctx, width, altToY(a + half), altToY(a - half), t / 6, bandAlpha, t);
       }
 
-      // Étoiles dans la bande
+      // Stars in the band
       for (const st of s.stars) drawStar(ctx, st.x, st.y, st.r, st.color, st.rot);
       for (const p of s.pops) {
         const u = clamp01((t - p.at) / 500);
@@ -202,7 +202,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       s.power += (raw - s.power) * Math.min(1, 0.25 * k);
 
       if (s.partyAt >= 0) {
-        // Fête : le cerf-volant monte tout en haut.
+        // Celebration: the kite climbs all the way up.
         s.vAlt = 0;
         s.alt += (1 - s.alt) * Math.min(1, 0.05 * k);
         paint(t);
@@ -237,7 +237,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         s.hold = Math.max(0, s.hold - dt * HOLD_DECAY);
       }
 
-      // Étoiles qui filent dans la bande ; attrapées si le cerf-volant y est.
+      // Stars streaking through the band; caught if the kite is in it.
       if (!switching && t - s.lastStarAt > STAR_EVERY_MS) {
         s.lastStarAt = t;
         const y = altToY(a + (rand() * 2 - 1) * half * 0.8);
@@ -256,7 +256,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       s.pops = s.pops.filter((p) => t - p.at < 500);
 
       if (s.hold >= holdNeeded) {
-        // Cible réussie : pluie d'anneaux, bande suivante.
+        // Target completed: a shower of rings, next band.
         for (let i = 0; i < 6; i++) s.pops.push({ x: kx + (rand() - 0.5) * 120 * unit, y: ky + (rand() - 0.5) * 120 * unit, at: t + i * 60, color: RAINBOW[i] });
         s.stage += 1;
         s.hold = 0;

@@ -1,14 +1,14 @@
 /**
- * Dessin « papier découpé » du Cerf-volant : ciel, colline, enfant, cerf-volant
- * et bande de vent cible. Fonctions pures sur un canvas 2D, partagées entre
+ * Cut-paper drawing of Cerf-volant: sky, hill, child, kite and the target
+ * wind band. Pure functions on a 2D canvas, shared between
  * le jeu et la vignette.
  */
 
 import { seeded } from '../_shared/math';
 import { cut } from '../_shared/canvas';
 
-// Réexportés pour que le jeu, sa simulation et sa vignette gardent
-// un seul point d'entrée : `./draw`.
+// Re-exported so that the game, its simulation and its thumbnail keep a
+// single entry point: `./draw`.
 export { clamp01, seeded } from '../_shared/math';
 export { INK, cut } from '../_shared/canvas';
 
@@ -24,7 +24,7 @@ export const SKIN = '#ffb08a';
 export const SHIRT = '#5ec2f0';
 export const RAINBOW = ['#ff6b6b', '#ff9a4d', '#ffd93d', '#6bcb77', '#5ec2f0', '#9d7bef'];
 
-// ─── Décor ───────────────────────────────────────────────────────────
+// ─── Scenery ─────────────────────────────────────────────────────────
 
 export function drawSky(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -91,7 +91,7 @@ export function drawHill(ctx: CanvasRenderingContext2D, w: number, h: number, gr
 
 /**
  * L'enfant qui tient la ficelle, de dos-profil. Origine = pieds.
- * Renvoie la position de la main (bout du bras levé), en px.
+ * Returns the position of the hand (tip of the raised arm), in px.
  */
 export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, armAngle: number, time: number): { x: number; y: number } {
   ctx.save();
@@ -103,7 +103,7 @@ export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: 
   cut(ctx, () => ctx.roundRect(3, -34, 11, 34, 4), INK_SOLID, 3);
   // Corps
   cut(ctx, () => ctx.roundRect(-18, -78 + bob, 36, 48, 10), SHIRT);
-  // Tête
+  // Head
   cut(ctx, () => ctx.arc(0, -98 + bob, 22, 0, Math.PI * 2), SKIN);
   // Cheveux
   cut(
@@ -126,7 +126,7 @@ export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: 
   ctx.beginPath();
   ctx.arc(9, -92 + bob, 6, 0.1, Math.PI * 0.8);
   ctx.stroke();
-  // Bras levé vers le cerf-volant
+  // Arm raised towards the kite
   ctx.save();
   ctx.translate(14, -70 + bob);
   ctx.rotate(armAngle);
@@ -141,7 +141,7 @@ export function drawKid(ctx: CanvasRenderingContext2D, x: number, y: number, s: 
 
 // ─── Cerf-volant ─────────────────────────────────────────────────────
 
-/** Ficelle : de la main au cerf-volant, avec un léger ventre. */
+/** String: from the hand to the kite, with a slight sag. */
 export function drawString(ctx: CanvasRenderingContext2D, hx: number, hy: number, kx: number, ky: number, sag: number) {
   ctx.save();
   ctx.strokeStyle = 'rgba(35, 50, 74, 0.7)';
@@ -154,7 +154,7 @@ export function drawString(ctx: CanvasRenderingContext2D, hx: number, hy: number
 }
 
 /**
- * Cerf-volant losange à queue de nœuds. Origine = centre du losange.
+ * Diamond kite with a knotted tail. Origin = centre of the diamond.
  * `tilt` en radians ; `tail` (0..1) anime l'ondulation ; `glow` (0..1)
  * l'entoure d'un halo quand il est dans la zone.
  */
@@ -172,7 +172,7 @@ export function drawKite(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   }
   ctx.rotate(tilt);
 
-  // Queue : ficelle ondulante + nœuds colorés
+  // Tail: wavy string + coloured knots
   ctx.strokeStyle = 'rgba(35, 50, 74, 0.7)';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -208,7 +208,7 @@ export function drawKite(ctx: CanvasRenderingContext2D, x: number, y: number, s:
     ctx.restore();
   });
 
-  // Losange : deux moitiés (corail / soleil) + baguettes
+  // Diamond: two halves (coral / sun) + spars
   cut(
     ctx,
     () => {
@@ -252,8 +252,8 @@ export function drawKite(ctx: CanvasRenderingContext2D, x: number, y: number, s:
 // ─── Bande de vent cible ─────────────────────────────────────────────
 
 /**
- * Bande arc-en-ciel translucide entre `top` et `bottom`, qui défile vers la
- * gauche (`offset`). `alpha` module sa présence, `pulse` (0..1) la fait
+ * Translucent rainbow band between `top` and `bottom`, scrolling to the
+ * left (`offset`). `alpha` modulates its presence, `pulse` (0..1) makes it
  * respirer quand le cerf-volant est dehors.
  */
 export function drawWindBand(ctx: CanvasRenderingContext2D, w: number, top: number, bottom: number, offset: number, alpha: number, time: number) {
@@ -297,7 +297,7 @@ export function drawWindBand(ctx: CanvasRenderingContext2D, w: number, top: numb
   ctx.restore();
 }
 
-/** Étoiles qui filent dans la bande ; `collected` les fait scintiller. */
+/** Stars streaking through the band; `collected` makes them sparkle. */
 export function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string, rot: number) {
   ctx.save();
   ctx.translate(x, y);

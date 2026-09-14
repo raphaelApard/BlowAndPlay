@@ -26,7 +26,7 @@
   color: var(--ink);
 }
 
-/* Bande de papier : intensité du souffle + avancement */
+/* Paper strip: breath intensity + progress */
 .strip {
   position: absolute;
   left: 50%;
@@ -60,10 +60,92 @@
   transition: transform 200ms ease-out;
 }
 
-/* Bouton parents : à gauche de la bande en paysage, au-dessus en portrait.
-   Double classe : l'emporte sur la règle portrait du kit UI. */
+/* Parents button: to the left of the strip in landscape, above it in portrait.
+   Double class: wins over the UI kit's portrait rule. */
 .parents.parents {
   bottom: calc(var(--edge) + var(--safe-bottom));
+}
+
+/* Skip (long press): top right, clear of the exit button on the left and of
+   the strip, parents button and mascot at the bottom. Held down, not tapped —
+   a child who is stuck can move on, but not by brushing the screen. */
+.skip {
+  position: absolute;
+  right: var(--edge);
+  top: calc(var(--edge) + var(--safe-top));
+  z-index: 4;
+  opacity: 0.8;
+}
+/* Gauge filling up for the duration of the press, like the parents button. */
+.skipIcon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+/* Chevrons: "go forward". */
+.skipIcon::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-right: 3px solid var(--ink);
+  border-top: 3px solid var(--ink);
+  transform: rotate(45deg) translate(-1px, 1px);
+}
+.skipFill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  background: var(--coral);
+  opacity: 0.6;
+}
+.skipPressing .skipFill {
+  height: 100%;
+  transition: height 700ms linear;
+}
+/* Bubble when the press was too short: it must explain, not just do nothing.
+   Below the button (the button sits at the top of the screen), and it takes
+   no pointer events — the next press must reach the button. */
+.skipTip {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.25;
+  box-shadow: 4px 4px 0 var(--ink-a25);
+  pointer-events: none;
+  animation: skipTipIn 0.22s ease-out both;
+}
+.skipTip::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  bottom: 100%;
+  border: 7px solid transparent;
+  border-bottom-color: var(--ink);
+}
+@keyframes skipTipIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .paused {
@@ -78,7 +160,7 @@
   text-shadow: var(--text-shadow);
 }
 
-/* Consigne : mascotte + bulle en bas à droite, glisse hors de l'écran au premier souffle. */
+/* Instruction: mascot + bubble at the bottom right, slides off screen on the first blow. */
 .hint {
   position: absolute;
   right: var(--edge);

@@ -49,7 +49,7 @@ interface Sim {
   vel: number;
   power: number;
   elapsed: number;
-  /** Prochaine île à atteindre (index d'ancre, 1..n). */
+  /** Next island to reach (anchor index, 1..n). */
   target: number;
   visited: boolean[];
   dockUntil: number;
@@ -58,10 +58,10 @@ interface Sim {
 }
 
 /**
- * Bateau Pirate. Canvas 2D piloté par une boucle rAF ; état de simulation
+ * Bateau Pirate. Canvas 2D driven by a rAF loop; simulation state
  * dans une ref (pas de re-rendu React par frame). Chaque souffle pousse le
- * bateau le long de la route, il glisse puis ralentit ; il s'amarre à chaque
- * île, et la fête commence au coffre.
+ * the boat along the route, it glides then slows down; it moors at each
+ * island, and the celebration starts at the chest.
  */
 export function Game({ level, breath, width, height, paused, difficulty, onProgress, onComplete }: GameProps<BateauPirateLevel>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -77,7 +77,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     done: false,
   });
 
-  // Carte : positions normalisées, stables pour ce niveau.
+  // Map: normalized positions, stable for this level.
   const map = useMemo(
     () => ({
       norm: layoutIslands(level.islands, 100 + level.islands * 17),
@@ -88,13 +88,13 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     [level.islands],
   );
 
-  // Géométrie en px (suit le redimensionnement). La progression est stockée
-  // en fraction de route pour survivre à un changement de taille.
+  // Geometry in px (follows resizing). Progress is stored as a fraction of
+  // the route so as to survive a change of size.
   const fracRef = useRef(0);
   const geo = useMemo(() => {
     const unit = gameUnit(width, height);
-    // La route (et le bateau) passe juste sous chaque île : le bateau
-    // s'amarre devant l'île sans jamais la traverser.
+    // The route (and the boat) passes just below each island: the boat moors
+    // in front of the island without ever crossing it.
     const anchors = map.norm.map((p) => ({ x: p.x * width, y: p.y * height }));
     const islandPos = anchors.map((a, i) => (i === 0 ? a : { x: a.x, y: a.y - 62 * unit * map.islandStyles[i - 1].s }));
     const route: Route = buildRoute(anchors);
@@ -128,7 +128,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       drawSea(ctx, width, height);
       drawWaves(ctx, map.waves, width, height, t, unit);
 
-      // Pointillés : segments faits en blanc pâle, segment en cours en or.
+      // Dashes: completed segments in pale white, the current one in gold.
       for (let i = 0; i < n; i++) {
         const current = i + 1 === s.target;
         drawRouteDashes(ctx, route, i, i + 1, unit, current ? GOLD : '#fff', current ? 0.9 : 0.4);
@@ -137,7 +137,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       const boat = routeAt(route, s.dist);
       const boatScale = unit * 0.95;
 
-      // Ordre de peinture : ce qui est plus haut passe derrière.
+      // Painting order: what is higher up goes behind.
       const items: { y: number; draw: () => void }[] = [];
       items.push({ y: anchors[0].y, draw: () => drawHarbor(ctx, anchors[0].x, anchors[0].y, unit) });
       for (let i = 1; i <= n; i++) {
@@ -156,7 +156,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       });
       items.sort((a, b) => a.y - b.y).forEach((it) => it.draw());
 
-      // Fête : pièces d'or qui jaillissent du coffre, anneaux.
+      // Celebration: gold coins bursting from the chest, rings.
       if (s.partyAt >= 0) {
         const chest = islandPos[n];
         const age = t - s.partyAt;

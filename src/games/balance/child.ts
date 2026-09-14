@@ -1,29 +1,29 @@
 /**
- * « Enfant type » : modèle de souffle utilisé pour comparer la difficulté
- * des jeux entre eux. Ce n'est pas un enfant réel, c'est un étalon : le même
- * pour tous les jeux, ce qui rend les résultats comparables.
+ * "Typical child": the breath model used to compare the difficulty of the
+ * games against each other. It is not a real child, it is a yardstick: the
+ * same one for every game, which is what makes the results comparable.
  */
 
 export interface ChildProfile {
-  /** Intensité (0..1, calibrée) d'un souffle long tenu. */
+  /** Intensity (0..1, calibrated) of a sustained long blow. */
   longPeak: number;
-  /** Intensité d'un souffle court et vif. */
+  /** Intensity of a short, sharp blow. */
   burstPeak: number;
-  /** Durée maximale d'un souffle long avant de reprendre son souffle. */
+  /** Maximum duration of a long blow before catching their breath. */
   longMaxMs: number;
   longRestMs: number;
   burstMs: number;
   burstRestMs: number;
-  /** Souffle « dosé » (tenir une intensité) : durée max puis pause. */
+  /** "Measured" blow (holding an intensity): max duration, then a pause. */
   holdMaxMs: number;
   holdRestMs: number;
-  /** Amplitude des oscillations quand il essaie de tenir une intensité. */
+  /** Amplitude of the wobble when they try to hold an intensity. */
   wobble: number;
-  /** Temps de réaction pour ajuster son souffle (ms). */
+  /** Reaction time to adjust their blow (ms). */
   lagMs: number;
-  /** Montée / descente d'un souffle (ms). */
+  /** Rise / fall of a blow (ms). */
   attackMs: number;
-  /** Reprise de souffle après un arrêt volontaire (le jeu n'en avait plus besoin). */
+  /** Catching their breath after a deliberate stop (the game no longer needed it). */
   recoverMs: number;
 }
 
@@ -42,16 +42,16 @@ export const TYPICAL_CHILD: ChildProfile = {
   recoverMs: 700,
 };
 
-/** Ce que le jeu demande à l'enfant à cet instant. */
+/** What the game is asking of the child at this instant. */
 export type Intent =
   | { kind: 'long' }
   | { kind: 'bursts' }
-  /** Tenir une intensité donnée (cerf-volant). */
+  /** Hold a given intensity (cerf-volant). */
   | { kind: 'hold'; level: number }
-  /** Ne pas souffler (le jeu n'en a pas besoin pour l'instant). */
+  /** Do not blow (the game does not need it for now). */
   | { kind: 'rest' };
 
-/** Ce que le moteur de souffle fournirait au jeu. */
+/** What the breath engine would provide to the game. */
 export interface BreathSample {
   intensity: number;
   isBlowing: boolean;
@@ -63,12 +63,12 @@ const BLOWING_THRESHOLD = 0.05;
 export class Child {
   private phase: 'blow' | 'rest' = 'rest';
   private phaseMs = 0;
-  /** Repos à respecter avant le prochain souffle. */
+  /** Rest to observe before the next blow. */
   private restNeeded = 0;
   private intensity = 0;
   private t = 0;
   private blowingMs = 0;
-  /** Cumul : effort réel et nombre de souffles. */
+  /** Totals: actual effort and number of blows. */
   blowMs = 0;
   blows = 0;
   private wasBlowing = false;
@@ -107,7 +107,7 @@ export class Child {
       }
     }
 
-    // Montée/descente d'un souffle, plus lente quand il faut doser.
+    // Rise/fall of a blow, slower when it has to be measured.
     const tau = intent.kind === 'hold' ? p.lagMs : p.attackMs;
     this.intensity += (target - this.intensity) * Math.min(1, dt / tau);
     if (this.intensity < 0.005) this.intensity = 0;

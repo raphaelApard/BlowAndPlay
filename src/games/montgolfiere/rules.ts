@@ -1,30 +1,30 @@
 import { OBSTACLE_KINDS, clamp01, seeded, type ObstacleKind } from './draw';
 
-/** Règles du jeu partagées entre le composant et la simulation d'équilibrage. */
+/** Game rules shared between the component and the balance simulation. */
 
-/** Souffle soutenu nécessaire pour décoller (ms au-dessus du seuil). */
+/** Sustained blow needed to take off (ms above the threshold). */
 export const TAKEOFF_MS = 250;
 export const TAKEOFF_THRESHOLD = 0.3;
-/** Montée en vitesse du défilement après le décollage. */
+/** Ramp-up of the scrolling speed after take-off. */
 export const RAMP_MS = 1500;
 /** Descente sur la plateforme. */
 export const LANDING_MS = 1600;
-/** Fête après l'atterrissage : drapeau hissé, confettis. */
+/** Celebration after landing: flag raised, confetti. */
 export const PARTY_MS = 3000;
-/** Invulnérabilité après un choc. */
+/** Invulnerability after an impact. */
 export const BUMP_COOLDOWN_MS = 1000;
 /** Distance entre le dernier obstacle et la plateforme (px monde). */
 export const PAD_AFTER = 320;
-/** Vitesse verticale visée (px/frame avant `unit`) : montée à intensité 0 et 1, descente sans souffle. */
+/** Target vertical speed (px/frame before `unit`): climb at intensity 0 and 1, descent without breath. */
 export const LIFT_BASE = 1.2;
 export const LIFT_POWER = 4.2;
 export const SINK = 2.4;
 
 /**
- * Difficulté globale (0 → 1) → vol :
+ * Global difficulty (0 → 1) → flight:
  *  - nombre d'obstacles : ×1 (facile) → ×2,5 ;
  *  - hauteur des obstacles : ×1,15 → ×1,85 ; espacement plus court.
- * La vitesse ne change pas : plus dur = plus d'obstacles à survoler, pas
+ * The speed does not change: harder = more obstacles to clear, not
  * moins de temps de jeu.
  */
 export function tuning(difficulty: number) {
@@ -46,7 +46,7 @@ export function makeObstacles(count: number, seed: number, gap: number, scale: n
   let x = 520;
   return Array.from({ length: count }, (_, i) => {
     const kind = OBSTACLE_KINDS[Math.floor(rand() * OBSTACLE_KINDS.length)];
-    // Les premiers obstacles sont bas, ça monte ensuite.
+    // The first obstacles are low, it rises after that.
     const ease = Math.min(1, 0.55 + (i / Math.max(1, count - 1)) * 0.45);
     const h = (110 + rand() * 120) * scale * ease;
     const w = kind === 'tower' ? 70 : kind === 'house' ? 96 : 84;
@@ -56,7 +56,7 @@ export function makeObstacles(count: number, seed: number, gap: number, scale: n
   });
 }
 
-/** Obstacles + plateforme d'un niveau, pour une difficulté donnée. */
+/** A level's obstacles + platform, for a given difficulty. */
 export function makeWorld(baseCount: number, difficulty: number) {
   const { gap, obstacleScale, count } = tuning(difficulty);
   const obstacleCount = Math.round(baseCount * count);

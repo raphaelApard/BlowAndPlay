@@ -1,8 +1,8 @@
 import type { BreathSource, Calibration } from './types';
 
 /**
- * Source micro : RMS du signal après un passe-bas (le souffle sur un micro
- * est un bruit large bande, dominé par les basses fréquences).
+ * Mic source: RMS of the signal after a low-pass (breath on a mic is
+ * broadband noise, dominated by the low frequencies).
  */
 export class MicBreathSource implements BreathSource {
   readonly kind = 'mic' as const;
@@ -15,7 +15,7 @@ export class MicBreathSource implements BreathSource {
   private raf = 0;
   private readonly listeners = new Set<(level: number) => void>();
 
-  /** Micro à utiliser ; null = défaut système. */
+  /** Mic to use; null = system default. */
   readonly deviceId: string | null;
 
   constructor(deviceId: string | null = null) {
@@ -35,7 +35,7 @@ export class MicBreathSource implements BreathSource {
         audio: this.deviceId ? { ...base, deviceId: { exact: this.deviceId } } : base,
       });
     } catch (e) {
-      // Micro choisi débranché ou inconnu : on retombe sur le défaut.
+      // Chosen mic unplugged or unknown: we fall back to the default.
       if (!this.deviceId || (e instanceof DOMException && e.name === 'NotAllowedError')) throw e;
       stream = await navigator.mediaDevices.getUserMedia({ audio: base });
     }
@@ -90,8 +90,8 @@ export interface Microphone {
 }
 
 /**
- * Liste les micros disponibles. Les libellés ne sont fournis qu'une fois la
- * permission accordée : on ouvre brièvement un flux si nécessaire.
+ * Lists the available mics. The labels are only provided once permission has
+ * been granted: we briefly open a stream if necessary.
  */
 export async function listMicrophones(): Promise<Microphone[]> {
   if (!navigator.mediaDevices?.enumerateDevices) return [];
@@ -103,7 +103,7 @@ export async function listMicrophones(): Promise<Microphone[]> {
       stream.getTracks().forEach((t) => t.stop());
       devices = await navigator.mediaDevices.enumerateDevices();
     } catch {
-      // permission refusée : on renvoie ce qu'on a
+      // permission denied: we return what we have
     }
   }
   return devices

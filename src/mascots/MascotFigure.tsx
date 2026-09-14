@@ -11,7 +11,7 @@ export const DEFAULT_MASCOT: MascotId = 'miko';
 
 export type MascotMode = 'idle' | 'hello' | 'bravo' | 'think';
 
-/** Animations corps / bras par état (reprises du prototype Claude Design). */
+/** Body / arm animations per state (taken from the Claude Design prototype). */
 const MODES: Record<MascotMode, { body: string; arm: string }> = {
   idle: { body: 'breathe 3.2s ease-in-out infinite', arm: 'armIdle 3.2s ease-in-out infinite' },
   hello: { body: 'leanWave 1.8s ease-in-out 2', arm: 'wave 0.5s ease-in-out 7' },
@@ -25,7 +25,7 @@ export function getMascot(id: string | undefined): MascotDef {
 
 interface MascotFigureProps {
   id: MascotId | undefined;
-  /** Hauteur affichée en px ; la largeur suit les proportions du personnage. */
+  /** Displayed height in px; the width follows the character's proportions. */
   size?: number;
   mode?: MascotMode;
   className?: string;
@@ -33,8 +33,8 @@ interface MascotFigureProps {
 }
 
 /**
- * Personnage animé (CSS pur). Le balisage vient du fichier de design, injecté
- * tel quel ; il est mis à l’échelle à partir de sa boîte mesurée.
+ * Animated character (pure CSS). The markup comes from the design file,
+ * injected as is; it is scaled from its measured box.
  */
 export function MascotFigure({ id, size = 120, mode = 'idle', className, style }: MascotFigureProps) {
   const def = getMascot(id);

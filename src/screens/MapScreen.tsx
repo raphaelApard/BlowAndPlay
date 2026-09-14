@@ -15,7 +15,7 @@ import {
 import { getGame } from '../games/registry';
 import type { Stars } from '../games/types';
 import { useBreath } from '../breath/BreathProvider';
-import { Balloon, GameThumbnail, Mascot, ParentsButton, Sky, TopBar, cx } from '../components/ui';
+import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, Sky, TopBar, cx } from '../components/ui';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
 import { selectAdventureGames, selectProgress, useAppState } from '../store/store';
@@ -28,8 +28,8 @@ interface Point {
 }
 
 /**
- * Positions des nœuds. Paysage : de bas-gauche à haut-droite en vague.
- * Portrait : serpentin vertical (défile si besoin).
+ * Node positions. Landscape: from bottom-left to top-right in a wave.
+ * Portrait: a vertical snake (scrolls if needed).
  */
 function layoutNodes(count: number, width: number, height: number, portrait: boolean): { points: Point[]; stageW: number; stageH: number } {
   if (portrait) {
@@ -53,7 +53,7 @@ function layoutNodes(count: number, width: number, height: number, portrait: boo
   return { points, stageW, stageH: height };
 }
 
-/** Courbe lisse (Catmull-Rom → Bézier) reliant les nœuds. */
+/** Smooth curve (Catmull-Rom → Bézier) connecting the nodes. */
 function smoothPath(points: Point[]): string {
   if (points.length < 2) return '';
   let d = `M${points[0].x} ${points[0].y}`;
@@ -69,7 +69,7 @@ function smoothPath(points: Point[]): string {
   return d;
 }
 
-/** Points d'une courbe de Bézier cubique entre deux nœuds, même contrôle que `smoothPath`. */
+/** Points of a cubic Bézier curve between two nodes, same control as `smoothPath`. */
 function segmentPoints(points: Point[], i: number, samples = 32): Point[] {
   const p0 = points[i - 1] ?? points[i];
   const p1 = points[i];
@@ -87,6 +87,18 @@ function segmentPoints(points: Point[], i: number, samples = 32): Point[] {
   });
 }
 
+/**
+ * Straight line between two nodes, sampled like `segmentPoints`. Used when the
+ * balloon goes back several steps at once (end of a round): following the
+ * curve would make it retrace the whole map backwards.
+ */
+function straightPoints(from: Point, to: Point, samples = 32): Point[] {
+  return Array.from({ length: samples + 1 }, (_, k) => {
+    const t = k / samples;
+    return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t };
+  });
+}
+
 interface Completed {
   gameId: string;
   levelId: string;
@@ -94,23 +106,41 @@ interface Completed {
 }
 
 /**
- * Animation d'arrivée après un niveau d'aventure réussi :
- * l'étape terminée reste « courante », ses étoiles apparaissent, puis le
- * ballon vole le long du chemin jusqu'à l'étape suivante, qui s'active.
+ * Arrival animation after an adventure level is passed, in this order:
+ *  1. the stars earned appear and chime;
+ *  2. the confetti falls (`party`);
+ *  3. the balloon flies off to the next step, while the confetti finishes
+ *     falling;
+ *  4. the next step opens as soon as the balloon has landed.
+ * The flight starts before the confetti ends (`PARTY_BEFORE_FLY_MS`): a
+ * strictly sequential chain would mean nearly six seconds of waiting, too
+ * long for a child aged 3 to 6.
+ *
+ * Exceptions, at the two kinds of boundary — nothing opens by itself then:
+ *  - end of a round (every game passed at this level): the balloon comes back
+ *    to the first game, ready for the next level;
+ *  - end of the adventure (every level of every game passed): the balloon
+ *    stays on the final yellow star.
+ * Relaunching a game straight away would trap the child in a loop they did
+ * not ask for; it is up to them to choose their step (the play button or a
+ * dot on the map).
  */
-type Phase = 'hold' | 'stars' | 'fly' | 'done';
+type Phase = 'hold' | 'stars' | 'party' | 'fly' | 'done';
 const HOLD_MS = 500;
 const STARS_MS = 900;
 const FLY_MS = 1500;
+/** Time of confetti alone before the balloon leaves. */
+const PARTY_BEFORE_FLY_MS = 1200;
 
-/** Durée des confettis de fin (accordée à l'animation `fall`). */
+/** Duration of the final confetti (matched to the `fall` animation). */
 const CONFETTI_MS = 3200;
 
 /**
- * Confettis d'arrivée : répartis sur toute la largeur, chute décalée.
- * La taille varie par `width`/`height` et non par `scale` : la propriété
- * `scale` autonome écraserait le `transform` animé par `@keyframes fall`,
- * et les confettis resteraient figés en haut de l'écran.
+ * Arrival confetti: spread across the full width, with staggered falls.
+ * The size varies through `width`/`height` and not through `scale`: the
+ * standalone `scale` property would override the `transform` animated by
+ * `@keyframes fall`, and the confetti would stay frozen at the top of the
+ * screen.
  */
 const CONFETTI = Array.from({ length: 24 }, (_, i) => {
   const size = 0.7 + ((i * 7) % 10) / 14;
@@ -133,50 +163,64 @@ export function MapScreen() {
   const state = useAppState();
   const progress = selectProgress(state, profile.id);
 
-  // L'aventure ne contient que les jeux retenus pour cet enfant (espace parents).
-  // Carte et ordre de déverrouillage en découlent : un jeu écarté n'apparaît
-  // nulle part ici, mais reste jouable depuis l'onglet « Jeux ».
+  // The adventure only contains the games kept for this child (parents area).
+  // The map and the unlock order follow from it: a game left out appears
+  // nowhere here, but stays playable from the Games tab.
   const games = selectAdventureGames(state, profile.id);
   const path = useMemo(() => buildAdventurePath(games), [games]);
   const order = useMemo(() => buildUnlockOrder(games), [games]);
   const realCurrent = currentNodeIndex(progress, path, order);
 
-  // Niveau qui vient d'être terminé (état de navigation posé par GameShell).
-  // L'étape est celle du jeu ; l'étape suivante est rarement voisine, car
-  // l'ordre de déverrouillage reste entrelacé entre les jeux.
+  // The level that was just finished (navigation state set by GameShell).
+  // The step is the game's; the next step is rarely adjacent, because the
+  // unlock order stays interleaved across the games.
   const completed = (location.state as { completed?: Completed } | null)?.completed;
   const fromIdx = completed ? nodeIndexOf(completed.gameId, path) : -1;
   const animating = fromIdx >= 0 && fromIdx !== realCurrent;
   const [phase, setPhase] = useState<Phase>(animating ? 'hold' : 'done');
   const balloonRef = useRef<HTMLDivElement>(null);
 
-  // Le moteur n'est plus démarré pour lancer un jeu (le ballon ouvre l'étape
-  // tout seul), mais la barre du haut affiche l'état du micro : on le démarre
-  // quand même à l'arrivée sur la carte.
-  // `status` est déjà pris par l'état des nœuds plus bas : on nomme celui-ci
-  // explicitement pour éviter toute confusion entre souffle et étape.
+  // The engine is no longer started in order to launch a game (the balloon
+  // opens the step by itself), but the top bar shows the mic status: we start
+  // it anyway on arriving at the map.
+  // `status` is already taken by the node status below: we name this one
+  // explicitly to avoid any confusion between breath and step.
   const { status: breathStatus, start } = useBreath();
 
-  // Ce que l'écran affiche : pendant l'animation, l'étape terminée reste courante.
-  const shownCurrent = phase === 'hold' || phase === 'stars' ? fromIdx : phase === 'fly' ? -1 : realCurrent;
+  // What the screen shows: during the animation, the finished step stays current.
+  const shownCurrent = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : phase === 'fly' ? -1 : realCurrent;
   const statusOf = (i: number): NodeStatus => {
     const node = path[i];
     if (!node) return 'locked';
     if (i === shownCurrent) return 'current';
-    // Pendant l'attente, l'étape qu'on vient de finir n'est pas encore « terminée ».
+    // During the wait, the step just finished is not yet "done".
     if (phase === 'hold' && i === fromIdx) return 'current';
     if (isNodeDone(node, progress)) return 'done';
     return 'locked';
   };
-  const balloonIdx = phase === 'done' ? realCurrent : fromIdx;
-
-  // Fête d'arrivée : à chaque fois que le ballon vient de se poser sur une étape
-  // (`animating`), pas à chaque retour sur la carte. La fanfare reste réservée à
-  // l'étoile finale — à chaque niveau elle couvrirait les étoiles qui tintent.
+  // True when every level is passed: the current step is the bonus star.
   const endReached = path[realCurrent]?.kind === 'bonus';
+
+  // End of a round: the child has just finished the last game of the map and
+  // the adventure goes back to the first game for the next level (the unlock
+  // order is interleaved, so `realCurrent` is already that first game). The
+  // balloon therefore comes back to the start of the map — but nothing opens
+  // by itself, as at the very end: the child chooses their step.
+  const firstGameIdx = path.findIndex((n) => n.kind === 'game');
+  const roundEnd = !endReached && animating && realCurrent === firstGameIdx && fromIdx > firstGameIdx;
+
+  // Where the balloon comes to rest. At the very end of the adventure it stays
+  // on the yellow star (the step it has just reached); otherwise on the
+  // current step, which at the end of a round is the first game again.
+  const restIdx = realCurrent;
+  const balloonIdx = phase === 'done' ? restIdx : fromIdx;
+
+  // Arrival celebration: every time the balloon has just landed on a step
+  // (`animating`), not on every return to the map. The fanfare stays reserved
+  // for the final star — on every level it would cover the chiming stars.
   const [party, setParty] = useState(false);
   useEffect(() => {
-    if (phase !== 'done' || !animating) return;
+    if (phase !== 'party') return;
     setParty(true);
     if (endReached) play('fanfare');
     const t = window.setTimeout(() => setParty(false), CONFETTI_MS);
@@ -200,8 +244,8 @@ export function MapScreen() {
 
   const { points, stageW, stageH } = layoutNodes(path.length, viewport.width, viewport.height, viewport.portrait);
 
-  // Centre la vue sur le nœud courant (en douceur quand le ballon vole).
-  const focusIdx = phase === 'hold' || phase === 'stars' ? fromIdx : realCurrent;
+  // Centres the view on the current node (smoothly while the balloon flies).
+  const focusIdx = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : realCurrent;
   useLayoutEffect(() => {
     const el = scrollRef.current;
     const p = points[focusIdx];
@@ -214,7 +258,7 @@ export function MapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusIdx, viewport.width, viewport.height]);
 
-  // Déroulé de l'animation d'arrivée.
+  // Course of the arrival animation.
   useEffect(() => {
     if (phase === 'hold') {
       const t = window.setTimeout(() => setPhase('stars'), HOLD_MS);
@@ -223,15 +267,29 @@ export function MapScreen() {
     if (phase === 'stars') {
       const n = completed?.stars ?? 0;
       const dings = Array.from({ length: n }, (_, i) => window.setTimeout(() => play('star'), i * 220));
-      const t = window.setTimeout(() => setPhase('fly'), STARS_MS);
+      const t = window.setTimeout(() => setPhase('party'), STARS_MS);
       return () => {
         dings.forEach((id) => window.clearTimeout(id));
         window.clearTimeout(t);
       };
     }
+    if (phase === 'party') {
+      // The confetti falls; the balloon leaves before it has finished.
+      const t = window.setTimeout(() => setPhase('fly'), PARTY_BEFORE_FLY_MS);
+      return () => window.clearTimeout(t);
+    }
     if (phase === 'fly') {
       const el = balloonRef.current;
-      const curve = points[fromIdx + 1] ? segmentPoints(points, fromIdx) : [];
+      // Usually the next step along the path (one segment). At the end of a
+      // round the balloon goes back to the first game, several steps
+      // backwards: it then flies straight there rather than following the
+      // curve, which would make it retrace the whole map.
+      const curve =
+        restIdx === fromIdx + 1 && points[fromIdx + 1]
+          ? segmentPoints(points, fromIdx)
+          : points[restIdx] && points[fromIdx]
+            ? straightPoints(points[fromIdx], points[restIdx])
+            : [];
       if (!el || !curve.length) {
         setPhase('done');
         return;
@@ -251,39 +309,56 @@ export function MapScreen() {
       raf = requestAnimationFrame(frame);
       return () => cancelAnimationFrame(raf);
     }
-    // Terminé : on efface l'état de navigation pour ne pas rejouer l'animation au rafraîchissement.
+    // Done: we clear the navigation state so the animation does not replay on refresh.
     if (completed) navigate('.', { replace: true, state: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Une étape lance son premier niveau non réussi (ordre entrelacé oblige,
-  // ce n'est pas forcément le niveau 1).
+  // A step launches its first level not yet passed (because of the
+  // interleaved order, that is not necessarily level 1).
   const open = (node: AdventureNode) => {
     if (node.kind !== 'game') return;
     const levelId = nextLevelOf(node, progress);
     if (levelId) navigate(`/play/${node.gameId}/${levelId}`);
   };
 
-  const currentNode = path[realCurrent];
   const balloonPos = points[balloonIdx];
 
-  // Démarre le moteur à l'arrivée sur la map (le micro est coupé quand l'onglet
-  // est caché, et aucun autre écran ne le démarre).
+  // The step the play button launches: the current step, except once the
+  // adventure is over — the current step is then the bonus star, which cannot
+  // be played. The button then falls back to the first game, so as to stay
+  // usable for another round (the balloon, meanwhile, stays on the star).
+  const playNode = endReached && firstGameIdx >= 0 ? path[firstGameIdx] : path[realCurrent];
+
+  // Playable step: common ground for the automatic chaining and the button.
+  const playable = playNode?.kind === 'game' && isNodeOpen(playNode, progress, order);
+
+  // In adventure mode, the next game opens by itself once the balloon has
+  // landed (`animating`: we really are arriving from a finished level, not
+  // from a plain return to the map). Two exceptions, where the balloon comes
+  // back to the start of the map: the end of a round (`roundEnd`) and the end
+  // of the adventure (`endReached`). Sending the child straight back into the
+  // first game would trap them in a loop they did not ask for — it is up to
+  // them to choose their step (the play button or a dot on the map).
+  const autoOpen = playable && phase === 'done' && animating && !endReached && !roundEnd;
+
+  // Play button: always present on the map as soon as there is a step to
+  // launch — including during the arrival animation and when the automatic
+  // chaining is about to take over. The child thus has a stable landmark,
+  // one that does not flicker from one screen to the next.
+  const showPlay = playable;
+
+  useEffect(() => {
+    if (!autoOpen || playNode?.kind !== 'game') return;
+    open(playNode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen]);
+
+  // Starts the engine on arriving at the map (the mic is cut when the tab is
+  // hidden, and no other screen starts it).
   useEffect(() => {
     if (breathStatus === 'idle') void start();
   }, [breathStatus, start]);
-
-  // Le ballon vient de se poser sur une nouvelle étape : on ouvre le jeu.
-  // L'enfant n'a rien à viser ni à souffler — l'aventure enchaîne toute seule.
-  // Seulement après une animation d'arrivée (`animating`) : un simple retour
-  // sur la carte doit laisser l'enfant regarder le chemin.
-  useEffect(() => {
-    if (phase !== 'done' || !animating) return;
-    if (currentNode?.kind !== 'game' || !isNodeOpen(currentNode, progress, order)) return;
-    const t = window.setTimeout(() => open(currentNode), CONFETTI_MS);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, animating]);
 
   return (
     <Sky horizon={0.5} clouds={false}>
@@ -311,8 +386,8 @@ export function MapScreen() {
 
               const game = getGame(node.gameId);
               const title = game ? tr(game.title) : node.gameId;
-              // Niveaux réussis sur le total de l'étape (1/3, pas 3/9) :
-              // l'enfant lit une progression d'étapes, pas un score d'étoiles.
+              // Levels passed out of the step's total (1/3, not 3/9): the
+              // child reads a progression of steps, not a star score.
               const levelsDone = nodeLevelsDone(node, progress);
               const levelsTotal = node.levelIds.length;
 
@@ -335,8 +410,8 @@ export function MapScreen() {
                       status === 'locked' && styles.nodeLocked,
                     )}
                     style={pos}
-                    // Jouable dès qu'un de ses niveaux est déverrouillé, même si
-                    // l'étape n'est ni courante ni terminée (ordre entrelacé).
+                    // Playable as soon as one of its levels is unlocked, even if
+                    // the step is neither current nor done (interleaved order).
                     disabled={!isNodeOpen(node, progress, order)}
                     onClick={() => open(node)}
                     aria-label={t(isNodeOpen(node, progress, order) ? 'map.game' : 'map.gameLocked', { title })}
@@ -376,7 +451,16 @@ export function MapScreen() {
       )}
 
       <TopBar name={profile.name} avatar={profile.avatar} />
-      <Mascot />
+      {/* The mascot and the play button are swapped on the adventure: the
+          button takes the edge of the screen, the mascot shifts inwards.
+          The offset is set here, and not on `.mascot` (a class shared with
+          the Games tab, where the mascot must stay at the edge). */}
+      <Mascot className={styles.mapMascot} />
+      {showPlay && (
+        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(playNode)} aria-label={t('map.start')}>
+          <PlayIcon size={54} />
+        </PaperButton>
+      )}
       <ParentsButton />
     </Sky>
   );

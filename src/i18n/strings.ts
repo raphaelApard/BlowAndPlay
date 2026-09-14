@@ -1,8 +1,8 @@
-/** Langues de l'interface. `fr` est la langue de référence : chaque clé y est définie. */
+/** UI languages. `fr` is the reference language: every key is defined in it. */
 export type Lang = 'fr' | 'en';
 export const LANGS: readonly Lang[] = ['fr', 'en'];
 
-/** Texte fourni dans chaque langue (titres de jeux, libellés de réglages, mascottes). */
+/** Text provided in each language (game titles, setting labels, mascots). */
 export type Localized = Readonly<Record<Lang, string>>;
 
 const fr = {
@@ -11,6 +11,7 @@ const fr = {
   'common.confirm': 'Confirmer',
   'common.parents': 'Parents',
   'common.parentsLongPress': 'Espace parents (appui long)',
+  'common.parentsHint': 'Reste appuyé un peu plus longtemps',
   'common.back': 'Retour',
   'common.play': 'Jouer',
   'common.quit': 'Quitter',
@@ -63,6 +64,7 @@ const fr = {
   'map.game': '{title}',
   'map.gameLocked': '{title} (verrouillé)',
   'map.gameStars': '{n} niveaux réussis sur {max}',
+  'map.start': 'Commencer l’aventure',
 
   // ── Jeux
   'games.artwork': 'visuel du jeu',
@@ -70,12 +72,9 @@ const fr = {
   'games.level': 'niveau {id}',
   'games.blows': '{n} souffles',
   'games.finish': 'Terminer',
-
-  // ── Récompense
-  'reward.bravo': 'Bravo !',
-  'reward.stars': '{n} étoiles',
-  'reward.replay': 'Rejouer',
-  'reward.next': 'Continuer',
+  'game.skip': 'Passer',
+  'game.skipLongPress': 'Passer le niveau (appui long)',
+  'game.skipHint': 'Reste appuyé un peu plus longtemps',
 
   // ── Espace parents
   'parents.title': 'Espace parents',
@@ -154,6 +153,7 @@ const en: Record<StringKey, string> = {
   'common.confirm': 'Confirm',
   'common.parents': 'Parents',
   'common.parentsLongPress': 'Parents area (long press)',
+  'common.parentsHint': 'Keep holding a little longer',
   'common.back': 'Back',
   'common.play': 'Play',
   'common.quit': 'Quit',
@@ -202,17 +202,16 @@ const en: Record<StringKey, string> = {
   'map.game': '{title}',
   'map.gameLocked': '{title} (locked)',
   'map.gameStars': '{n} levels done out of {max}',
+  'map.start': 'Start the adventure',
 
   'games.artwork': 'game artwork',
   'games.playGame': 'Play {title}',
   'games.level': 'level {id}',
   'games.blows': '{n} blows',
   'games.finish': 'Finish',
-
-  'reward.bravo': 'Well done!',
-  'reward.stars': '{n} stars',
-  'reward.replay': 'Play again',
-  'reward.next': 'Continue',
+  'game.skip': 'Skip',
+  'game.skipLongPress': 'Skip the level (long press)',
+  'game.skipHint': 'Keep holding a little longer',
 
   'parents.title': 'Parents area',
   'parents.children': 'Children',

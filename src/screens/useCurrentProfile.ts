@@ -1,9 +1,9 @@
 import { selectCurrentProfile, useAppState } from '../store/store';
 import type { Profile } from '../store/types';
 
-/** À utiliser uniquement sous <RequireProfile> : le profil est garanti. */
+/** To be used only under <RequireProfile>: the profile is guaranteed. */
 export function useCurrentProfile(): Profile {
   const profile = selectCurrentProfile(useAppState());
-  if (!profile) throw new Error('Aucun profil sélectionné');
+  if (!profile) throw new Error('No profile selected');
   return profile;
 }

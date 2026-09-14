@@ -1,38 +1,38 @@
 import { clamp01 } from './draw';
 
-/** Règles du jeu partagées entre le composant et la simulation d'équilibrage. */
+/** Game rules shared between the component and the balance simulation. */
 
-/** Fête finale : les bulles rangées éclatent l'une après l'autre. */
+/** Final celebration: the stored bubbles pop one after another. */
 export const PARTY_MS = 3200;
-/** Trajet d'une bulle réussie vers son rangement en haut. */
+/** Path of a successful bubble towards its slot at the top. */
 export const PARK_MS = 1600;
-/** Rayon cible à la difficulté maximale (avant `unit`). */
+/** Target radius at maximum difficulty (before `unit`). */
 export const TARGET_R = 78;
-/** Intensité moyenne de référence pour `blowMs` (voir `growPerFrame`). */
+/** Reference average intensity for `blowMs` (see `growPerFrame`). */
 export const REF_POWER = 0.7;
-/** Nombre de bulles à réussir, identique à tous les niveaux. */
+/** Number of bubbles to complete, the same at every level. */
 export const BUBBLES = 3;
 
 /**
- * Difficulté globale (0 → 1) → bulles :
- *  - souffle nécessaire : ×1 (facile) → ×2 ;
+ * Global difficulty (0 → 1) → bubbles:
+ *  - breath required: ×1 (easy) → ×2;
  *  - taille de la bulle : ×0,6 (facile, petite bulle) → ×1.
  *
- * La bulle n'éclate jamais : souffler fort ne casse rien, seul le temps
- * passé départage les étoiles. La taille ne change que l'aspect : la
- * croissance étant proportionnelle à la cible, elle ne modifie pas l'effort.
+ * The bubble never pops: blowing hard breaks nothing, only the time taken
+ * decides the stars. The size only changes the look: since growth is
+ * proportional to the target, it does not change the effort.
  */
 export function tuning(difficulty: number) {
   const d = clamp01(difficulty);
   return { blow: 1 + d, size: 0.6 + d * 0.4 };
 }
 
-/** Rayon cible à cette difficulté (avant `unit`). */
+/** Target radius at this difficulty (before `unit`). */
 export function targetR(difficulty: number) {
   return TARGET_R * tuning(difficulty).size;
 }
 
-/** Croissance par frame : taille cible atteinte en `blowMs × blow` à intensité `REF_POWER`. */
+/** Growth per frame: target size reached in `blowMs × blow` at intensity `REF_POWER`. */
 export function growPerFrame(targetR: number, blowMs: number, blow: number) {
   return targetR / ((blowMs * blow) / 16.67) / (0.5 + REF_POWER);
 }

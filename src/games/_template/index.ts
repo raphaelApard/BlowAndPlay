@@ -2,15 +2,15 @@ import { defineGame, setting, type LevelBase, type SettingValues } from '../type
 import { Game } from './Game';
 import { simulate } from './simulate';
 
-/** Réglages propres à ce jeu, par niveau. */
+/** Settings specific to this game, per level. */
 export interface TemplateLevel extends LevelBase {
-  /** Exemple : durée de souffle cumulée à atteindre. */
+  /** Example: cumulative breath duration to reach. */
   targetMs: number;
 }
 
 /**
- * Réglages parents (optionnel) : affichés dans l'espace parents, mémorisés,
- * reçus résolus dans `props.settings`. Supprimer si le jeu n'en a pas.
+ * Parents settings (optional): displayed in the parents area, remembered,
+ * received resolved in `props.settings`. Remove if the game has none.
  */
 export const SETTINGS = {
   speed: setting.range({ label: { fr: 'Vitesse', en: 'Speed' }, default: 1, min: 0.5, max: 2, step: 0.1, unit: '×' }),

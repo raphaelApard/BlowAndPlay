@@ -3,7 +3,7 @@ import { clamp01, type Simulate } from '../balance/types';
 import type { CerfVolantLevel } from './index';
 import { FOLLOW, HOLD_DECAY, SWITCH_MS, makeCourse, tuning } from './rules';
 
-/** Cerf-volant : l'enfant vise le milieu de la bande avec un souffle dosé. */
+/** Cerf-volant: the child aims for the middle of the band with a measured blow. */
 export const simulate: Simulate<CerfVolantLevel> = (level, difficulty, child) => {
   const { hold: holdFactor } = tuning(difficulty);
   const holdNeeded = level.holdMs * holdFactor;

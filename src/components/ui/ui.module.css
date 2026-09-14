@@ -13,7 +13,7 @@
   width: 100%;
   display: block;
 }
-/* Arbres et buissons en papier découpé, posés sur la bande de terre. */
+/* Cut-paper trees and bushes, standing on the strip of earth. */
 .tree {
   position: absolute;
   bottom: 7%;
@@ -95,9 +95,9 @@
   inset: 0;
 }
 /*
- * Écrans qui doivent pouvoir défiler quand le contenu dépasse (accueil en
+ * Screens that must be able to scroll when the content overflows (home in
  * portrait). `body` reste en overflow:hidden pour que les jeux gardent une
- * scène fixe : le défilement est porté par le conteneur, pas par la page.
+ * fixed scene: the scrolling is carried by the container, not by the page.
  */
 .contentScroll {
   overflow-y: auto;
@@ -151,7 +151,7 @@
   border-radius: 50%;
 }
 
-/* ─── Montgolfière ─────────────────────────────────────────────────── */
+/* ─── Hot-air balloon ──────────────────────────────────────────────── */
 .balloon {
   display: flex;
   flex-direction: column;
@@ -193,7 +193,7 @@
   margin-top: 10%;
   position: relative;
 }
-/* Les deux cordes : une barre + son ombre décalée. */
+/* The two ropes: a bar + its offset shadow. */
 .balloonBasket::before {
   content: '';
   position: absolute;
@@ -212,7 +212,7 @@
   align-items: center;
   width: 74px;
 }
-/* Hauteur réservée à la flamme : le corps ne bouge pas quand elle maigrit. */
+/* Height reserved for the flame: the body does not move when it thins. */
 .candleFlameSlot {
   height: 52px;
   display: flex;
@@ -220,8 +220,8 @@
   justify-content: center;
 }
 /*
- * La flamme maigrit et se couche à mesure que le souffle monte.
- * Pas d'animation de flottement : elle doit rester soudée à la mèche.
+ * The flame thins and leans over as the breath rises.
+ * No floating animation: it must stay welded to the wick.
  */
 .candleFlame {
   width: 26px;
@@ -248,7 +248,7 @@
   background: var(--ink);
   border-radius: 3px;
 }
-/* Cire crème cerclée d'encre : lisible sur la carte blanche. */
+/* Cream wax ringed with ink: legible on the white card. */
 .candleBody {
   width: 100%;
   height: 96px;
@@ -290,9 +290,9 @@
   background: var(--ink);
   box-shadow: 0.32em 0 0 var(--ink);
 }
-/* Bouche centrée sur la paire d'yeux, pas sur le visage : l'œil gauche
-   commence à 25 % et le droit est décalé de 0.32em, le milieu tombe donc à
-   46.5 %. On centre par transform plutôt qu'avec un `left` calculé — la
+/* Mouth centred on the pair of eyes, not on the face: the left eye starts at
+   25 % and the right one is offset by 0.32em, so the middle falls at 46.5 %.
+   We centre by transform rather than with a computed `left` — the
    bordure (border-box, sans bord haut) rendrait le calcul fragile. */
 .avatar::after {
   content: '';
@@ -382,7 +382,7 @@
   border-radius: 22px;
 }
 
-/* Pictos géométriques */
+/* Geometric pictograms */
 .play {
   width: 0;
   height: 0;
@@ -423,8 +423,42 @@
   transform: rotate(-135deg);
   margin-left: 0.08em;
 }
+/* Replay: a nearly closed ring with an arrow head at its opening.
+   Drawn in CSS like the other icons — the kit carries no image assets.
+   Only the top-right quarter is cut, and the head sits on the ring's own
+   top edge, so the whole reads as an arrow turning back on itself. */
+.replay {
+  position: relative;
+  /* `block`, and not the default `inline` of a span: on an inline box the
+     width/height below are ignored and the ring collapses. The other
+     pictograms get away with it (zero-sized boxes, or dimensions in % of a
+     box that the flex container blockifies) — this one does not. */
+  display: block;
+  /* As visually strong as the neighbouring arrow: a wide ring and a thick
+     stroke, otherwise the icon looks frail inside a 128px button. */
+  width: 0.72em;
+  height: 0.72em;
+  border: 0.13em solid currentColor;
+  border-radius: 50%;
+  border-right-color: transparent;
+  transform: rotate(45deg);
+}
+.replayHead {
+  position: absolute;
+  /* Caps the stroke where the ring stops (its top end), pointing the way the
+     arrow turns. Centred on that end, so it reads as one continuous arrow
+     rather than a nub floating in the ring's opening. */
+  top: -0.065em;
+  right: -0.075em;
+  width: 0;
+  height: 0;
+  border-top: 0.13em solid transparent;
+  border-bottom: 0.13em solid transparent;
+  border-left: 0.2em solid currentColor;
+  transform: rotate(-45deg);
+}
 
-/* ─── Étoiles ──────────────────────────────────────────────────────── */
+/* ─── Stars ────────────────────────────────────────────────────────── */
 .stars {
   display: inline-flex;
   gap: 2px;
@@ -488,13 +522,13 @@
   color: var(--paper);
   text-shadow: var(--text-shadow);
 }
-/* Coin haut droit : état du micro, puis sortie vers la liste des enfants. */
+/* Top right corner: mic status, then exit to the list of children. */
 .topRight {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-/* Croix de sortie : même papier que le reste, carrée et discrète. */
+/* Exit cross: the same paper as the rest, square and discreet. */
 .closeBtn {
   display: inline-flex;
   align-items: center;
@@ -539,7 +573,7 @@
   left: 0;
   transform: translateY(-50%) rotate(-45deg);
 }
-/* État du micro + niveau de souffle (remplace le compteur d'étoiles). */
+/* Mic status + breath level (replaces the star counter). */
 .micStatus {
   display: flex;
   align-items: center;
@@ -549,7 +583,7 @@
   padding: 8px 16px;
   box-shadow: var(--shadow-1);
 }
-/* Micro en papier découpé : capsule + pied. Vert = capté, gris barré = non. */
+/* Cut-paper mic: capsule + stand. Green = picked up, crossed grey = not. */
 .micIcon {
   position: relative;
   width: 26px;
@@ -600,7 +634,7 @@
   background: var(--coral);
   transform: translate(-50%, -50%) rotate(-45deg);
 }
-/* Témoin vertical, fin : il monte avec le souffle comme une petite jauge. */
+/* Thin vertical indicator: it rises with the breath like a small gauge. */
 .micMeter {
   display: block;
   width: 6px;
@@ -692,10 +726,10 @@
   z-index: 6;
 }
 /*
- * Dans un écran qui défile (accueil en portrait), le bouton ne peut pas
- * rester ancré : fixe ou absolu, les cartes passent dessous au défilement.
- * Il reprend donc sa place dans le flux, à la fin du contenu. En paysage
- * rien ne défile : il garde son ancrage en bas à gauche.
+ * In a scrolling screen (home in portrait), the button cannot stay anchored:
+ * fixed or absolute, the cards pass underneath it when scrolling.
+ * It therefore takes its place back in the flow, at the end of the content.
+ * In landscape nothing scrolls: it keeps its anchor at the bottom left.
  */
 @media (orientation: portrait) {
   .contentScroll .parents {
@@ -730,6 +764,47 @@
   height: 0;
   opacity: 0.6;
 }
+/*
+ * Explanation bubble: the adult released the button before the end of the
+ * long press. Placed above the button, it does not take the events of
+ * pointeur — l'appui suivant doit atteindre le bouton, pas la bulle.
+ */
+.parentsTip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.25;
+  box-shadow: 4px 4px 0 var(--ink-a25);
+  pointer-events: none;
+  animation: parentsTipIn 0.22s ease-out both;
+}
+/* Petite pointe vers le bouton. */
+.parentsTip::after {
+  content: '';
+  position: absolute;
+  left: 22px;
+  top: 100%;
+  border: 7px solid transparent;
+  border-top-color: var(--ink);
+}
+@keyframes parentsTipIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .parentsPressing .parentsFill {
   height: 100%;
   transition: height 700ms linear;
@@ -754,7 +829,7 @@
   }
 }
 
-/* ─── Sélecteur de langue ──────────────────────────────────────────── */
+/* ─── Language switch ──────────────────────────────────────────────── */
 .langSwitch {
   display: inline-flex;
   padding: 4px;

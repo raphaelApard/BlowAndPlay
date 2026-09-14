@@ -1,4 +1,4 @@
-// Généré depuis Mascottes.dc.html (Claude Design, projet ef66d716). Ne pas éditer à la main.
+// Generated from Mascottes.dc.html (Claude Design, project ef66d716). Do not edit by hand.
 export type MascotId = 'miko' | 'poum' | 'lumi' | 'tico' | 'ourso' | 'croa' | 'octo' | 'piko' | 'rex' | 'zim';
 
 export interface MascotDef {
@@ -7,7 +7,7 @@ export interface MascotDef {
   tagline: string;
   description: string;
   colors: string[];
-  /** Boîte visuelle à l’échelle 1 (mesurée dans Chrome) : taille, et décalage du coin haut-gauche par rapport à la racine. */
+  /** Visual box at scale 1 (measured in Chrome): size, and offset of the top-left corner relative to the root. */
   box: { w: number; h: number; dx: number; dy: number };
   html: string;
 }

@@ -51,7 +51,7 @@ input {
   letter-spacing: 0.5px;
 }
 
-/* Animations partagées (importées du design) */
+/* Shared animations (imported from the design) */
 @keyframes floaty {
   0%,
   100% {

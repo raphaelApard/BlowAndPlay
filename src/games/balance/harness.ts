@@ -3,19 +3,19 @@ import { FRAME_MS, MAX_MS, SMOOTH, type Outcome } from './types';
 import type { Stars } from '../types';
 
 /**
- * Boucle d'images d'une simulation : avance le temps, interroge l'enfant,
- * lisse l'intensité comme les jeux (`power`). Chaque `simulate` écrit sa
- * physique dans `step`, et renvoie la fin de partie via `finish`.
+ * Frame loop of a simulation: advances time, queries the child, smooths the
+ * intensity like the games do (`power`). Each `simulate` writes its physics
+ * in `step`, and reports the end of the game via `finish`.
  */
 export interface Frame {
-  /** Temps écoulé depuis le début (ms), comme `performance.now()` relatif. */
+  /** Time elapsed since the start (ms), like a relative `performance.now()`. */
   t: number;
   dt: number;
-  /** Facteur « images à 60 Hz » (`dt / 16.67`), toujours 1 ici. */
+  /** The "frames at 60 Hz" factor (`dt / 16.67`), always 1 here. */
   k: number;
-  /** Souffle brut fourni par l'enfant. */
+  /** Raw breath provided by the child. */
   st: BreathSample;
-  /** Intensité lissée (comme `s.power` dans les jeux). */
+  /** Smoothed intensity (like `s.power` in the games). */
   power: number;
 }
 

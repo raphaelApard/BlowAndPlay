@@ -1,9 +1,9 @@
 import type { BreathSource, Calibration } from './types';
 
 /**
- * Source de secours / développement : maintenir Espace (ou le doigt sur
- * l'écran, hors boutons) simule un souffle. Le niveau monte en ~150 ms et
- * retombe vite (~90 ms) pour que deux appuis rapprochés fassent deux souffles.
+ * Fallback / development source: holding Space (or a finger on the screen,
+ * away from buttons) simulates a blow. The level rises in ~150 ms and falls
+ * quickly (~90 ms) so that two presses close together make two blows.
  */
 export class KeyboardBreathSource implements BreathSource {
   readonly kind = 'keyboard' as const;

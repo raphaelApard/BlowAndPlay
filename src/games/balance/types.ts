@@ -2,35 +2,35 @@ import type { LevelBase, Stars } from '../types';
 import type { Child } from './child';
 import { gameUnit } from '../_shared/math';
 
-/** Résultat d'une partie simulée par « l'enfant type ». */
+/** Result of a game simulated by the "typical child". */
 export interface Outcome {
-  /** Faux si le niveau n'a pas été terminé dans le temps imparti. */
+  /** False if the level was not finished within the allotted time. */
   finished: boolean;
-  /** Durée de la partie (ms), hors fête finale. */
+  /** Duration of the game (ms), excluding the final celebration. */
   elapsedMs: number;
-  /** Temps total passé à souffler (ms) : l'effort réel de l'enfant. */
+  /** Total time spent blowing (ms): the child's actual effort. */
   blowMs: number;
-  /** Nombre de souffles. */
+  /** Number of blows. */
   blows: number;
   stars: Stars;
 }
 
 /**
- * Simulation sans écran d'un niveau : mêmes équations que le jeu (les
- * constantes viennent du `rules.ts` du jeu), souffle fourni par `child`.
- * `difficulty` : 0 (facile) → 1 (difficile), comme `GameProps.difficulty`.
+ * Headless simulation of a level: the same equations as the game (the
+ * constants come from the game's `rules.ts`), breath provided by `child`.
+ * `difficulty`: 0 (easy) → 1 (hard), like `GameProps.difficulty`.
  */
 export type Simulate<L extends LevelBase = LevelBase> = (level: L, difficulty: number, child: Child) => Outcome;
 
-/** Écran de référence des simulations (tablette paysage). */
+/** Reference screen for the simulations (landscape tablet). */
 export const VIEW = { width: 1180, height: 820 } as const;
-/** Même formule que les jeux : facteur d'échelle du décor. */
+/** Same formula as the games: scenery scale factor. */
 export const UNIT = gameUnit(VIEW.width, VIEW.height);
-/** Pas de simulation : une image à 60 Hz. */
+/** Simulation step: one frame at 60 Hz. */
 export const FRAME_MS = 1000 / 60;
-/** Au-delà, on considère que l'enfant n'y arrive pas. */
+/** Beyond this, we consider that the child cannot manage it. */
 export const MAX_MS = 240_000;
-/** Lissage de l'intensité utilisé par tous les jeux (`power += (raw - power) * 0.25`). */
+/** Intensity smoothing used by every game (`power += (raw - power) * 0.25`). */
 export const SMOOTH = 0.25;
 
 export function clamp01(v: number) {

@@ -1,7 +1,7 @@
 import { Rocket } from './Rocket';
 import styles from './fusee.module.css';
 
-/** Étoiles de la vignette : [left %, top %, taille en cqmin]. */
+/** Thumbnail stars: [left %, top %, size in cqmin]. */
 const STARS = [
   [8, 10, 1.6],
   [22, 26, 1.1],
@@ -13,7 +13,7 @@ const STARS = [
   [30, 50, 0.9],
 ] as const;
 
-/** Fumée : [left %, bottom %, diamètre en cqmin], de la flamme vers les nuages. */
+/** Smoke: [left %, bottom %, diameter in cqmin], from the flame towards the clouds. */
 const SMOKE = [
   [35, 29, 7],
   [30, 21, 11],
@@ -22,8 +22,8 @@ const SMOKE = [
 ] as const;
 
 /**
- * Vignette de la carte « Jeux » : la fusée sort des nuages, flamme allumée,
- * et file vers la Lune dans un ciel qui vire à la nuit.
+ * Games card thumbnail: the rocket emerges from the clouds, flame lit, and
+ * speeds towards the Moon in a sky turning to night.
  */
 export function Thumbnail() {
   return (

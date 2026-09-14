@@ -4,14 +4,14 @@ import { simulate } from './simulate';
 import { Thumbnail } from './Thumbnail';
 
 /**
- * Montgolfière — un souffle pour décoller, puis le ballon avance tout seul
- * près du sol : chaque souffle le fait monter pour passer par-dessus les
- * obstacles (arbres, rochers, maisons, tours). À l'arrivée, il se pose sur
- * la plateforme. Les chocs ne font pas perdre : ils coûtent des étoiles.
- * La difficulté globale ajoute des obstacles, plus hauts et plus serrés.
+ * Montgolfière — one blow to take off, then the balloon moves on its own
+ * near the ground: each blow makes it rise to clear the obstacles (trees,
+ * rocks, houses, towers). On arrival, it lands on the platform. Impacts do
+ * not make you lose: they cost stars.
+ * The global difficulty adds obstacles, taller and closer together.
  */
 export interface MontgolfiereLevel extends LevelBase {
-  /** Nombre d'obstacles à survoler (avant multiplication par la difficulté). */
+  /** Number of obstacles to fly over (before multiplication by the difficulty). */
   obstacles: number;
 }
 

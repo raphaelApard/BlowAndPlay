@@ -11,7 +11,7 @@ interface Props {
   still?: boolean;
 }
 
-/** La fusée et Pip, sa pilote, dans le hublot (design « Blast Off »). */
+/** The rocket and Pip, its pilot, in the porthole ("Blast Off" design). */
 export function Rocket({ size = 64, flameRef, flame = true, still = false }: Props) {
   return (
     <div className={still ? styles.rocket : `${styles.rocket} ${styles.rocketBob}`} style={{ fontSize: size }} aria-hidden>

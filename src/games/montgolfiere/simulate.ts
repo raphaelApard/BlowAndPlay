@@ -4,13 +4,13 @@ import { BASKET_DROP } from './draw';
 import type { MontgolfiereLevel } from './index';
 import { BUMP_COOLDOWN_MS, LIFT_BASE, LIFT_POWER, RAMP_MS, SINK, TAKEOFF_MS, TAKEOFF_THRESHOLD, makeWorld, tuning } from './rules';
 
-/** Anticipation de l'enfant : il souffle quand un obstacle approche (px écran). */
+/** The child's anticipation: they blow when an obstacle approaches (screen px). */
 const LOOKAHEAD = 260;
-/** Marge de sécurité qu'il vise au-dessus de l'obstacle (px écran). */
+/** Safety margin they aim for above the obstacle (screen px). */
 const MARGIN = 30;
 
 /**
- * Montgolfière : l'enfant souffle pour décoller, puis à chaque obstacle qui
+ * Montgolfière: the child blows to take off, then at each obstacle that
  * approche s'il est trop bas ; sinon il se repose et le ballon redescend.
  */
 export const simulate: Simulate<MontgolfiereLevel> = (level, difficulty, child) => {
@@ -67,7 +67,7 @@ export const simulate: Simulate<MontgolfiereLevel> = (level, difficulty, child) 
         vy = -4 * unit;
         break;
       }
-      // Obstacle devant, pas encore passé : souffler s'il faut monter.
+      // Obstacle ahead, not yet cleared: blow if we need to climb.
       if (ox + ow > left && ox - ow - right < LOOKAHEAD * unit && bottom > top - MARGIN * unit) want = 'long';
     }
 

@@ -6,15 +6,15 @@ import { Thumbnail } from './Thumbnail';
 /**
  * Cerf-volant — l'altitude du cerf-volant suit la force du souffle : doux,
  * il vole bas ; fort, il monte. Une bande de vent arc-en-ciel montre la zone
- * à tenir ; quand le cerf-volant y reste assez longtemps, la bande change
- * d'altitude. La difficulté globale resserre la bande et allonge la tenue.
+ * to hold; when the kite stays in it long enough, the band changes altitude.
+ * The global difficulty narrows the band and lengthens the hold.
  */
 export interface CerfVolantLevel extends LevelBase {
-  /** Hauteur de la zone cible (0..1 de l'intensité). Plus petit = plus dur. */
+  /** Height of the target zone (0..1 of the intensity). Smaller = harder. */
   targetWidth: number;
-  /** Durée cumulée à tenir dans la zone, par cible (ms). */
+  /** Cumulative time to hold inside the zone, per target (ms). */
   holdMs: number;
-  /** Nombre de cibles (altitudes) à réussir. */
+  /** Number of targets (altitudes) to complete. */
   targets: number;
 }
 

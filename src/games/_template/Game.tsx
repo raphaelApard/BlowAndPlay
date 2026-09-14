@@ -3,8 +3,8 @@ import type { GameProps } from '../types';
 import type { TemplateLevel, TemplateSettings } from './index';
 
 /**
- * Squelette de jeu : une boucle rAF qui lit le souffle, un état dans une
- * ref (pas de re-rendu React par frame), et `onComplete` appelé une fois.
+ * Game skeleton: a rAF loop reading the breath, state in a ref (no React
+ * re-render per frame), and `onComplete` called once.
  */
 export function Game({
   level,
@@ -25,8 +25,8 @@ export function Game({
     if (paused) return;
     let raf = 0;
     let last = performance.now();
-    // Exemple : la difficulté globale allonge l'objectif du niveau (×0,7 → ×1,5),
-    // le réglage parents « vitesse » le raccourcit.
+    // Example: the global difficulty lengthens the level's target (×0.7 → ×1.5),
+    // the "speed" parents setting shortens it.
     const targetMs = (level.targetMs * (0.7 + difficulty * 0.8)) / settings.speed;
 
     const frame = (t: number) => {

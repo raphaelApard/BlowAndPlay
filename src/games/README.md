@@ -1,68 +1,68 @@
-# Ajouter un jeu
+# Adding a game
 
-Un jeu = un dossier dans `src/games/`, découvert automatiquement au build.
+A game = a folder in `src/games/`, discovered automatically at build time.
 
 ```
 src/games/
-  _template/        ← à copier (ignoré par le registre : préfixe `_`)
-  _shared/          ← code commun aux jeux (voir ci-dessous)
+  _template/        ← to copy (ignored by the registry: `_` prefix)
+  _shared/          ← code common to all games (see below)
   montgolfiere/
     index.ts        ← export default defineGame({...})
-    Game.tsx        ← le composant du jeu
+    Game.tsx        ← the game component
   ...
 ```
 
-## Ce que `_shared/` fournit — à utiliser plutôt que recopier
+## What `_shared/` provides — use it rather than copying
 
-| module | contenu |
+| module | contents |
 | --- | --- |
-| `math.ts` | `clamp01`, `seeded` (mulberry32), `lerp`, `mixHex`, `gameUnit(w,h)` (échelle du décor), `thumbUnit(w,h)` |
-| `canvas.ts` | `INK` (encre des ombres), `cut()` (forme « papier découpé »), `setupCanvas()` (densité d'écran) |
-| `stars.ts` | `starsForTime(elapsedMs, parMs)` — barème commun 3 / 2 / 1 étoiles |
-| `CanvasThumbnail.tsx` | échafaudage d'une vignette : canvas, densité d'écran, redimensionnement |
+| `math.ts` | `clamp01`, `seeded` (mulberry32), `lerp`, `mixHex`, `gameUnit(w,h)` (scenery scale), `thumbUnit(w,h)` |
+| `canvas.ts` | `INK` (shadow ink), `cut()` (the "cut paper" shape), `setupCanvas()` (screen density) |
+| `stars.ts` | `starsForTime(elapsedMs, parMs)` — the common 3 / 2 / 1 star scale |
+| `CanvasThumbnail.tsx` | scaffolding for a thumbnail: canvas, screen density, resizing |
 
-Ces fonctions étaient recopiées dans chaque jeu ; elles n'ont plus qu'une
-source. Un `draw.ts` de jeu les réexporte (`export { clamp01, seeded } from
-'../_shared/math';`) pour que `Game.tsx`, `simulate.ts` et `Thumbnail.tsx`
-gardent un seul point d'entrée : `./draw`.
+These functions used to be copied into each game; they now have a single
+source. A game's `draw.ts` re-exports them (`export { clamp01, seeded } from
+'../_shared/math';`) so that `Game.tsx`, `simulate.ts` and `Thumbnail.tsx`
+keep a single entry point: `./draw`.
 
-En revanche, la **palette de couleurs** (`SKY_TOP`, `CORAL`…) et la fonction
-`tuning(difficulty)` restent propres à chaque jeu : ce sont sa direction
-artistique et sa courbe de difficulté, volontairement indépendantes.
+The **colour palette** (`SKY_TOP`, `CORAL`…) and the `tuning(difficulty)`
+function, on the other hand, stay specific to each game: they are its art
+direction and its difficulty curve, deliberately independent.
 
-## 1. Copier le template
+## 1. Copy the template
 
 ```sh
-cp -r src/games/_template src/games/mon-jeu
+cp -r src/games/_template src/games/my-game
 ```
 
-## 2. Décrire le jeu dans `index.ts`
+## 2. Describe the game in `index.ts`
 
 ```ts
 export default defineGame({
-  id: 'mon-jeu',          // stable : URL + progression
-  title: { fr: 'Mon jeu', en: 'My game' },   // affiché à l'enfant, dans chaque langue
-  description: { fr: '…', en: '…' }, // espace parents
-  instruction: { fr: 'Souffle pour…', en: 'Blow to…' }, // bulle de la mascotte au lancement
+  id: 'my-game',          // stable: URL + progress
+  title: { fr: 'Mon jeu', en: 'My game' },   // shown to the child, in each language
+  description: { fr: '…', en: '…' }, // parents area
+  instruction: { fr: 'Souffle pour…', en: 'Blow to…' }, // mascot speech bubble at launch
   pattern: 'long',        // 'long' | 'bursts' | 'modulated' | 'free'
   accent: '#ffd93d',
   order: 40,
   levels: [{ id: '1', targetMs: 2000 }, { id: '2', targetMs: 4000 }],
-  Game,                   // composant
-  Thumbnail,              // optionnel
+  Game,                   // component
+  Thumbnail,              // optional
 });
 ```
 
-La vignette est toujours affichée via `<GameThumbnail game={…} />`
-(`src/components/ui`) : carte d'aventure, onglet « Jeux », choix des jeux à la
-création d'un enfant et liste des jeux de l'aventure côté parents passent tous
-par là. Un jeu sans `Thumbnail` y reçoit automatiquement un placeholder — il
-n'y a donc jamais de repli à écrire dans un écran.
+The thumbnail is always displayed via `<GameThumbnail game={…} />`
+(`src/components/ui`): the adventure map, the Games tab, the game picker when
+creating a child and the parents-side list of adventure games all go through
+it. A game with no `Thumbnail` automatically gets a placeholder there — so
+there is never a fallback to write in a screen.
 
-Les niveaux étendent `LevelBase` avec les réglages propres au jeu :
-c'est la seule chose que le shell ne connaît pas.
+Levels extend `LevelBase` with the game's own settings: that is the only
+thing the shell does not know about.
 
-### Réglages parents propres au jeu (optionnel)
+### Game-specific parents settings (optional)
 
 ```ts
 export const SETTINGS = {
@@ -70,82 +70,81 @@ export const SETTINGS = {
   helper: setting.toggle({ label: { fr: 'Aide visuelle', en: 'Visual helper' }, default: true }),
   mode: setting.choice({ label: { fr: 'Mode', en: 'Mode' }, default: 'calme', options: [{ value: 'calme', label: { fr: 'Calme', en: 'Calm' } }, { value: 'vif', label: { fr: 'Vif', en: 'Lively' } }] }),
 };
-export default defineGame<MonNiveau, typeof SETTINGS>({ ..., settings: SETTINGS, Game });
+export default defineGame<MyLevel, typeof SETTINGS>({ ..., settings: SETTINGS, Game });
 ```
 
-L'espace parents affiche ces contrôles sous « Réglages des jeux », le
-store les mémorise (`gameSettings[gameId]`), et le jeu les reçoit résolus
-et typés dans `props.settings` (`SettingValues<typeof SETTINGS>`).
+The parents area shows these controls under "Réglages des jeux", the store
+remembers them (`gameSettings[gameId]`), and the game receives them resolved
+and typed in `props.settings` (`SettingValues<typeof SETTINGS>`).
 
-## 3. Écrire le composant `Game.tsx`
+## 3. Write the `Game.tsx` component
 
-Il reçoit `GameProps<MonNiveau>` :
+It receives `GameProps<MyLevel>`:
 
-| prop | rôle |
+| prop | role |
 | --- | --- |
-| `level` | le niveau à jouer |
-| `settings` | réglages parents du jeu, résolus (défaut si non modifiés) |
-| `breath` | `BreathEngine` démarré et calibré |
-| `width`, `height` | zone de jeu en px (suit le redimensionnement) |
-| `paused` | geler le jeu (onglet caché) |
-| `difficulty` | réglage parents global (1 → 10 côté parents), reçu ramené à 0 (facile) → 1 (difficile) ; à combiner avec le niveau |
-| `onProgress(0..1)` | optionnel, alimente la jauge du HUD |
-| `onComplete({ stars })` | **une seule fois**, à la fin du niveau |
+| `level` | the level to play |
+| `settings` | the game's parents settings, resolved (defaults if untouched) |
+| `breath` | a started, calibrated `BreathEngine` |
+| `width`, `height` | play area in px (follows resizing) |
+| `paused` | freeze the game (tab hidden) |
+| `difficulty` | the global parents setting (1 → 10 on the parents side), received scaled to 0 (easy) → 1 (hard); combine it with the level |
+| `onProgress(0..1)` | optional, feeds the HUD gauge |
+| `onComplete({ stars })` | **exactly once**, at the end of the level |
 
-Lire le souffle :
+Reading the breath:
 
 ```ts
-// À chaque frame (boucle canvas / rAF) :
+// Every frame (canvas / rAF loop):
 useEffect(() => breath.subscribe((s) => { s.intensity /* 0..1 */; s.isBlowing; s.blowDurationMs }), [breath]);
 
-// Événements discrets :
+// Discrete events:
 useEffect(() => breath.on((e) => { if (e.type === 'blowEnd') e.blow.durationMs; }), [breath]);
 
-// En React, re-rendu chaque frame :
+// In React, re-renders every frame:
 const { intensity } = useBreathState();
 ```
 
-## Ce que le shell fait pour vous
+## What the shell does for you
 
-- démarre le micro, force le calibrage si absent, met en pause quand l'onglet est caché ;
-- HUD : bouton quitter, badge de niveau, bande de papier (intensité + progression) ;
-- enregistre étoiles + statistiques de souffle dans la progression du profil ;
-- enchaîne : en aventure, retour sur la map (animation vers l'étape suivante) ;
-  depuis l'onglet Jeux (`?mode=free`), écran de récompense puis niveau suivant du jeu.
+- starts the mic, forces calibration if missing, pauses when the tab is hidden;
+- HUD: quit button, level badge, paper strip (intensity + progress);
+- records stars + breath statistics in the profile's progress;
+- chains: in adventure mode, back to the map (animation towards the next step);
+  from the Games tab (`?mode=free`), back to the list, which celebrates there.
 
-Le jeu ne doit **pas** : parler de médical, afficher du texte à l'enfant
-(pictos, formes, couleurs), ni gérer la navigation.
+A game must **not**: mention anything medical, show text to the child
+(use pictos, shapes, colours), or handle navigation.
 
-## 4. Équilibrer la difficulté (`simulate.ts`)
+## 4. Balancing the difficulty (`simulate.ts`)
 
-Les jeux doivent demander le **même effort** à difficulté égale : un jeu
-bien plus dur que les autres frustre l'enfant. Chaque jeu fournit donc une
-simulation sans écran, jouée par « l'enfant type » (`src/games/balance/`) :
+Games must demand the **same effort** at equal difficulty: a game much harder
+than the others frustrates the child. Each game therefore provides a headless
+simulation, played by the "typical child" (`src/games/balance/`):
 
-- `rules.ts` : la fonction `tuning(difficulty)` et les constantes de
-  physique, partagées par `Game.tsx` et la simulation (une seule source) ;
-- `simulate.ts` : la même boucle que le jeu, sans rendu, qui renvoie à
-  chaque image ce que le jeu demande à l'enfant (`long`, `bursts`,
-  `hold`, `rest`) et appelle `finish(elapsedMs, stars)` à la fin ;
-- `index.ts` : `simulate` dans `defineGame({...})`.
+- `rules.ts`: the `tuning(difficulty)` function and the physics constants,
+  shared by `Game.tsx` and the simulation (a single source);
+- `simulate.ts`: the same loop as the game, without rendering, returning on
+  each frame what the game asks of the child (`long`, `bursts`, `hold`,
+  `rest`) and calling `finish(elapsedMs, stars)` at the end;
+- `index.ts`: `simulate` in `defineGame({...})`.
 
-`pnpm test` (ou `pnpm balance`) vérifie pour chaque difficulté 1 → 10 et
-chaque niveau que l'enfant type finit tous les jeux, que le temps de souffle
-demandé reste à ±50 % de la médiane des jeux (durée de partie à ±60 %), et
-que l'effort monte avec la difficulté et d'un niveau au suivant. Le rapport
-imprime le tableau complet (souffle, durée, étoiles). Un jeu sans
-`simulate` fait échouer le test.
+`pnpm test` (or `pnpm balance`) checks, for each difficulty 1 → 10 and each
+level, that the typical child finishes every game, that the breath time
+required stays within ±50 % of the cross-game median (game duration within
+±60 %), and that effort rises with difficulty and from one level to the next.
+The report prints the full table (breath, duration, stars). A game without
+`simulate` makes the test fail.
 
-## Aventure
+## Adventure
 
-`src/adventure/path.ts` construit deux choses à partir du registre :
+`src/adventure/path.ts` builds two things from the registry:
 
-- **les étapes de la carte** (`ADVENTURE_PATH`) — une étape par jeu, dans
-  l'ordre `order`, affichée avec la vignette du jeu (`GameThumbnail`) ;
-- **l'ordre de déverrouillage** (`UNLOCK_ORDER`) — le niveau 1 de chaque jeu,
-  puis le niveau 2, etc., pour que l'enfant rencontre tous les jeux avant
-  d'en approfondir un.
+- **the map steps** (`ADVENTURE_PATH`) — one step per game, in `order` order,
+  displayed with the game's thumbnail (`GameThumbnail`);
+- **the unlock order** (`UNLOCK_ORDER`) — level 1 of every game, then level 2,
+  and so on, so that the child meets every game before going deeper into one.
 
-Une étape est donc « terminée » quand tous ses niveaux sont réussis, et
-« courante » quand elle contient le niveau courant. Un nouveau jeu apparaît
-automatiquement dans l'aventure et dans l'onglet Jeux.
+A step is therefore "complete" when all its levels are passed, and "current"
+when it contains the current level. A new game appears automatically in the
+adventure and in the Games tab.

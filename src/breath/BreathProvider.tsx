@@ -18,16 +18,16 @@ export type BreathStatus = 'idle' | 'starting' | 'running' | 'error';
 interface BreathContextValue {
   engine: BreathEngine;
   sourceKind: BreathSourceKind;
-  /** Micro choisi (null = défaut système). */
+  /** Chosen mic (null = system default). */
   micDeviceId: string | null;
   status: BreathStatus;
   error: string | null;
-  /** Démarre la source courante (demande la permission micro si besoin). */
+  /** Starts the current source (asks for mic permission if needed). */
   start(): Promise<boolean>;
   stop(): void;
-  /** Change de source (micro ↔ clavier). Redémarre si le moteur tournait. */
+  /** Switches source (mic ↔ keyboard). Restarts if the engine was running. */
   setSourceKind(kind: BreathSourceKind): Promise<void>;
-  /** Change de micro. Invalide le calibrage. */
+  /** Switches mic. Invalidates the calibration. */
   setMicDeviceId(deviceId: string | null): Promise<void>;
 }
 
@@ -117,7 +117,7 @@ export function BreathProvider({
     [sourceKind, micDeviceId, onMicDeviceIdChange, swapSource],
   );
 
-  // Coupe le micro quand l'onglet est caché (économie + vie privée).
+  // Cuts the mic when the tab is hidden (battery + privacy).
   useEffect(() => {
     const onVisibility = () => {
       if (document.hidden && engine.isRunning()) {
@@ -139,11 +139,11 @@ export function BreathProvider({
 
 export function useBreath(): BreathContextValue {
   const ctx = useContext(BreathContext);
-  if (!ctx) throw new Error('useBreath doit être utilisé sous <BreathProvider>');
+  if (!ctx) throw new Error('useBreath must be used under <BreathProvider>');
   return ctx;
 }
 
-/** État du souffle re-rendu à chaque frame (HUD, jauges). */
+/** Breath state re-rendered on every frame (HUD, gauges). */
 export function useBreathState(): BreathState {
   const { engine } = useBreath();
   return useSyncExternalStore(

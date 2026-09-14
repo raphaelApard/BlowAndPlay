@@ -1,9 +1,9 @@
 /**
- * Petites fonctions numériques partagées par tous les jeux.
+ * Small numeric helpers shared by every game.
  *
- * Elles étaient recopiées à l'identique dans chaque `draw.ts` : une seule
- * source évite qu'un jeu dérive (un `seeded` différent changerait le décor
- * d'un jeu et, par ricochet, son équilibrage).
+ * They used to be copied identically into each `draw.ts`: a single source
+ * prevents a game from drifting (a different `seeded` would change a game's
+ * scenery and, as a knock-on effect, its balance).
  */
 
 export function clamp01(v: number) {
@@ -11,8 +11,8 @@ export function clamp01(v: number) {
 }
 
 /**
- * PRNG mulberry32 : rendu pur et déterministe. Même graine = même décor,
- * ce qui rend les niveaux reproductibles et les simulations comparables.
+ * mulberry32 PRNG: pure and deterministic. Same seed = same scenery, which
+ * makes the levels reproducible and the simulations comparable.
  */
 export function seeded(seed: number) {
   let a = seed >>> 0;
@@ -29,7 +29,7 @@ export function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-/** Mélange deux couleurs `#rrggbb` (dégradés de ciel, fondus). */
+/** Mixes two `#rrggbb` colours (sky gradients, fades). */
 export function mixHex(h1: string, h2: string, t: number) {
   const n = (h: string) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
   const [r1, g1, b1] = n(h1);
@@ -39,16 +39,16 @@ export function mixHex(h1: string, h2: string, t: number) {
 }
 
 /**
- * Facteur d'échelle du décor : tout se dessine en « unités » multipliées par
- * `unit`, pour que la scène garde ses proportions de la tablette au mobile.
- * `src/games/balance/types.ts` applique la même formule à l'écran de
- * référence des simulations — garder les deux identiques.
+ * Scenery scale factor: everything is drawn in "units" multiplied by `unit`,
+ * so that the scene keeps its proportions from tablet to mobile.
+ * `src/games/balance/types.ts` applies the same formula to the simulations'
+ * reference screen — keep the two identical.
  */
 export function gameUnit(width: number, height: number) {
   return Math.max(0.55, Math.min(width / 1000, height / 620));
 }
 
-/** Échelle d'une vignette (carte « Jeux »), calée sur son plus petit côté. */
+/** Scale of a thumbnail (Games card), based on its smallest side. */
 export function thumbUnit(width: number, height: number) {
   return Math.min(width, height) / 230;
 }

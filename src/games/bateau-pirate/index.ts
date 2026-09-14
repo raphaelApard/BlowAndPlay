@@ -4,15 +4,15 @@ import { simulate } from './simulate';
 import { Thumbnail } from './Thumbnail';
 
 /**
- * Bateau Pirate — souffler dans la voile fait avancer le bateau d'île en île
- * sur une carte au trésor. Chaque souffle pousse le bateau, qui glisse puis
- * ralentit ; un bon souffle par étape suffit, plusieurs petits font pareil.
- * La difficulté globale réduit la poussée (÷1 → ÷1,8) et freine davantage.
+ * Bateau Pirate — blowing into the sail moves the boat from island to island
+ * on a treasure map. Each blow pushes the boat, which glides then slows down;
+ * one good blow per step is enough, several small ones do the same.
+ * The global difficulty reduces the thrust (÷1 → ÷1.8) and brakes harder.
  */
 export interface BateauPirateLevel extends LevelBase {
-  /** Nombre d'îles à visiter (le départ n'en fait pas partie). */
+  /** Number of islands to visit (the start is not one of them). */
   islands: number;
-  /** Temps de référence pour 3 étoiles (ms). 2 étoiles jusqu'à 1,6×, sinon 1. */
+  /** Reference time for 3 stars (ms). 2 stars up to 1.6×, otherwise 1. */
   parMs: number;
 }
 

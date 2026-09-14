@@ -1,4 +1,4 @@
-/* Plein écran : la zone hachurée est tout l'espace disponible pour le jeu. */
+/* Full screen: the hatched area is all the space available to the game. */
 .root {
   position: absolute;
   inset: 0;

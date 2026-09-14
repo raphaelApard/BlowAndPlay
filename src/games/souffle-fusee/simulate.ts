@@ -4,7 +4,7 @@ import type { Simulate } from '../balance/types';
 import type { SouffleFuseeLevel } from './index';
 import { DRAG, MAX_VEL, MIN_VEL, THRUST, tuning } from './rules';
 
-/** Souffle-Fusée : l'enfant souffle longuement, la fusée monte, retombe entre deux souffles. */
+/** Souffle-Fusée: the child blows for a long time, the rocket climbs and falls back between blows. */
 export const simulate: Simulate<SouffleFuseeLevel> = (level, difficulty, child) => {
   const { distance, gravity } = tuning(difficulty);
   const MAX = level.maxAltitude * distance;

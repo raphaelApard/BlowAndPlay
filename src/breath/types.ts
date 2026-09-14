@@ -1,37 +1,37 @@
 /**
- * Couche « souffle » : une source fournit un niveau brut, le moteur le
- * normalise (calibrage), le lisse et en déduit des événements de souffle.
+ * The "breath" layer: a source provides a raw level, the engine normalizes it
+ * (calibration), smooths it and derives breath events from it.
  */
 
 export type BreathSourceKind = 'mic' | 'keyboard';
 
 export interface Calibration {
-  /** Niveau brut au repos (bruit ambiant). */
+  /** Raw level at rest (ambient noise). */
   noiseFloor: number;
-  /** Niveau brut atteint quand l'enfant souffle fort. */
+  /** Raw level reached when the child blows hard. */
   peak: number;
 }
 
 export interface BreathSource {
   readonly kind: BreathSourceKind;
-  /** Calibrage utilisé tant que l'enfant n'a pas calibré. */
+  /** Calibration used until the child has calibrated. */
   readonly defaultCalibration: Calibration;
   start(): Promise<void>;
   stop(): void;
-  /** Reçoit le niveau brut à chaque frame. Renvoie la fonction de désabonnement. */
+  /** Receives the raw level on each frame. Returns the unsubscribe function. */
   onLevel(cb: (level: number) => void): () => void;
 }
 
 export interface BreathState {
-  /** Niveau brut (dépend de la source). */
+  /** Raw level (depends on the source). */
   raw: number;
-  /** Intensité normalisée et lissée, 0 = rien, 1 = souffle max calibré. */
+  /** Normalized and smoothed intensity, 0 = nothing, 1 = calibrated max breath. */
   intensity: number;
-  /** Vrai entre blowStart et blowEnd (avec hystérésis). */
+  /** True between blowStart and blowEnd (with hysteresis). */
   isBlowing: boolean;
-  /** Durée du souffle en cours, en ms (0 sinon). */
+  /** Duration of the current blow, in ms (0 otherwise). */
   blowDurationMs: number;
-  /** performance.now() du dernier échantillon. */
+  /** performance.now() of the last sample. */
   t: number;
 }
 
@@ -46,7 +46,7 @@ export type BreathEvent =
   | { type: 'blowStart'; t: number }
   | { type: 'blowEnd'; blow: BlowSummary };
 
-/** Statistiques agrégées sur une partie (calculées par le GameShell). */
+/** Aggregated statistics for one game (computed by the GameShell). */
 export interface BreathSessionStats {
   blows: number;
   totalBlowMs: number;

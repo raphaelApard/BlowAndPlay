@@ -5,14 +5,14 @@ import { thumbUnit } from './math';
 interface Props {
   /** Classe de la vignette (fond), dans le module CSS du jeu. */
   className: string;
-  /** Dessine la vignette. `unit` suit le plus petit côté (voir `thumbUnit`). */
+  /** Draws the thumbnail. `unit` follows the smallest side (see `thumbUnit`). */
   paint(ctx: CanvasRenderingContext2D, w: number, h: number, unit: number): void;
 }
 
 /**
- * Vignette d'un jeu sur la carte « Jeux » : canvas calé sur la densité de
- * l'écran, redessiné au redimensionnement. Chaque jeu ne fournit que son
- * dessin ; l'échafaudage était identique dans les six vignettes.
+ * A game's thumbnail on the Games card: a canvas matched to the screen
+ * density, redrawn on resize. Each game only provides its drawing; the
+ * scaffolding was identical in all six thumbnails.
  */
 export function CanvasThumbnail({ className, paint }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -32,7 +32,7 @@ export function CanvasThumbnail({ className, paint }: Props) {
     const ro = new ResizeObserver(draw);
     ro.observe(canvas);
     return () => ro.disconnect();
-    // `paint` est une fonction stable par jeu (définie au module).
+    // `paint` is a stable function per game (defined at module level).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

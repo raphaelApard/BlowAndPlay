@@ -1,22 +1,22 @@
 import { clamp01, seeded } from './draw';
 
-/** Règles du jeu partagées entre le composant et la simulation d'équilibrage. */
+/** Game rules shared between the component and the balance simulation. */
 
 /** Fondu de la bande entre deux cibles. */
 export const SWITCH_MS = 900;
-/** Fête finale : le cerf-volant monte, pluie d'étoiles. */
+/** Final celebration: the kite climbs, a shower of stars. */
 export const PARTY_MS = 3200;
-/** Intervalle d'apparition des étoiles dans la bande. */
+/** Interval at which stars appear in the band. */
 export const STAR_EVERY_MS = 650;
-/** Hors de la zone, le temps tenu s'érode doucement (fraction du temps réel). */
+/** Outside the zone, the time held erodes slowly (a fraction of real time). */
 export const HOLD_DECAY = 0.25;
-/** Inertie du cerf-volant (part du chemin vers l'altitude visée, par frame). */
+/** Kite inertia (share of the way towards the target altitude, per frame). */
 export const FOLLOW = 0.07;
 
 /**
- * Difficulté globale (0 → 1) → cible :
+ * Global difficulty (0 → 1) → target:
  *  - hauteur de la bande : ×1 (facile) → ×0,6 ;
- *  - durée à tenir : ×1 → ×1,5.
+ *  - time to hold: ×1 → ×1.5.
  */
 export function tuning(difficulty: number) {
   const d = clamp01(difficulty);
@@ -42,7 +42,7 @@ export function makeTargets(count: number, half: number, seed: number): number[]
   return out;
 }
 
-/** Demi-hauteur de la bande et cibles d'un niveau, pour une difficulté donnée. */
+/** Half-height of the band and a level's targets, for a given difficulty. */
 export function makeCourse(level: { targetWidth: number; targets: number }, difficulty: number) {
   const { band } = tuning(difficulty);
   const half = (level.targetWidth * band) / 2;

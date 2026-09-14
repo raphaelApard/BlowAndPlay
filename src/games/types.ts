@@ -4,44 +4,44 @@ import type { Localized } from '../i18n/strings';
 import type { Simulate } from './balance/types';
 
 /**
- * Contrat d'un jeu. Voir `src/games/README.md` pour ajouter un jeu.
+ * A game's contract. See `src/games/README.md` to add a game.
  */
 
-/** Type de souffle travaillé — sert à décrire le jeu côté parents et à équilibrer l'aventure. */
+/** The kind of breath being practised — describes the game for parents and balances the adventure. */
 export type BreathPattern =
-  /** Un souffle long et régulier (ex. montgolfière). */
+  /** One long, steady blow (e.g. montgolfiere). */
   | 'long'
-  /** Souffles courts répétés (ex. pousse-nuages). */
+  /** Repeated short blows (e.g. pousse-nuages). */
   | 'bursts'
-  /** Doux / fort, contrôle de l'intensité (ex. cerf-volant). */
+  /** Gentle / strong, controlling the intensity (e.g. cerf-volant). */
   | 'modulated'
-  /** Libre. */
+  /** Free. */
   | 'free';
 
 export type Stars = 0 | 1 | 2 | 3;
 
-/** Un niveau. Chaque jeu étend ce type avec ses propres réglages. */
+/** One level. Each game extends this type with its own settings. */
 export interface LevelBase {
-  /** Identifiant stable, utilisé dans l'URL et la progression (ex. "1", "2"). */
+  /** Stable identifier, used in the URL and in progress (e.g. "1", "2"). */
   id: string;
 }
 
 export interface GameResult {
   stars: Stars;
-  /** Score optionnel, propre au jeu (affiché côté parents). */
+  /** Optional score, specific to the game (shown on the parents side). */
   score?: number;
 }
 
-// ─── Réglages parents propres à un jeu ─────────────────────────────────
+// ─── Game-specific parents settings ────────────────────────────────────
 //
-// Un jeu déclare ses réglages dans `settings` ; l'espace parents les affiche
-// automatiquement, le store les mémorise, et le jeu les reçoit résolus
-// (valeur enregistrée ou défaut) dans `props.settings`.
+// A game declares its settings in `settings`; the parents area displays them
+// automatically, the store remembers them, and the game receives them resolved
+// (stored value or default) in `props.settings`.
 
 export type SettingValue = number | boolean | string;
 
 interface SettingBase {
-  /** Libellé affiché aux parents, dans chaque langue. */
+  /** Label shown to parents, in each language. */
   label: Localized;
   description?: Localized;
 }
@@ -51,7 +51,7 @@ export interface RangeSettingDef extends SettingBase {
   min: number;
   max: number;
   step?: number;
-  /** Suffixe affiché après la valeur (ex. "×", "s"). */
+  /** Suffix displayed after the value (e.g. "×", "s"). */
   unit?: string;
 }
 export interface ToggleSettingDef extends SettingBase {
@@ -66,7 +66,7 @@ export interface ChoiceSettingDef<T extends string = string> extends SettingBase
 export type SettingDef = RangeSettingDef | ToggleSettingDef | ChoiceSettingDef;
 export type SettingDefs = Record<string, SettingDef>;
 
-/** Valeurs résolues à partir des définitions : `{ vitesse: number, aide: boolean }`. */
+/** Values resolved from the definitions: `{ speed: number, helper: boolean }`. */
 export type SettingValues<D extends SettingDefs> = { [K in keyof D]: D[K]['default'] };
 
 export const setting = {
@@ -75,7 +75,7 @@ export const setting = {
   choice: <T extends string>(def: Omit<ChoiceSettingDef<T>, 'type'>): ChoiceSettingDef<T> => ({ type: 'choice', ...def }),
 };
 
-/** Fusionne défauts et valeurs enregistrées (en ignorant les valeurs invalides). */
+/** Merges defaults and stored values (ignoring invalid values). */
 export function resolveSettings<D extends SettingDefs>(
   defs: D | undefined,
   stored: Record<string, SettingValue> | undefined,
@@ -93,70 +93,70 @@ export function resolveSettings<D extends SettingDefs>(
 
 export interface GameProps<L extends LevelBase = LevelBase, S extends object = Record<string, SettingValue>> {
   level: L;
-  /** Réglages parents du jeu, résolus (voir `GameDefinition.settings`). */
+  /** The game's parents settings, resolved (see `GameDefinition.settings`). */
   settings: S;
-  /** Moteur de souffle déjà démarré et calibré. */
+  /** Breath engine, already started and calibrated. */
   breath: BreathEngine;
-  /** Zone de jeu disponible, en px (mise à jour au redimensionnement). */
+  /** Available play area, in px (updated on resize). */
   width: number;
   height: number;
-  /** Vrai quand l'onglet est caché ou qu'un dialogue est ouvert : geler le jeu. */
+  /** True when the tab is hidden or a dialog is open: freeze the game. */
   paused: boolean;
   /**
-   * Difficulté globale (réglage parents), 0 = facile → 1 = difficile.
-   * À combiner avec les réglages du niveau : force de souffle exigée,
-   * distance, tolérance…
+   * Global difficulty (parents setting), 0 = easy → 1 = hard.
+   * To be combined with the level's settings: breath strength required,
+   * distance, tolerance…
    */
   difficulty: number;
-  /** Avancement 0..1 affiché dans le HUD (optionnel). */
+  /** Progress 0..1 shown in the HUD (optional). */
   onProgress?(progress: number): void;
-  /** À appeler une seule fois quand le niveau est terminé. */
+  /** To be called exactly once when the level is finished. */
   onComplete(result: GameResult): void;
 }
 
 export interface GameDefinition<L extends LevelBase = LevelBase, D extends SettingDefs = SettingDefs> {
-  /** Identifiant unique, kebab-case, stable (utilisé en URL et stockage). */
+  /** Unique identifier, kebab-case, stable (used in the URL and in storage). */
   id: string;
-  /** Nom affiché à l'enfant, dans chaque langue. */
+  /** Name shown to the child, in each language. */
   title: Localized;
-  /** Description pour l'espace parents, dans chaque langue. */
+  /** Description for the parents area, in each language. */
   description: Localized;
   /**
-   * Consigne montrée par la mascotte dans une bulle au lancement d'un jeu.
-   * Une phrase courte, à la deuxième personne : « Souffle fort pour… ».
+   * Instruction shown by the mascot in a speech bubble when a game starts.
+   * A short sentence, in the second person: « Souffle fort pour… ».
    */
   instruction: Localized;
   pattern: BreathPattern;
-  /** Couleur d'accent (carte, pastille sur la map). */
+  /** Accent colour (card, dot on the map). */
   accent: string;
-  /** Ordre dans la liste des jeux et l'aventure (croissant). */
+  /** Order in the games list and in the adventure (ascending). */
   order: number;
   levels: readonly L[];
   /**
-   * Réglages parents propres au jeu (optionnel). Affichés dans l'espace
-   * parents, mémorisés, et reçus résolus dans `GameProps.settings`.
+   * The game's own parents settings (optional). Displayed in the parents
+   * area, remembered, and received resolved in `GameProps.settings`.
    */
   settings?: D;
-  /** Visuel de la carte de sélection. Sans visuel : placeholder. */
+  /** Visual for the selection card. Without one: a placeholder. */
   Thumbnail?: ComponentType<{ className?: string }>;
-  /** Le jeu lui-même. Monté par GameShell pour un niveau donné. */
+  /** The game itself. Mounted by GameShell for a given level. */
   Game: ComponentType<GameProps<L, SettingValues<D>>>;
   /**
-   * Simulation sans écran du niveau par « l'enfant type » (voir
-   * `src/games/balance/`). Obligatoire en pratique : le test d'équilibrage
-   * refuse un jeu qui n'en a pas, pour garantir que tous les jeux restent
-   * au même niveau de difficulté.
+   * Headless simulation of the level by the "typical child" (see
+   * `src/games/balance/`). Mandatory in practice: the balance test rejects a
+   * game that does not have one, to guarantee that all games stay at the
+   * same level of difficulty.
    */
   simulate?: Simulate<L>;
 }
 
-/** Helper d'inférence : `export default defineGame({...})`. */
+/** Inference helper: `export default defineGame({...})`. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export function defineGame<L extends LevelBase, D extends SettingDefs = {}>(def: GameDefinition<L, D>): GameDefinition<L, D> {
   return def;
 }
 
-// Le registre mélange des jeux aux niveaux et réglages hétérogènes ; `Game`
-// étant contravariant sur ses props, on efface les paramètres de type ici.
+// The registry mixes games with heterogeneous levels and settings; since
+// `Game` is contravariant on its props, we erase the type parameters here.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyGameDefinition = GameDefinition<any, any>;

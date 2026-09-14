@@ -21,9 +21,9 @@ function makePetals(count: number, seed: number): Petal[] {
 }
 
 interface Sim {
-  /** Index du nuage en cours (0..n-1) ; n = tous chassés. */
+  /** Index of the current cloud (0..n-1); n = all chased away. */
   index: number;
-  /** Centre du nuage courant (px écran). */
+  /** Centre of the current cloud (screen px). */
   x: number;
   vx: number;
   enteredAt: number;
@@ -36,8 +36,8 @@ interface Sim {
 }
 
 /**
- * Pousse-nuages. Canvas 2D piloté par une boucle rAF, état dans une ref.
- * Le nuage courant couvre le soleil ; les souffles le poussent à droite.
+ * Pousse-nuages. Canvas 2D driven by a rAF loop, state in a ref.
+ * The current cloud covers the sun; the blows push it to the right.
  */
 export function Game({ level, breath, width, height, paused, difficulty, onProgress, onComplete }: GameProps<PousseNuagesLevel>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -83,7 +83,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     let last = performance.now();
 
     const paint = (t: number) => {
-      // Luminosité : nuages chassés + éloignement du nuage courant.
+      // Brightness: clouds chased away + how far the current cloud has moved.
       const away = s.index < n ? clamp01((s.x - sunX) / (cloudHalf + sunR)) : 1;
       const bright = clamp01((s.index + away) / n);
       drawSky(ctx, width, height, bright);
@@ -166,7 +166,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
           s.vx = Math.max(0, s.vx);
         }
         if (s.x - cloudHalf > width + 10) {
-          // Chassé : une fleur éclot, le suivant arrive.
+          // Chased away: a flower blooms, the next one arrives.
           s.clearedAt[s.index] = t;
           s.index += 1;
           s.enteredAt = -1;
