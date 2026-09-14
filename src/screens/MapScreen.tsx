@@ -103,6 +103,11 @@ interface Completed {
  * Le vol démarre avant la fin des cotillons (`PARTY_BEFORE_FLY_MS`) : un
  * enchaînement strictement séquentiel ferait près de six secondes d'attente,
  * trop long pour un enfant de 3 à 6 ans.
+ *
+ * Exception : l'aventure terminée, le ballon repart au premier jeu pour un
+ * nouveau tour — là, rien ne s'ouvre. Relancer aussitôt le premier jeu
+ * enfermerait l'enfant dans une boucle qu'il n'a pas demandée ; c'est à lui
+ * de choisir son étape (bouton « jouer » ou pastille de la carte).
  */
 type Phase = 'hold' | 'stars' | 'party' | 'fly' | 'done';
 const HOLD_MS = 500;
@@ -287,12 +292,26 @@ export function MapScreen() {
   const currentNode = path[realCurrent];
   const balloonPos = points[balloonIdx];
 
-  // Bouton « jouer » : aucun jeu ne s'ouvre jamais tout seul, c'est toujours
-  // l'enfant qui lance. Affiché dès que l'animation d'arrivée est finie, et
-  // seulement si l'étape courante est un jeu jouable — à la fin de l'aventure
-  // (étoile bonus) il n'y a rien à lancer, le ballon repart au premier jeu et
-  // l'enfant choisit son étape sur la carte.
-  const showPlay = phase === 'done' && currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
+  // Étape courante jouable : socle commun à l'enchaînement automatique et au
+  // bouton « jouer ».
+  const playable = phase === 'done' && currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
+
+  // En aventure, le jeu suivant s'ouvre tout seul une fois le ballon posé
+  // (`animating` : on arrive bien d'un niveau terminé, pas d'un simple retour
+  // sur la carte). Exception, `endReached` : l'aventure est finie et le ballon
+  // est revenu au premier jeu — on ne relance rien, l'enfant choisit.
+  const autoOpen = playable && animating && !endReached;
+
+  // Bouton « jouer » : quand rien ne s'enchaîne tout seul. C'est le cas d'un
+  // retour sur la carte hors animation, et du tour suivant une fois l'aventure
+  // terminée.
+  const showPlay = playable && !autoOpen;
+
+  useEffect(() => {
+    if (!autoOpen || currentNode?.kind !== 'game') return;
+    open(currentNode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen]);
 
   // Démarre le moteur à l'arrivée sur la map (le micro est coupé quand l'onglet
   // est caché, et aucun autre écran ne le démarre).
