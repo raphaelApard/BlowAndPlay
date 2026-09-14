@@ -393,7 +393,7 @@ export function MapScreen() {
       <TopBar name={profile.name} avatar={profile.avatar} />
       <Mascot />
       {showPlay && (
-        <PaperButton icon tone="leaf" className={styles.nodePlay} onClick={() => open(currentNode)} aria-label={t('map.start')}>
+        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(currentNode)} aria-label={t('map.start')}>
           <PlayIcon size={54} />
         </PaperButton>
       )}
