@@ -730,6 +730,47 @@
   height: 0;
   opacity: 0.6;
 }
+/*
+ * Bulle d'explication : l'adulte a relâché le bouton avant la fin de l'appui
+ * long. Posée au-dessus du bouton, elle ne prend pas les événements de
+ * pointeur — l'appui suivant doit atteindre le bouton, pas la bulle.
+ */
+.parentsTip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.25;
+  box-shadow: 4px 4px 0 var(--ink-a25);
+  pointer-events: none;
+  animation: parentsTipIn 0.22s ease-out both;
+}
+/* Petite pointe vers le bouton. */
+.parentsTip::after {
+  content: '';
+  position: absolute;
+  left: 22px;
+  top: 100%;
+  border: 7px solid transparent;
+  border-top-color: var(--ink);
+}
+@keyframes parentsTipIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .parentsPressing .parentsFill {
   height: 100%;
   transition: height 700ms linear;

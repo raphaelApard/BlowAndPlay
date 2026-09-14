@@ -1,4 +1,4 @@
-import { useRef, useState, useSyncExternalStore, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { play } from '../../audio/sfx';
 import { useBreath, useBreathState } from '../../breath/BreathProvider';
@@ -418,22 +418,59 @@ function BreathMeter({ active }: { active: boolean }) {
 
 // ─── Accès parents : appui long 700 ms ─────────────────────────────────
 
+/** Appui long ouvrant l'espace parents (ms). */
+const PARENTS_PRESS_MS = 700;
+/** Durée d'affichage de la bulle quand l'appui a été trop court (ms). */
+const PARENTS_TIP_MS = 2600;
+
 export function ParentsButton({ label, className }: { label?: string; className?: string }) {
   const navigate = useNavigate();
   const { t } = useT();
   const timer = useRef(0);
+  const tipTimer = useRef(0);
   const [pressing, setPressing] = useState(false);
+  // Appui en cours, suivi en ref et non en état : sur un appui bref, `pointerdown`
+  // et `pointerup` tombent dans le même lot de rendu et l'état serait encore
+  // `false` au relâchement — la bulle ne s'afficherait jamais sur les appuis
+  // les plus courts, ceux-là mêmes qu'elle doit expliquer.
+  const pressingRef = useRef(false);
+  // Bulle affichée quand l'adulte a relâché avant la fin de l'appui long :
+  // sans elle, un appui trop court ne produit rien et ne s'explique pas.
+  const [tip, setTip] = useState(false);
+
+  // Les minuteurs ne doivent pas survivre au démontage de l'écran.
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+      window.clearTimeout(tipTimer.current);
+    },
+    [],
+  );
 
   const startPress = () => {
+    setTip(false);
+    window.clearTimeout(tipTimer.current);
+    pressingRef.current = true;
     setPressing(true);
     timer.current = window.setTimeout(() => {
       setPressing(false);
       navigate('/parents');
-    }, 700);
+    }, PARENTS_PRESS_MS);
   };
-  const cancel = () => {
+
+  /**
+   * Fin de l'appui. `earlyRelease` distingue un vrai relâchement (doigt levé
+   * sur le bouton, donc appui trop court : on explique) d'un pointeur qui
+   * quitte simplement le bouton — là, rien à expliquer.
+   */
+  const endPress = (earlyRelease: boolean) => {
+    const wasPressing = pressingRef.current;
+    pressingRef.current = false;
     window.clearTimeout(timer.current);
     setPressing(false);
+    if (!earlyRelease || !wasPressing) return;
+    setTip(true);
+    tipTimer.current = window.setTimeout(() => setTip(false), PARENTS_TIP_MS);
   };
 
   return (
@@ -442,9 +479,9 @@ export function ParentsButton({ label, className }: { label?: string; className?
       silent
       className={cx(styles.parents, pressing && styles.parentsPressing, className)}
       onPointerDown={startPress}
-      onPointerUp={cancel}
-      onPointerLeave={cancel}
-      onPointerCancel={cancel}
+      onPointerUp={() => endPress(true)}
+      onPointerLeave={() => endPress(false)}
+      onPointerCancel={() => endPress(false)}
       onContextMenu={(e) => e.preventDefault()}
       aria-label={t('common.parentsLongPress')}
       data-no-blow
@@ -453,6 +490,11 @@ export function ParentsButton({ label, className }: { label?: string; className?
         <span className={styles.parentsFill} />
       </span>
       {label ?? t('common.parents')}
+      {tip && (
+        <span className={styles.parentsTip} role="status" aria-live="polite">
+          {t('common.parentsHint')}
+        </span>
+      )}
     </PaperButton>
   );
 }
