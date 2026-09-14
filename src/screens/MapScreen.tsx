@@ -289,12 +289,16 @@ export function MapScreen() {
     if (levelId) navigate(`/play/${node.gameId}/${levelId}`);
   };
 
-  const currentNode = path[realCurrent];
   const balloonPos = points[balloonIdx];
 
-  // Étape courante jouable : socle commun à l'enchaînement automatique et au
-  // bouton « jouer ».
-  const playable = currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
+  // Étape que le bouton « jouer » lance : l'étape courante, sauf une fois
+  // l'aventure terminée — l'étape courante est alors l'étoile bonus, qui ne se
+  // joue pas. Le bouton reprend donc l'étape sur laquelle le ballon s'est posé
+  // (le premier jeu), pour rester utilisable au tour suivant.
+  const playNode = path[restIdx];
+
+  // Étape jouable : socle commun à l'enchaînement automatique et au bouton.
+  const playable = playNode?.kind === 'game' && isNodeOpen(playNode, progress, order);
 
   // En aventure, le jeu suivant s'ouvre tout seul une fois le ballon posé
   // (`animating` : on arrive bien d'un niveau terminé, pas d'un simple retour
@@ -309,8 +313,8 @@ export function MapScreen() {
   const showPlay = playable;
 
   useEffect(() => {
-    if (!autoOpen || currentNode?.kind !== 'game') return;
-    open(currentNode);
+    if (!autoOpen || playNode?.kind !== 'game') return;
+    open(playNode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpen]);
 
@@ -417,7 +421,7 @@ export function MapScreen() {
           l'onglet « Jeux », où la mascotte doit rester au bord). */}
       <Mascot className={styles.mapMascot} />
       {showPlay && (
-        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(currentNode)} aria-label={t('map.start')}>
+        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(playNode)} aria-label={t('map.start')}>
           <PlayIcon size={54} />
         </PaperButton>
       )}
