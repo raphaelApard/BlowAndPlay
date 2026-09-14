@@ -391,7 +391,11 @@ export function MapScreen() {
       )}
 
       <TopBar name={profile.name} avatar={profile.avatar} />
-      <Mascot />
+      {/* Mascotte et bouton « jouer » sont permutés sur l'aventure : le bouton
+          prend le bord de l'écran, la mascotte se décale vers l'intérieur.
+          Le décalage est posé ici, et non sur `.mascot` (classe partagée avec
+          l'onglet « Jeux », où la mascotte doit rester au bord). */}
+      <Mascot className={styles.mapMascot} />
       {showPlay && (
         <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(currentNode)} aria-label={t('map.start')}>
           <PlayIcon size={54} />

@@ -262,11 +262,20 @@ export function GameThumbnail({
 }
 
 /** Mascotte du profil courant (ou celle par défaut), posée en bas à droite. */
-export function Mascot({ style, mode = 'idle' }: { style?: CSSProperties; mode?: MascotMode }) {
+export function Mascot({
+  style,
+  className,
+  mode = 'idle',
+}: {
+  style?: CSSProperties;
+  /** Classe de l'écran, pour ajuster la place de la mascotte (voir `.mapMascot`). */
+  className?: string;
+  mode?: MascotMode;
+}) {
   const profile = selectCurrentProfile(useAppState());
   const portrait = useMediaQuery('(orientation: portrait)');
   return (
-    <div className={styles.mascot} style={style} aria-hidden>
+    <div className={cx(styles.mascot, className)} style={style} aria-hidden>
       <MascotFigure id={profile?.mascot} size={portrait ? 96 : 140} mode={mode} />
     </div>
   );

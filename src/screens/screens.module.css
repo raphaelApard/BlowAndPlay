@@ -820,8 +820,11 @@
    défilée. */
 .nodePlay {
   position: absolute;
-  right: 190px;
-  bottom: 52px;
+  /* Permuté avec la mascotte : le bouton est au bord, la mascotte en retrait
+     (voir `.mapMascot`). Le bouton étant l'élément agissant, il prend le coin
+     le plus accessible au pouce. */
+  right: 40px;
+  bottom: 44px;
   width: 104px;
   height: 104px;
   /* Carré arrondi, comme les pastilles de la carte et les boutons du kit
@@ -830,6 +833,13 @@
   z-index: 4;
   animation: nodePlayIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, floaty 3s ease-in-out 0.4s infinite;
 }
+/* Mascotte de l'aventure : décalée vers l'intérieur pour laisser le bord au
+   bouton « jouer ». Classe propre à la carte — sur l'onglet « Jeux », la
+   mascotte garde sa place au bord de l'écran. */
+.mapMascot {
+  right: 186px;
+}
+
 @keyframes nodePlayIn {
   from {
     opacity: 0;
@@ -846,14 +856,17 @@
     margin: -140px 0 0 -60px;
     width: 120px;
   }
-  /* En portrait la mascotte est plus petite et remonte au-dessus de la bande
-     de souffle : le bouton la suit, toujours à sa gauche. */
+  /* En portrait tout remonte au-dessus de la bande de souffle ; le bouton
+     reste au bord, la mascotte en retrait. */
   .nodePlay {
-    right: 130px;
-    bottom: calc(146px + var(--safe-bottom));
+    right: 20px;
+    bottom: calc(140px + var(--safe-bottom));
     width: 88px;
     height: 88px;
     border-radius: 24px;
+  }
+  .mapMascot {
+    right: 126px;
   }
 }
 
