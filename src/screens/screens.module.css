@@ -813,10 +813,39 @@
   }
 }
 
+/* Bouton « jouer » posé sous l'étape courante, à l'arrivée sur la carte quand
+   rien ne s'enchaîne tout seul : l'enfant décide de commencer. Il est en
+   dehors de la pastille (qui est déjà cliquable) pour rester visible et gros
+   au doigt, et il ne tourne pas avec le `--tilt` des pastilles. */
+.nodePlay {
+  position: absolute;
+  margin: 62px 0 0 -44px;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  z-index: 3;
+  animation: nodePlayIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both, floaty 3s ease-in-out 0.4s infinite;
+}
+@keyframes nodePlayIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (orientation: portrait) {
   .nodeBalloon {
     margin: -140px 0 0 -60px;
     width: 120px;
+  }
+  .nodePlay {
+    margin: 58px 0 0 -38px;
+    width: 76px;
+    height: 76px;
   }
 }
 

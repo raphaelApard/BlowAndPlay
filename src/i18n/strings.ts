@@ -63,6 +63,7 @@ const fr = {
   'map.game': '{title}',
   'map.gameLocked': '{title} (verrouillé)',
   'map.gameStars': '{n} niveaux réussis sur {max}',
+  'map.start': 'Commencer l’aventure',
 
   // ── Jeux
   'games.artwork': 'visuel du jeu',
@@ -202,6 +203,7 @@ const en: Record<StringKey, string> = {
   'map.game': '{title}',
   'map.gameLocked': '{title} (locked)',
   'map.gameStars': '{n} levels done out of {max}',
+  'map.start': 'Start the adventure',
 
   'games.artwork': 'game artwork',
   'games.playGame': 'Play {title}',

@@ -15,7 +15,7 @@ import {
 import { getGame } from '../games/registry';
 import type { Stars } from '../games/types';
 import { useBreath } from '../breath/BreathProvider';
-import { Balloon, GameThumbnail, Mascot, ParentsButton, Sky, TopBar, cx } from '../components/ui';
+import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, Sky, TopBar, cx } from '../components/ui';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
 import { selectAdventureGames, selectProgress, useAppState } from '../store/store';
@@ -94,14 +94,24 @@ interface Completed {
 }
 
 /**
- * Animation d'arrivée après un niveau d'aventure réussi :
- * l'étape terminée reste « courante », ses étoiles apparaissent, puis le
- * ballon vole le long du chemin jusqu'à l'étape suivante, qui s'active.
+ * Animation d'arrivée après un niveau d'aventure réussi, dans cet ordre :
+ *  1. les étoiles gagnées apparaissent et tintent ;
+ *  2. les cotillons tombent (`party`) ;
+ *  3. le ballon s'envole vers l'étape suivante, pendant que les cotillons
+ *     finissent de tomber ;
+ *  4. l'étape suivante s'ouvre toute seule.
+ * Le vol démarre avant la fin des cotillons (`PARTY_BEFORE_FLY_MS`) : un
+ * enchaînement strictement séquentiel ferait près de six secondes d'attente,
+ * trop long pour un enfant de 3 à 6 ans.
  */
-type Phase = 'hold' | 'stars' | 'fly' | 'done';
+type Phase = 'hold' | 'stars' | 'party' | 'fly' | 'done';
 const HOLD_MS = 500;
 const STARS_MS = 900;
 const FLY_MS = 1500;
+/** Temps de cotillons seuls avant que le ballon ne parte. */
+const PARTY_BEFORE_FLY_MS = 1200;
+/** Petit temps de pose une fois le ballon arrivé, avant d'ouvrir le jeu. */
+const OPEN_AFTER_LAND_MS = 400;
 
 /** Durée des confettis de fin (accordée à l'animation `fall`). */
 const CONFETTI_MS = 3200;
@@ -158,7 +168,7 @@ export function MapScreen() {
   const { status: breathStatus, start } = useBreath();
 
   // Ce que l'écran affiche : pendant l'animation, l'étape terminée reste courante.
-  const shownCurrent = phase === 'hold' || phase === 'stars' ? fromIdx : phase === 'fly' ? -1 : realCurrent;
+  const shownCurrent = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : phase === 'fly' ? -1 : realCurrent;
   const statusOf = (i: number): NodeStatus => {
     const node = path[i];
     if (!node) return 'locked';
@@ -176,7 +186,7 @@ export function MapScreen() {
   const endReached = path[realCurrent]?.kind === 'bonus';
   const [party, setParty] = useState(false);
   useEffect(() => {
-    if (phase !== 'done' || !animating) return;
+    if (phase !== 'party') return;
     setParty(true);
     if (endReached) play('fanfare');
     const t = window.setTimeout(() => setParty(false), CONFETTI_MS);
@@ -201,7 +211,7 @@ export function MapScreen() {
   const { points, stageW, stageH } = layoutNodes(path.length, viewport.width, viewport.height, viewport.portrait);
 
   // Centre la vue sur le nœud courant (en douceur quand le ballon vole).
-  const focusIdx = phase === 'hold' || phase === 'stars' ? fromIdx : realCurrent;
+  const focusIdx = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : realCurrent;
   useLayoutEffect(() => {
     const el = scrollRef.current;
     const p = points[focusIdx];
@@ -223,11 +233,16 @@ export function MapScreen() {
     if (phase === 'stars') {
       const n = completed?.stars ?? 0;
       const dings = Array.from({ length: n }, (_, i) => window.setTimeout(() => play('star'), i * 220));
-      const t = window.setTimeout(() => setPhase('fly'), STARS_MS);
+      const t = window.setTimeout(() => setPhase('party'), STARS_MS);
       return () => {
         dings.forEach((id) => window.clearTimeout(id));
         window.clearTimeout(t);
       };
+    }
+    if (phase === 'party') {
+      // Les cotillons tombent ; le ballon part avant qu'ils aient fini.
+      const t = window.setTimeout(() => setPhase('fly'), PARTY_BEFORE_FLY_MS);
+      return () => window.clearTimeout(t);
     }
     if (phase === 'fly') {
       const el = balloonRef.current;
@@ -267,6 +282,13 @@ export function MapScreen() {
   const currentNode = path[realCurrent];
   const balloonPos = points[balloonIdx];
 
+  // Bouton « jouer » : seulement quand rien ne s'enchaîne tout seul, c'est-à-dire
+  // à l'arrivée sur la carte hors animation de fin de niveau (nouvelle séance,
+  // retour par les onglets). Après un niveau, la séquence cotillons -> ballon ->
+  // ouverture s'en charge et le bouton n'a pas lieu d'être.
+  const showPlay =
+    !animating && phase === 'done' && currentNode?.kind === 'game' && isNodeOpen(currentNode, progress, order);
+
   // Démarre le moteur à l'arrivée sur la map (le micro est coupé quand l'onglet
   // est caché, et aucun autre écran ne le démarre).
   useEffect(() => {
@@ -280,7 +302,7 @@ export function MapScreen() {
   useEffect(() => {
     if (phase !== 'done' || !animating) return;
     if (currentNode?.kind !== 'game' || !isNodeOpen(currentNode, progress, order)) return;
-    const t = window.setTimeout(() => open(currentNode), CONFETTI_MS);
+    const t = window.setTimeout(() => open(currentNode), OPEN_AFTER_LAND_MS);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, animating]);
@@ -351,6 +373,19 @@ export function MapScreen() {
               <div ref={balloonRef} className={styles.balloonAnchor} style={{ left: balloonPos.x, top: balloonPos.y }}>
                 <Balloon className={cx(styles.nodeBalloon, phase === 'fly' && styles.nodeBalloonFlying)} />
               </div>
+            )}
+
+            {showPlay && points[realCurrent] && (
+              <PaperButton
+                icon
+                tone="leaf"
+                className={styles.nodePlay}
+                style={{ left: points[realCurrent].x, top: points[realCurrent].y }}
+                onClick={() => open(currentNode)}
+                aria-label={t('map.start')}
+              >
+                <PlayIcon size={54} />
+              </PaperButton>
             )}
           </div>
         )}
