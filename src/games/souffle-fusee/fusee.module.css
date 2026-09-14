@@ -442,10 +442,15 @@
 }
 
 /* ─── Phase label ─────────────────────────────────────────────────── */
+/* Altitude reached, at the top centre: the corners belong to the shell (quit
+   on the left, parents/dev on the right), and the middle is the one place a
+   badge can sit at any width without colliding with them. */
 .phase {
   position: absolute;
-  right: var(--edge);
+  left: 50%;
+  transform: translateX(-50%);
   top: calc(var(--edge) + var(--safe-top));
+  white-space: nowrap;
   background: rgba(255, 255, 255, 0.9);
   color: var(--ink2);
   border-radius: 999px;
