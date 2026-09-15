@@ -32,11 +32,13 @@ interface Props {
 export function GameShell({ game, level, profileId }: Props) {
   const navigate = useNavigate();
   // `?mode=free`: launched from the Games tab (back to the games, which
-  // celebrates there). Otherwise: adventure (back to the map, which animates
-  // the move to the next step).
+  // celebrates there). `?mode=pick`: a step the child tapped on the map (back
+  // to the map, which moves on to the step right after it). Otherwise:
+  // adventure (back to the map, which animates the move to the next step).
   const [search] = useSearchParams();
   const free = search.get('mode') === 'free';
-  const playPath = `/play/${game.id}/${level.id}${free ? '?mode=free' : ''}`;
+  const picked = search.get('mode') === 'pick';
+  const playPath = `/play/${game.id}/${level.id}${free ? '?mode=free' : picked ? '?mode=pick' : ''}`;
   const backPath = free ? '/games' : '/map';
   const { engine, status, start } = useBreath();
   const { t, tr } = useT();
@@ -161,14 +163,14 @@ export function GameShell({ game, level, profileId }: Props) {
       const { intensitySum, samples, ...rest } = statsRef.current;
       const stats: BreathSessionStats = { ...rest, meanIntensity: samples ? intensitySum / samples : 0 };
       actions.recordResult(profileId, game.id, level.id, result, stats);
-      const completed = { gameId: game.id, levelId: level.id, stars: result.stars };
+      const completed = { gameId: game.id, levelId: level.id, stars: result.stars, picked };
       // Both modes go back where the child came from, carrying what they have
       // just finished: the games list celebrates on the spot, the map animates
       // the move to the next step.
       if (free) navigate('/games', { replace: true, state: { completed } });
       else navigate('/map', { replace: true, state: { completed } });
     },
-    [profileId, game.id, level.id, navigate, free],
+    [profileId, game.id, level.id, navigate, free, picked],
   );
 
   const startSkip = () => {

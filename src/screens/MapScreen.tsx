@@ -103,6 +103,8 @@ interface Completed {
   gameId: string;
   levelId: string;
   stars: Stars;
+  /** The child picked this step on the map rather than following the adventure. */
+  picked?: boolean;
 }
 
 /**
@@ -115,6 +117,9 @@ interface Completed {
  * The flight starts before the confetti ends (`PARTY_BEFORE_FLY_MS`): a
  * strictly sequential chain would mean nearly six seconds of waiting, too
  * long for a child aged 3 to 6.
+ *
+ * The next step is the current one in the unlock order — or, when the child
+ * picked the finished step on the map, the step right after it.
  *
  * Exceptions, at the two kinds of boundary — nothing opens by itself then:
  *  - end of a round (every game passed at this level): the balloon comes back
@@ -170,13 +175,24 @@ export function MapScreen() {
   const path = useMemo(() => buildAdventurePath(games), [games]);
   const order = useMemo(() => buildUnlockOrder(games), [games]);
   const realCurrent = currentNodeIndex(progress, path, order);
+  // True when every level is passed: the current step is the bonus star.
+  const endReached = path[realCurrent]?.kind === 'bonus';
 
   // The level that was just finished (navigation state set by GameShell).
   // The step is the game's; the next step is rarely adjacent, because the
   // unlock order stays interleaved across the games.
   const completed = (location.state as { completed?: Completed } | null)?.completed;
   const fromIdx = completed ? nodeIndexOf(completed.gameId, path) : -1;
-  const animating = fromIdx >= 0 && fromIdx !== realCurrent;
+
+  // A step the child picked on the map: the adventure carries on from there,
+  // to the step right after it, rather than going back to the current step.
+  // Only while that step is a playable game and the adventure is not over —
+  // otherwise (last game of the map, final star) the usual course applies.
+  const afterPicked = path[fromIdx + 1];
+  const pickedNext =
+    !!completed?.picked && !endReached && fromIdx >= 0 && afterPicked?.kind === 'game' && isNodeOpen(afterPicked, progress, order);
+  const targetIdx = pickedNext ? fromIdx + 1 : realCurrent;
+  const animating = fromIdx >= 0 && fromIdx !== targetIdx;
   const [phase, setPhase] = useState<Phase>(animating ? 'hold' : 'done');
   const balloonRef = useRef<HTMLDivElement>(null);
 
@@ -188,7 +204,7 @@ export function MapScreen() {
   const { status: breathStatus, start } = useBreath();
 
   // What the screen shows: during the animation, the finished step stays current.
-  const shownCurrent = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : phase === 'fly' ? -1 : realCurrent;
+  const shownCurrent = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : phase === 'fly' ? -1 : targetIdx;
   const statusOf = (i: number): NodeStatus => {
     const node = path[i];
     if (!node) return 'locked';
@@ -198,8 +214,6 @@ export function MapScreen() {
     if (isNodeDone(node, progress)) return 'done';
     return 'locked';
   };
-  // True when every level is passed: the current step is the bonus star.
-  const endReached = path[realCurrent]?.kind === 'bonus';
 
   // End of a round: the child has just finished the last game of the map and
   // the adventure goes back to the first game for the next level (the unlock
@@ -207,12 +221,13 @@ export function MapScreen() {
   // balloon therefore comes back to the start of the map — but nothing opens
   // by itself, as at the very end: the child chooses their step.
   const firstGameIdx = path.findIndex((n) => n.kind === 'game');
-  const roundEnd = !endReached && animating && realCurrent === firstGameIdx && fromIdx > firstGameIdx;
+  const roundEnd = !pickedNext && !endReached && animating && realCurrent === firstGameIdx && fromIdx > firstGameIdx;
 
   // Where the balloon comes to rest. At the very end of the adventure it stays
-  // on the yellow star (the step it has just reached); otherwise on the
-  // current step, which at the end of a round is the first game again.
-  const restIdx = realCurrent;
+  // on the yellow star (the step it has just reached); after a picked step, on
+  // the step right after it; otherwise on the current step, which at the end
+  // of a round is the first game again.
+  const restIdx = targetIdx;
   const balloonIdx = phase === 'done' ? restIdx : fromIdx;
 
   // Arrival celebration: every time the balloon has just landed on a step
@@ -245,7 +260,7 @@ export function MapScreen() {
   const { points, stageW, stageH } = layoutNodes(path.length, viewport.width, viewport.height, viewport.portrait);
 
   // Centres the view on the current node (smoothly while the balloon flies).
-  const focusIdx = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : realCurrent;
+  const focusIdx = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : targetIdx;
   useLayoutEffect(() => {
     const el = scrollRef.current;
     const p = points[focusIdx];
@@ -315,20 +330,23 @@ export function MapScreen() {
   }, [phase]);
 
   // A step launches its first level not yet passed (because of the
-  // interleaved order, that is not necessarily level 1).
-  const open = (node: AdventureNode) => {
+  // interleaved order, that is not necessarily level 1). `picked`: the child
+  // chose it themselves, so its end leads to the step right after it.
+  const open = (node: AdventureNode, picked = false) => {
     if (node.kind !== 'game') return;
     const levelId = nextLevelOf(node, progress);
-    if (levelId) navigate(`/play/${node.gameId}/${levelId}`);
+    if (levelId) navigate(`/play/${node.gameId}/${levelId}${picked ? '?mode=pick' : ''}`);
   };
 
   const balloonPos = points[balloonIdx];
 
-  // The step the play button launches: the current step, except once the
-  // adventure is over — the current step is then the bonus star, which cannot
-  // be played. The button then falls back to the first game, so as to stay
-  // usable for another round (the balloon, meanwhile, stays on the star).
-  const playNode = endReached && firstGameIdx >= 0 ? path[firstGameIdx] : path[realCurrent];
+  // The step the play button launches: the step after a picked one, or the
+  // current step, except once the adventure is over — the current step is
+  // then the bonus star, which cannot be played. The button then falls back to
+  // the first game, so as to stay usable for another round (the balloon,
+  // meanwhile, stays on the star). A chain started by a pick stays picked, so
+  // the child keeps walking the map from where they chose.
+  const playNode = pickedNext ? path[targetIdx] : endReached && firstGameIdx >= 0 ? path[firstGameIdx] : path[realCurrent];
 
   // Playable step: common ground for the automatic chaining and the button.
   const playable = playNode?.kind === 'game' && isNodeOpen(playNode, progress, order);
@@ -350,7 +368,7 @@ export function MapScreen() {
 
   useEffect(() => {
     if (!autoOpen || playNode?.kind !== 'game') return;
-    open(playNode);
+    open(playNode, pickedNext);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpen]);
 
@@ -413,7 +431,7 @@ export function MapScreen() {
                     // Playable as soon as one of its levels is unlocked, even if
                     // the step is neither current nor done (interleaved order).
                     disabled={!isNodeOpen(node, progress, order)}
-                    onClick={() => open(node)}
+                    onClick={() => open(node, true)}
                     aria-label={t(isNodeOpen(node, progress, order) ? 'map.game' : 'map.gameLocked', { title })}
                   >
                     <GameThumbnail game={game} className={styles.nodeThumb} />
@@ -457,7 +475,7 @@ export function MapScreen() {
           the Games tab, where the mascot must stay at the edge). */}
       <Mascot className={styles.mapMascot} />
       {showPlay && (
-        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(playNode)} aria-label={t('map.start')}>
+        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(playNode, pickedNext)} aria-label={t('map.start')}>
           <PlayIcon size={54} />
         </PaperButton>
       )}
