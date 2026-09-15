@@ -4,8 +4,8 @@
  * shared between the game and the thumbnail.
  */
 
-import { seeded, mixHex } from '../_shared/math';
-import { cut } from '../_shared/canvas';
+import { clamp01, seeded, mixHex } from '../_shared/math';
+import { INK, cut } from '../_shared/canvas';
 
 // Re-exported so that the game, its simulation and its thumbnail keep a
 // single entry point: `./draw`.
@@ -238,39 +238,125 @@ export function drawHills(ctx: CanvasRenderingContext2D, w: number, h: number, u
   void unit;
 }
 
-/** Paper flower: stem, petals, heart. `bloom` (0..1) = blossoming. */
+/** Stem and leaf greens: darker than the near hill, so the flower stands out. */
+const STEM = '#3f9f57';
+const LEAF = '#2e8b4a';
+
+/** Ease with a small overshoot: the flower head pops open. */
+function backOut(u: number) {
+  const c = 1.9;
+  const v = u - 1;
+  return 1 + (c + 1) * v * v * v + c * v * v;
+}
+
+/** A ring of `count` almond petals around the centre, rotated by `turn`. */
+function petalRing(ctx: CanvasRenderingContext2D, count: number, dist: number, rx: number, ry: number, turn: number) {
+  for (let i = 0; i < count; i++) {
+    const a = turn + (i / count) * Math.PI * 2;
+    const cx = Math.cos(a) * dist;
+    const cy = Math.sin(a) * dist;
+    // Separate sub-path per petal, so no connecting line fills a wedge.
+    ctx.moveTo(cx + Math.cos(a) * rx, cy + Math.sin(a) * rx);
+    ctx.ellipse(cx, cy, rx, ry, a, 0, Math.PI * 2);
+  }
+}
+
+/**
+ * Paper flower: curved stem with two leaves, two rings of petals and a
+ * smiling heart. `s` = head radius (px). `bloom` (0..1): the stem grows
+ * first, then the head pops open while its petals unfold.
+ */
 export function drawFlower(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, color: string, bloom: number, time: number) {
   if (bloom <= 0) return;
+  const grow = 1 - Math.pow(1 - clamp01(bloom / 0.45), 3);
+  const open = clamp01((bloom - 0.35) / 0.65);
+  const stemH = s * 2.1 * grow;
+  const bend = s * 0.18;
+  const shadow = Math.max(2, s * 0.08);
+
   ctx.save();
   ctx.translate(x, y);
-  const sway = Math.sin(time / 700 + x) * 0.05;
-  ctx.rotate(sway);
-  ctx.strokeStyle = '#3f9f57';
-  ctx.lineWidth = Math.max(2, s * 0.12);
+  ctx.rotate(Math.sin(time / 700 + x * 0.013) * 0.06);
+
+  // Leaves, fastened to the stem (point of the stem's curve at `at`).
+  const leaf = (side: 1 | -1, at: number, size: number) => {
+    const len = s * size * grow;
+    const lx = 2 * (1 - at) * at * bend;
+    const ly = -stemH * at;
+    cut(
+      ctx,
+      () => {
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(side === 1 ? -0.5 : Math.PI + 0.5);
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(len * 0.5, -len * 0.42, len, 0);
+        ctx.quadraticCurveTo(len * 0.5, len * 0.42, 0, 0);
+        ctx.restore();
+      },
+      LEAF,
+      shadow,
+    );
+  };
+  leaf(-1, 0.28, 0.9);
+  leaf(1, 0.5, 0.75);
+
+  // Stem, with its paper shadow.
   ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, -s * 1.4 * bloom);
-  ctx.stroke();
-  ctx.translate(0, -s * 1.4 * bloom);
-  const pop = bloom < 1 ? 1.2 * bloom : 1;
+  ctx.lineWidth = Math.max(2, s * 0.14);
+  const stem = () => {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(bend * 2, -stemH * 0.5, 0, -stemH);
+    ctx.stroke();
+  };
+  ctx.save();
+  ctx.translate(shadow, shadow);
+  ctx.strokeStyle = INK;
+  stem();
+  ctx.restore();
+  ctx.strokeStyle = STEM;
+  stem();
+
+  ctx.translate(0, -stemH);
+  if (open <= 0) {
+    // Green bud while the stem grows.
+    cut(ctx, () => ctx.arc(0, 0, s * 0.26 * grow, 0, Math.PI * 2), STEM, shadow * 0.6);
+    ctx.restore();
+    return;
+  }
+  ctx.rotate(Math.sin(time / 900 + x) * 0.08);
+  const pop = backOut(open);
   ctx.scale(pop, pop);
-  cut(
-    ctx,
-    () => {
-      for (let i = 0; i < 5; i++) {
-        const a = (i / 5) * Math.PI * 2;
-        ctx.moveTo(Math.cos(a) * s * 0.45, Math.sin(a) * s * 0.45);
-        ctx.arc(Math.cos(a) * s * 0.45, Math.sin(a) * s * 0.45, s * 0.32, 0, Math.PI * 2);
-      }
-    },
-    color,
-    3,
-  );
-  ctx.fillStyle = SUN;
+  const twist = (1 - open) * 1.2;
+
+  cut(ctx, () => petalRing(ctx, 8, s * 0.58, s * 0.42, s * 0.25, twist), color, shadow);
+  ctx.fillStyle = mixHex(color, '#ffffff', 0.4);
   ctx.beginPath();
-  ctx.arc(0, 0, s * 0.28, 0, Math.PI * 2);
+  petalRing(ctx, 8, s * 0.36, s * 0.26, s * 0.15, twist + Math.PI / 8);
   ctx.fill();
+
+  // Heart with a little face, like the sun's.
+  cut(ctx, () => ctx.arc(0, 0, s * 0.3, 0, Math.PI * 2), SUN, shadow * 0.6);
+  if (s >= 14) {
+    ctx.fillStyle = INK_SOLID;
+    for (const ex of [-0.11, 0.11]) {
+      ctx.beginPath();
+      ctx.arc(ex * s, -s * 0.05, s * 0.038, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = INK_SOLID;
+    ctx.lineWidth = Math.max(1.5, s * 0.035);
+    ctx.beginPath();
+    ctx.arc(0, s * 0.03, s * 0.1, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 107, 107, 0.55)';
+    for (const cx of [-0.19, 0.19]) {
+      ctx.beginPath();
+      ctx.arc(cx * s, s * 0.07, s * 0.045, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
   ctx.restore();
 }
 

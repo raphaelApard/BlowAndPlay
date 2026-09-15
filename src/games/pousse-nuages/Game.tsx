@@ -46,11 +46,19 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
   const scene = useMemo(() => {
     const rand = seeded(300 + level.clouds);
     const shapes: CloudShape[] = Array.from({ length: level.clouds }, (_, i) => makeCloudShape(50 + i * 7 + level.clouds, i));
-    const flowers = Array.from({ length: level.clouds }, (_, i) => ({
-      x: 0.06 + ((i * 0.61) % 1) * 0.88,
-      y: 0.83 + rand() * 0.05,
-      s: 1 + rand() * 0.5,
-      color: PETALS[i % PETALS.length],
+    // One flower per cloud, on evenly spaced slots along the hills (so the big
+    // heads never overlap), blooming in a shuffled order. Colour by slot:
+    // two neighbours are never the same.
+    const slots = Array.from({ length: level.clouds }, (_, i) => i);
+    for (let i = slots.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [slots[i], slots[j]] = [slots[j], slots[i]];
+    }
+    const flowers = slots.map((slot) => ({
+      x: 0.05 + ((slot + 0.5) / level.clouds) * 0.9,
+      y: 0.86 + (slot % 2) * 0.05,
+      s: 0.9 + rand() * 0.2,
+      color: PETALS[slot % PETALS.length],
     }));
     return { shapes, flowers, petals: makePetals(28, 4) };
   }, [level.clouds]);
@@ -93,8 +101,8 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       drawHills(ctx, width, height, unit);
       scene.flowers.forEach((f, i) => {
         const at = s.clearedAt[i];
-        const bloom = at === undefined ? 0 : clamp01((t - at) / 600);
-        drawFlower(ctx, f.x * width, f.y * height, 14 * unit * f.s, f.color, bloom, t);
+        const bloom = at === undefined ? 0 : clamp01((t - at) / 900);
+        drawFlower(ctx, f.x * width, f.y * height, 44 * unit * f.s, f.color, bloom, t);
       });
 
       if (s.index < n) {
