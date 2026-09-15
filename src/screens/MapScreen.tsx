@@ -7,8 +7,8 @@ import {
   isNodeDone,
   isNodeOpen,
   nextLevelOf,
-  nodeIndexOf,
   nodeLevelsDone,
+  planArrival,
   type AdventureNode,
   type NodeStatus,
 } from '../adventure/path';
@@ -178,21 +178,17 @@ export function MapScreen() {
   // True when every level is passed: the current step is the bonus star.
   const endReached = path[realCurrent]?.kind === 'bonus';
 
-  // The level that was just finished (navigation state set by GameShell).
-  // The step is the game's; the next step is rarely adjacent, because the
-  // unlock order stays interleaved across the games.
+  // The level that was just finished (navigation state set by GameShell) and
+  // where the adventure goes from there (`planArrival`: the current step, or
+  // the step after one the child picked). The next step is rarely adjacent,
+  // because the unlock order stays interleaved across the games.
+  // The plan is frozen on arrival: the navigation state is cleared once the
+  // balloon has landed, and the balloon must not move again then.
   const completed = (location.state as { completed?: Completed } | null)?.completed;
-  const fromIdx = completed ? nodeIndexOf(completed.gameId, path) : -1;
-
-  // A step the child picked on the map: the adventure carries on from there,
-  // to the step right after it, rather than going back to the current step.
-  // Only while that step is a playable game and the adventure is not over —
-  // otherwise (last game of the map, final star) the usual course applies.
-  const afterPicked = path[fromIdx + 1];
-  const pickedNext =
-    !!completed?.picked && !endReached && fromIdx >= 0 && afterPicked?.kind === 'game' && isNodeOpen(afterPicked, progress, order);
-  const targetIdx = pickedNext ? fromIdx + 1 : realCurrent;
-  const animating = fromIdx >= 0 && fromIdx !== targetIdx;
+  const [arrival] = useState(() => (completed ? planArrival(completed, progress, path, order) : null));
+  const fromIdx = arrival?.from ?? -1;
+  const targetIdx = arrival?.target ?? realCurrent;
+  const animating = !!arrival && arrival.from !== arrival.target;
   const [phase, setPhase] = useState<Phase>(animating ? 'hold' : 'done');
   const balloonRef = useRef<HTMLDivElement>(null);
 
@@ -215,18 +211,12 @@ export function MapScreen() {
     return 'locked';
   };
 
-  // End of a round: the child has just finished the last game of the map and
-  // the adventure goes back to the first game for the next level (the unlock
-  // order is interleaved, so `realCurrent` is already that first game). The
-  // balloon therefore comes back to the start of the map — but nothing opens
-  // by itself, as at the very end: the child chooses their step.
   const firstGameIdx = path.findIndex((n) => n.kind === 'game');
-  const roundEnd = !pickedNext && !endReached && animating && realCurrent === firstGameIdx && fromIdx > firstGameIdx;
 
   // Where the balloon comes to rest. At the very end of the adventure it stays
   // on the yellow star (the step it has just reached); after a picked step, on
-  // the step right after it; otherwise on the current step, which at the end
-  // of a round is the first game again.
+  // the step right after it (the first game after the last one); otherwise on
+  // the current step, which at the end of a round is the first game again.
   const restIdx = targetIdx;
   const balloonIdx = phase === 'done' ? restIdx : fromIdx;
 
@@ -340,25 +330,25 @@ export function MapScreen() {
 
   const balloonPos = points[balloonIdx];
 
-  // The step the play button launches: the step after a picked one, or the
+  // The step the play button launches: where a picked chain has led (it stays
+  // picked, so the child keeps walking the map from where they chose), or the
   // current step, except once the adventure is over — the current step is
   // then the bonus star, which cannot be played. The button then falls back to
   // the first game, so as to stay usable for another round (the balloon,
-  // meanwhile, stays on the star). A chain started by a pick stays picked, so
-  // the child keeps walking the map from where they chose.
-  const playNode = pickedNext ? path[targetIdx] : endReached && firstGameIdx >= 0 ? path[firstGameIdx] : path[realCurrent];
+  // meanwhile, stays on the star).
+  const playNode = arrival?.picked ? path[targetIdx] : endReached && firstGameIdx >= 0 ? path[firstGameIdx] : path[realCurrent];
 
   // Playable step: common ground for the automatic chaining and the button.
   const playable = playNode?.kind === 'game' && isNodeOpen(playNode, progress, order);
 
   // In adventure mode, the next game opens by itself once the balloon has
   // landed (`animating`: we really are arriving from a finished level, not
-  // from a plain return to the map). Two exceptions, where the balloon comes
-  // back to the start of the map: the end of a round (`roundEnd`) and the end
-  // of the adventure (`endReached`). Sending the child straight back into the
-  // first game would trap them in a loop they did not ask for — it is up to
-  // them to choose their step (the play button or a dot on the map).
-  const autoOpen = playable && phase === 'done' && animating && !endReached && !roundEnd;
+  // from a plain return to the map) — unless the arrival plan says otherwise:
+  // end of a round, end of the adventure, or back to the first game after a
+  // picked last game. Sending the child straight back into the first game
+  // would trap them in a loop they did not ask for — it is up to them to
+  // choose their step (the play button or a dot on the map).
+  const autoOpen = playable && phase === 'done' && animating && !!arrival?.autoOpen;
 
   // Play button: always present on the map as soon as there is a step to
   // launch — including during the arrival animation and when the automatic
@@ -368,7 +358,7 @@ export function MapScreen() {
 
   useEffect(() => {
     if (!autoOpen || playNode?.kind !== 'game') return;
-    open(playNode, pickedNext);
+    open(playNode, !!arrival?.picked);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpen]);
 
@@ -475,7 +465,7 @@ export function MapScreen() {
           the Games tab, where the mascot must stay at the edge). */}
       <Mascot className={styles.mapMascot} />
       {showPlay && (
-        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(playNode, pickedNext)} aria-label={t('map.start')}>
+        <PaperButton icon tone="sun" className={styles.nodePlay} onClick={() => open(playNode, !!arrival?.picked)} aria-label={t('map.start')}>
           <PlayIcon size={54} />
         </PaperButton>
       )}

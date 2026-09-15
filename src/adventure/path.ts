@@ -131,3 +131,63 @@ export function isNodeOpen(node: AdventureNode, progress: ProfileProgress, order
 export function nodeIndexOf(gameId: string, path = ADVENTURE_PATH): number {
   return path.findIndex((n) => n.kind === 'game' && n.gameId === gameId);
 }
+
+/** A level just finished in adventure mode. */
+export interface FinishedLevel {
+  gameId: string;
+  levelId: string;
+  /** The child picked this step on the map rather than following the adventure. */
+  picked?: boolean;
+}
+
+/** Where the map goes after a finished level (see `planArrival`). */
+export interface Arrival {
+  /** Step of the finished level. */
+  from: number;
+  /** Step the balloon lands on. */
+  target: number;
+  /** The target step opens by itself once the balloon has landed. */
+  autoOpen: boolean;
+  /** The target step is launched as picked: the chain started by the child goes on. */
+  picked: boolean;
+}
+
+/**
+ * Next move of the adventure after a level (`progress` already includes it).
+ *
+ * Followed adventure: the balloon goes to the current step of the unlock
+ * order, which opens by itself — except at the end of a round (back to the
+ * first game) and at the end of the adventure (the final star), where the
+ * child chooses their step.
+ *
+ * Step picked on the map: the adventure carries on from there, never back to
+ * the child's progression. The balloon goes to the step right after it, which
+ * opens by itself; after the last game of the map, back to the first game,
+ * which does not (as at the end of a round). The level that completes the
+ * whole adventure still leads to the final star.
+ */
+export function planArrival(
+  finished: FinishedLevel,
+  progress: ProfileProgress,
+  path: readonly AdventureNode[] = ADVENTURE_PATH,
+  order: readonly UnlockStep[] = UNLOCK_ORDER,
+): Arrival | null {
+  const from = nodeIndexOf(finished.gameId, path);
+  if (from < 0) return null;
+  const current = currentNodeIndex(progress, path, order);
+  const endReached = path[current]?.kind === 'bonus';
+  const firstGame = path.findIndex((n) => n.kind === 'game');
+  const lastStep = order[order.length - 1];
+  const endsAdventure = endReached && lastStep?.gameId === finished.gameId && lastStep.levelId === finished.levelId;
+
+  if (finished.picked && !endsAdventure) {
+    const next = path[from + 1];
+    if (next?.kind === 'game' && isNodeOpen(next, progress, order)) {
+      return { from, target: from + 1, autoOpen: true, picked: true };
+    }
+    return { from, target: firstGame, autoOpen: false, picked: true };
+  }
+
+  const roundEnd = !endReached && current === firstGame && from > firstGame;
+  return { from, target: current, autoOpen: !endReached && !roundEnd, picked: false };
+}

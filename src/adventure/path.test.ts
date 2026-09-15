@@ -15,6 +15,7 @@ import {
   nodeLevelsDone,
   nodeStarsTotal,
   nodeStatus,
+  planArrival,
 } from './path';
 
 /**
@@ -240,5 +241,94 @@ describe('nodeIndexOf', () => {
 
   it('returns −1 for a game that is not on the path', () => {
     expect(nodeIndexOf('nope', PATH)).toBe(-1);
+  });
+});
+
+/** Progress with the given `game:level` levels passed. */
+function progressWith(...levels: string[]): ProfileProgress {
+  const progress: ProfileProgress = {};
+  for (const key of levels) {
+    const [gameId, levelId] = key.split(':');
+    (progress[gameId] ??= {})[levelId] = { stars: 1, plays: 1 };
+  }
+  return progress;
+}
+
+describe('planArrival', () => {
+  const ROUND_ONE = ['alpha:1', 'beta:1', 'gamma:1'];
+
+  describe('followed adventure', () => {
+    it('goes to the current step, which opens by itself', () => {
+      expect(planArrival({ gameId: 'alpha', levelId: '1' }, progressWith('alpha:1'), PATH, ORDER)).toEqual({
+        from: 0,
+        target: 1,
+        autoOpen: true,
+        picked: false,
+      });
+    });
+
+    it('comes back to the first game at the end of a round, without opening it', () => {
+      expect(planArrival({ gameId: 'gamma', levelId: '1' }, progressWith(...ROUND_ONE), PATH, ORDER)).toEqual({
+        from: 2,
+        target: 0,
+        autoOpen: false,
+        picked: false,
+      });
+    });
+
+    it('lands on the final star at the end of the adventure', () => {
+      const all = progressWith(...ROUND_ONE, 'alpha:2', 'beta:2', 'gamma:2');
+      expect(planArrival({ gameId: 'gamma', levelId: '2' }, all, PATH, ORDER)).toMatchObject({ target: 3, autoOpen: false });
+    });
+  });
+
+  describe('step picked on the map', () => {
+    it('goes to the step right after it, not back to the progression', () => {
+      // Current step: alpha level 2. The child picked beta.
+      const progress = progressWith(...ROUND_ONE, 'beta:2');
+      expect(currentNodeIndex(progress, PATH, ORDER)).toBe(0);
+      expect(planArrival({ gameId: 'beta', levelId: '2', picked: true }, progress, PATH, ORDER)).toEqual({
+        from: 1,
+        target: 2,
+        autoOpen: true,
+        picked: true,
+      });
+    });
+
+    it('comes back to the first game after the last one, without opening it', () => {
+      // Current step: beta level 2. The child picked gamma, the last game.
+      const progress = progressWith(...ROUND_ONE, 'alpha:2', 'gamma:2');
+      expect(currentNodeIndex(progress, PATH, ORDER)).toBe(1);
+      expect(planArrival({ gameId: 'gamma', levelId: '2', picked: true }, progress, PATH, ORDER)).toEqual({
+        from: 2,
+        target: 0,
+        autoOpen: false,
+        picked: true,
+      });
+    });
+
+    it('keeps walking the map once the adventure is finished', () => {
+      const all = progressWith(...ROUND_ONE, 'alpha:2', 'beta:2', 'gamma:2');
+      expect(planArrival({ gameId: 'alpha', levelId: '2', picked: true }, all, PATH, ORDER)).toEqual({
+        from: 0,
+        target: 1,
+        autoOpen: true,
+        picked: true,
+      });
+    });
+
+    it('still lands on the final star when it completes the adventure', () => {
+      const all = progressWith(...ROUND_ONE, 'alpha:2', 'beta:2', 'gamma:2');
+      expect(planArrival({ gameId: 'gamma', levelId: '2', picked: true }, all, PATH, ORDER)).toEqual({
+        from: 2,
+        target: 3,
+        autoOpen: false,
+        picked: false,
+      });
+    });
+  });
+
+  it('returns null for a game that is not on the path', () => {
+    expect(planArrival({ gameId: 'nope', levelId: '1' }, {}, PATH, ORDER)).toBeNull();
   });
 });
