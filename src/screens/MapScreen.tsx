@@ -110,13 +110,8 @@ interface Completed {
 /**
  * Arrival animation after an adventure level is passed, in this order:
  *  1. the stars earned appear and chime;
- *  2. the confetti falls (`party`);
- *  3. the balloon flies off to the next step, while the confetti finishes
- *     falling;
- *  4. the next step opens as soon as the balloon has landed.
- * The flight starts before the confetti ends (`PARTY_BEFORE_FLY_MS`): a
- * strictly sequential chain would mean nearly six seconds of waiting, too
- * long for a child aged 3 to 6.
+ *  2. the balloon flies off to the next step;
+ *  3. the next step opens as soon as the balloon has landed.
  *
  * The next step is the current one in the unlock order — or, when the child
  * picked the finished step on the map, the step right after it.
@@ -130,35 +125,10 @@ interface Completed {
  * not ask for; it is up to them to choose their step (the play button or a
  * dot on the map).
  */
-type Phase = 'hold' | 'stars' | 'party' | 'fly' | 'done';
+type Phase = 'hold' | 'stars' | 'fly' | 'done';
 const HOLD_MS = 500;
 const STARS_MS = 900;
 const FLY_MS = 1500;
-/** Time of confetti alone before the balloon leaves. */
-const PARTY_BEFORE_FLY_MS = 1200;
-
-/** Duration of the final confetti (matched to the `fall` animation). */
-const CONFETTI_MS = 3200;
-
-/**
- * Arrival confetti: spread across the full width, with staggered falls.
- * The size varies through `width`/`height` and not through `scale`: the
- * standalone `scale` property would override the `transform` animated by
- * `@keyframes fall`, and the confetti would stay frozen at the top of the
- * screen.
- */
-const CONFETTI = Array.from({ length: 24 }, (_, i) => {
-  const size = 0.7 + ((i * 7) % 10) / 14;
-  const round = i % 3 === 0;
-  return {
-    left: `${2 + i * 4.1}%`,
-    color: ['#ff6b6b', '#ffd93d', '#6bcb77', '#5ec2f0'][i % 4],
-    delay: `${(i % 7) * 0.18}s`,
-    round,
-    width: Math.round((round ? 16 : 18) * size),
-    height: Math.round((round ? 16 : 26) * size),
-  };
-});
 
 export function MapScreen() {
   const navigate = useNavigate();
@@ -200,7 +170,7 @@ export function MapScreen() {
   const { status: breathStatus, start } = useBreath();
 
   // What the screen shows: during the animation, the finished step stays current.
-  const shownCurrent = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : phase === 'fly' ? -1 : targetIdx;
+  const shownCurrent = phase === 'hold' || phase === 'stars' ? fromIdx : phase === 'fly' ? -1 : targetIdx;
   const statusOf = (i: number): NodeStatus => {
     const node = path[i];
     if (!node) return 'locked';
@@ -220,16 +190,10 @@ export function MapScreen() {
   const restIdx = targetIdx;
   const balloonIdx = phase === 'done' ? restIdx : fromIdx;
 
-  // Arrival celebration: every time the balloon has just landed on a step
-  // (`animating`), not on every return to the map. The fanfare stays reserved
-  // for the final star — on every level it would cover the chiming stars.
-  const [party, setParty] = useState(false);
+  // The fanfare stays reserved for the final star — on every level it would
+  // cover the chiming stars. It sounds as the balloon flies off towards it.
   useEffect(() => {
-    if (phase !== 'party') return;
-    setParty(true);
-    if (endReached) play('fanfare');
-    const t = window.setTimeout(() => setParty(false), CONFETTI_MS);
-    return () => window.clearTimeout(t);
+    if (phase === 'fly' && path[targetIdx]?.kind === 'bonus') play('fanfare');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
@@ -250,7 +214,7 @@ export function MapScreen() {
   const { points, stageW, stageH } = layoutNodes(path.length, viewport.width, viewport.height, viewport.portrait);
 
   // Centres the view on the current node (smoothly while the balloon flies).
-  const focusIdx = phase === 'hold' || phase === 'stars' || phase === 'party' ? fromIdx : targetIdx;
+  const focusIdx = phase === 'hold' || phase === 'stars' ? fromIdx : targetIdx;
   useLayoutEffect(() => {
     const el = scrollRef.current;
     const p = points[focusIdx];
@@ -272,16 +236,11 @@ export function MapScreen() {
     if (phase === 'stars') {
       const n = completed?.stars ?? 0;
       const dings = Array.from({ length: n }, (_, i) => window.setTimeout(() => play('star'), i * 220));
-      const t = window.setTimeout(() => setPhase('party'), STARS_MS);
+      const t = window.setTimeout(() => setPhase('fly'), STARS_MS);
       return () => {
         dings.forEach((id) => window.clearTimeout(id));
         window.clearTimeout(t);
       };
-    }
-    if (phase === 'party') {
-      // The confetti falls; the balloon leaves before it has finished.
-      const t = window.setTimeout(() => setPhase('fly'), PARTY_BEFORE_FLY_MS);
-      return () => window.clearTimeout(t);
     }
     if (phase === 'fly') {
       const el = balloonRef.current;
@@ -438,25 +397,6 @@ export function MapScreen() {
           </div>
         )}
       </div>
-
-      {party && (
-        <div className={styles.mapConfetti} aria-hidden>
-          {CONFETTI.map((c, i) => (
-            <span
-              key={i}
-              className={styles.mapConfettiPiece}
-              style={{
-                left: c.left,
-                background: c.color,
-                animationDelay: c.delay,
-                borderRadius: c.round ? '50%' : 3,
-                width: c.width,
-                height: c.height,
-              }}
-            />
-          ))}
-        </div>
-      )}
 
       <TopBar name={profile.name} avatar={profile.avatar} />
       {/* The mascot and the play button are swapped on the adventure: the

@@ -1,4 +1,5 @@
 import { play } from '../../audio/sfx';
+import { canvasDpr } from '../_shared/canvas';
 import { gameUnit } from '../_shared/math';
 import { starsForTime } from '../_shared/stars';
 import { useEffect, useMemo, useRef } from 'react';
@@ -106,7 +107,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasDpr();
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

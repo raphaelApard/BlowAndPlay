@@ -1,13 +1,12 @@
 import { play } from '../../audio/sfx';
+import { canvasDpr } from '../_shared/canvas';
 import { gameUnit } from '../_shared/math';
 import { useEffect, useMemo, useRef } from 'react';
 import type { GameProps, Stars } from '../types';
 import {
   BASKET_DROP,
-  CORAL,
   HILL_FAR,
   HILL_NEAR,
-  SUN,
   clamp01,
   drawBalloon,
   drawCloud,
@@ -18,33 +17,11 @@ import {
   drawSky,
   drawWind,
   makeClouds,
-  seeded,
 } from './draw';
 import type { MontgolfiereLevel } from './index';
 import styles from './montgolfiere.module.css';
 import { BUMP_COOLDOWN_MS, LANDING_MS, LIFT_BASE, LIFT_POWER, PARTY_MS, RAMP_MS, SINK, TAKEOFF_MS, TAKEOFF_THRESHOLD, makeWorld, tuning } from './rules';
 
-
-interface Confetti {
-  x: number;
-  vx: number;
-  vy: number;
-  color: string;
-  round: boolean;
-  spin: number;
-}
-function makeConfetti(count: number, seed: number): Confetti[] {
-  const rand = seeded(seed);
-  const colors = [SUN, CORAL, '#6bcb77', '#5ec2f0', '#9d7bef'];
-  return Array.from({ length: count }, (_, i) => ({
-    x: rand() * 2 - 1,
-    vx: (rand() - 0.5) * 6,
-    vy: -(6 + rand() * 6),
-    color: colors[i % colors.length],
-    round: i % 3 === 0,
-    spin: rand() * Math.PI * 2,
-  }));
-}
 
 type Phase = 'ground' | 'flight' | 'landing' | 'party';
 
@@ -95,7 +72,6 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       padX,
       total,
       clouds: makeClouds(Math.ceil(padX / 260) + 6, 21, padX + 1200),
-      confetti: makeConfetti(30, 8),
     };
   }, [level.obstacles, difficulty]);
 
@@ -105,7 +81,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasDpr();
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -119,7 +95,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     const floorY = groundY - R * BASKET_DROP - 4;
     const ceilY = R * 1.4 + 16;
     if (s.by < 0) s.by = floorY;
-    const { obstacles, padX, total, clouds, confetti } = world;
+    const { obstacles, padX, total, clouds } = world;
 
     let raf = 0;
     let last = performance.now();
@@ -156,28 +132,6 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       const flame = s.phase === 'flight' ? s.power : s.phase === 'ground' ? Math.min(1, s.blowMs / TAKEOFF_MS) * s.power : 0;
       drawWind(ctx, bx, s.by, R, s.phase === 'flight' || s.phase === 'ground' ? s.power : 0, t);
       drawBalloon(ctx, bx, s.by, R, flame, tilt, t);
-
-      if (s.partyAt >= 0) {
-        const age = (t - s.partyAt) / 1000;
-        ctx.save();
-        for (const c of confetti) {
-          const u = age;
-          const x = bx + c.x * 40 * unit + c.vx * unit * u * 30;
-          const y = s.by + c.vy * unit * u * 30 + 0.5 * 9 * unit * u * u * 30;
-          if (y > height) continue;
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(c.spin + u * 5);
-          ctx.fillStyle = c.color;
-          if (c.round) {
-            ctx.beginPath();
-            ctx.arc(0, 0, 6 * unit, 0, Math.PI * 2);
-            ctx.fill();
-          } else ctx.fillRect(-5 * unit, -8 * unit, 10 * unit, 16 * unit);
-          ctx.restore();
-        }
-        ctx.restore();
-      }
     };
 
     const frame = (t: number) => {

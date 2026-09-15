@@ -4,7 +4,7 @@ import { clamp01 } from './draw';
 
 /** Arrival of a cloud from the left up to the sun. */
 export const ENTER_MS = 1300;
-/** Final celebration: big sun, turning rays, petals. */
+/** Final celebration: big sun, turning rays. */
 export const PARTY_MS = 3200;
 /** Thrust of a blow at intensity 1 (before `unit` and difficulty). */
 export const PUSH = 0.85;

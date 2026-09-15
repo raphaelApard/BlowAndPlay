@@ -712,34 +712,6 @@
   /* The counter is under the thumbnail: it grows from its top, on the dot's side. */
   transform-origin: 48px 0;
 }
-/* Arrival confetti on the final star. `fixed` (and not `absolute`): the map
-   scrolls, the celebration must stay in front of the child's eyes. */
-.mapConfetti {
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  overflow: hidden;
-  pointer-events: none;
-}
-.mapConfettiPiece {
-  position: absolute;
-  top: 0;
-  width: 18px;
-  height: 26px;
-  border-radius: 3px;
-  /* Local keyframes: in a CSS module, `animation: fall` is renamed to a
-     scoped name and no longer finds the global `@keyframes fall` — the
-     confetti then stayed frozen at the top of the screen. */
-  animation: mapFall 3.2s linear forwards;
-}
-@keyframes mapFall {
-  from {
-    transform: translateY(-80px) rotate(0);
-  }
-  to {
-    transform: translateY(110vh) rotate(360deg);
-  }
-}
 
 /* Bouton « jouer » : c'est toujours l'enfant qui lance un jeu, rien ne s'ouvre
    by itself. Placed next to the mascot (which is set to the right), so just
@@ -918,31 +890,6 @@
   }
   .gameFoot {
     width: auto;
-  }
-}
-
-/* ─── Celebration on the games list ────────────────────────────────── */
-/* Fired when a game has just been finished: above the cards, but not in the
-   way — it takes no pointer events. The keyframes are declared here, in the
-   module: the `animation` shorthand rewrites the name to a scoped one, which
-   no longer matches a global `@keyframes fall` — the pieces then stay frozen
-   at the top of the screen (the same trap as `mapFall` above). */
-.confetti {
-  position: fixed;
-  top: 0;
-  z-index: 5;
-  width: 18px;
-  height: 26px;
-  border-radius: 3px;
-  pointer-events: none;
-  animation: gamesFall 3.6s linear forwards;
-}
-@keyframes gamesFall {
-  from {
-    transform: translateY(-80px) rotate(0);
-  }
-  to {
-    transform: translateY(110vh) rotate(360deg);
   }
 }
 

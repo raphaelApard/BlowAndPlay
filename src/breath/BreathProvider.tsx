@@ -143,12 +143,15 @@ export function useBreath(): BreathContextValue {
   return ctx;
 }
 
-/** Breath state re-rendered on every frame (HUD, gauges). */
+/**
+ * Breath state re-rendered on every frame. Costly: prefer `engine.subscribe`
+ * writing to the DOM (see `BreathStrip`) for anything that stays on screen.
+ */
 export function useBreathState(): BreathState {
   const { engine } = useBreath();
-  return useSyncExternalStore(
-    (cb) => engine.subscribe(cb),
-    () => engine.getState(),
-    () => engine.getState(),
-  );
+  // Stable callbacks: an inline `subscribe` makes React unsubscribe and
+  // resubscribe on every render — that is, on every frame here.
+  const subscribe = useCallback((cb: () => void) => engine.subscribe(cb), [engine]);
+  const getState = useCallback(() => engine.getState(), [engine]);
+  return useSyncExternalStore(subscribe, getState, getState);
 }

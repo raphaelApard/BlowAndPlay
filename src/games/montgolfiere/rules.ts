@@ -9,7 +9,7 @@ export const TAKEOFF_THRESHOLD = 0.3;
 export const RAMP_MS = 1500;
 /** Descente sur la plateforme. */
 export const LANDING_MS = 1600;
-/** Celebration after landing: flag raised, confetti. */
+/** Celebration after landing: flag raised. */
 export const PARTY_MS = 3000;
 /** Invulnerability after an impact. */
 export const BUMP_COOLDOWN_MS = 1000;

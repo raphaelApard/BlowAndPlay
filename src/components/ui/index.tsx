@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { play } from '../../audio/sfx';
-import { useBreath, useBreathState } from '../../breath/BreathProvider';
+import { useBreath } from '../../breath/BreathProvider';
 import { LANGS, setLang, useT, type Lang } from '../../i18n';
 import { MascotFigure, type MascotMode } from '../../mascots/MascotFigure';
 import type { AnyGameDefinition } from '../../games/types';
@@ -410,25 +410,41 @@ function MicIcon({ off }: { off: boolean }) {
 }
 
 /**
- * Level bar. A separate component: `useBreathState` re-renders on every
- * frame, so we keep that cost on a leaf rather than on the whole top bar
- * (and therefore on the screen that contains it).
+ * Level bar. Written straight to the DOM from the engine subscription: a
+ * React state would re-render on every frame, on every screen with a top bar.
  */
 function BreathMeter({ active }: { active: boolean }) {
-  const { intensity } = useBreathState();
-  // Display curve only: a weak breath must be seen to move. The square root
-  // mostly lifts the bottom of the scale (0.04 → 0.2). We do not touch the
-  // engine's thresholds, which govern detection and the games.
-  const level = active ? Math.sqrt(Math.min(1, Math.max(0, intensity))) : 0;
+  const { engine } = useBreath();
+  const meterRef = useRef<HTMLSpanElement>(null);
+  const fillRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    let shownPct = -1;
+    const apply = ({ intensity }: { intensity: number }) => {
+      const meter = meterRef.current;
+      const fill = fillRef.current;
+      if (!meter || !fill) return;
+      // Display curve only: a weak breath must be seen to move. The square root
+      // mostly lifts the bottom of the scale (0.04 → 0.2). We do not touch the
+      // engine's thresholds, which govern detection and the games.
+      const level = active ? Math.sqrt(Math.min(1, Math.max(0, intensity))) : 0;
+      fill.style.transform = `scaleY(${level})`;
+      const pct = Math.round(level * 100);
+      if (pct !== shownPct) {
+        meter.setAttribute('aria-valuenow', String(pct));
+        shownPct = pct;
+      }
+    };
+    apply(engine.getState());
+    const off = engine.subscribe(apply);
+    return () => {
+      off();
+    };
+  }, [engine, active]);
+
   return (
-    <span
-      className={styles.micMeter}
-      role="meter"
-      aria-valuenow={Math.round(level * 100)}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <span className={styles.micMeterFill} style={{ transform: `scaleY(${level})` }} />
+    <span ref={meterRef} className={styles.micMeter} role="meter" aria-valuenow={0} aria-valuemin={0} aria-valuemax={100}>
+      <span ref={fillRef} className={styles.micMeterFill} style={{ transform: 'scaleY(0)' }} />
     </span>
   );
 }

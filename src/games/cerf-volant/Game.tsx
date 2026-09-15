@@ -1,4 +1,5 @@
 import { play } from '../../audio/sfx';
+import { canvasDpr } from '../_shared/canvas';
 import { gameUnit } from '../_shared/math';
 import { useEffect, useMemo, useRef } from 'react';
 import type { GameProps, Stars } from '../types';
@@ -38,24 +39,6 @@ interface Pop {
   at: number;
   color: string;
 }
-interface Confetti {
-  x: number;
-  vx: number;
-  vy: number;
-  color: string;
-  spin: number;
-}
-function makeConfetti(count: number, seed: number): Confetti[] {
-  const rand = seeded(seed);
-  return Array.from({ length: count }, (_, i) => ({
-    x: rand() * 2 - 1,
-    vx: (rand() - 0.5) * 7,
-    vy: -(5 + rand() * 7),
-    color: RAINBOW[i % RAINBOW.length],
-    spin: rand() * Math.PI * 2,
-  }));
-}
-
 interface Sim {
   alt: number;
   vAlt: number;
@@ -99,7 +82,6 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     return {
       ...makeCourse(level, difficulty),
       clouds: makeClouds(6, 17),
-      confetti: makeConfetti(34, 9),
     };
   }, [level, difficulty]);
 
@@ -109,7 +91,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasDpr();
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -118,7 +100,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     const unit = gameUnit(width, height);
     const { hold: holdFactor } = tuning(difficulty);
     const holdNeeded = level.holdMs * holdFactor;
-    const { half, targets, clouds, confetti } = scene;
+    const { half, targets, clouds } = scene;
     const n = targets.length;
     const groundY = height * 0.84;
     const kidX = width * 0.17;
@@ -177,21 +159,6 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       const tilt = 0.3 + s.vAlt * 6 + Math.sin(t / 700) * 0.04;
       drawKite(ctx, kx, ky, kiteS, tilt, t, inZone ? 1 : 0);
       if (s.stage < n && s.partyAt < 0) drawHoldRing(ctx, kx, ky, kiteS * 1.7, s.hold / holdNeeded);
-
-      if (s.partyAt >= 0) {
-        const age = (t - s.partyAt) / 1000;
-        for (const c of confetti) {
-          const x = kx + c.x * 30 * unit + c.vx * unit * age * 30;
-          const y = ky + c.vy * unit * age * 30 + 0.5 * 9 * unit * age * age * 30;
-          if (y > height) continue;
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(c.spin + age * 5);
-          ctx.fillStyle = c.color;
-          ctx.fillRect(-5 * unit, -8 * unit, 10 * unit, 16 * unit);
-          ctx.restore();
-        }
-      }
     };
 
     const frame = (t: number) => {

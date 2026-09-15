@@ -1,4 +1,5 @@
 import { play } from '../../audio/sfx';
+import { canvasDpr } from '../_shared/canvas';
 import { gameUnit } from '../_shared/math';
 import { starsForTime } from '../_shared/stars';
 import { useEffect, useMemo, useRef } from 'react';
@@ -8,17 +9,6 @@ import type { PousseNuagesLevel } from './index';
 import styles from './nuages.module.css';
 import { CLOUD_S, ENTER_MS, MAX_VX, PARTY_MS, PUSH, blowEfficiency, tuning } from './rules';
 
-
-interface Petal {
-  ang: number;
-  speed: number;
-  color: string;
-  spin: number;
-}
-function makePetals(count: number, seed: number): Petal[] {
-  const rand = seeded(seed);
-  return Array.from({ length: count }, (_, i) => ({ ang: rand() * Math.PI * 2, speed: 2 + rand() * 4, color: PETALS[i % PETALS.length], spin: rand() * 6 }));
-}
 
 interface Sim {
   /** Index of the current cloud (0..n-1); n = all chased away. */
@@ -60,7 +50,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
       s: 0.9 + rand() * 0.2,
       color: PETALS[slot % PETALS.length],
     }));
-    return { shapes, flowers, petals: makePetals(28, 4) };
+    return { shapes, flowers };
   }, [level.clouds]);
 
   useEffect(() => {
@@ -69,7 +59,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasDpr();
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -109,24 +99,6 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         const mood = s.vx > 1.5 * unit ? clamp01(s.vx / (6 * unit)) : -1;
         drawWind(ctx, s.x - cloudHalf * 0.2, cloudY, cloudS, s.power, t);
         drawCloud(ctx, scene.shapes[s.index], s.x, cloudY, cloudS, s.squash, mood, t);
-      }
-
-      if (s.partyAt >= 0) {
-        const age = (t - s.partyAt) / 1000;
-        for (const p of scene.petals) {
-          const d = p.speed * unit * age * 60 * 0.5;
-          const x = sunX + Math.cos(p.ang) * d;
-          const y = sunY + Math.sin(p.ang) * d + 0.5 * 4 * unit * age * age * 30;
-          if (y > height + 20) continue;
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(p.spin + age * 4);
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, 9 * unit, 5 * unit, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
       }
     };
 

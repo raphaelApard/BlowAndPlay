@@ -1,9 +1,10 @@
 import { play } from '../../audio/sfx';
+import { canvasDpr } from '../_shared/canvas';
 import { gameUnit } from '../_shared/math';
 import { starsForTime } from '../_shared/stars';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { GameProps } from '../types';
-import { PETALS, clamp01, drawBubble, drawCloud, drawGarden, drawKid, drawPop, drawSky, drawSun, drawTarget, drawWind, seeded } from './draw';
+import { clamp01, drawBubble, drawCloud, drawGarden, drawKid, drawPop, drawSky, drawSun, drawTarget, drawWind } from './draw';
 import type { BullesLevel } from './index';
 import styles from './bulles.module.css';
 import { BUBBLES, PARK_MS, PARTY_MS, growPerFrame as growRate, targetR as targetRadius, tuning } from './rules';
@@ -28,11 +29,6 @@ interface Pop {
   y: number;
   r: number;
   at: number;
-}
-interface Confetti {
-  ang: number;
-  speed: number;
-  color: string;
 }
 
 interface Sim {
@@ -61,20 +57,13 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sim = useRef<Sim>({ r: 0, power: 0, prevPower: 0, wobble: 0, wasBlowing: false, floating: [], pops: [], success: 0, elapsed: 0, partyDue: -1, partyAt: -1, done: false });
 
-  const scene = useMemo(() => {
-    const rand = seeded(77);
-    return {
-      confetti: Array.from({ length: 14 }, (_, i) => ({ ang: rand() * Math.PI * 2, speed: 2 + rand() * 4, color: PETALS[i % PETALS.length] })) as Confetti[],
-    };
-  }, []);
-
   useEffect(() => {
     if (paused) return;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasDpr();
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -123,23 +112,6 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         drawBubble(ctx, f.x, f.y, f.r, 0.15, t + f.bornAt, f.ok);
       }
       for (const p of s.pops) drawPop(ctx, p.x, p.y, p.r, clamp01((t - p.at) / 500));
-
-      if (s.partyAt >= 0) {
-        for (const f of s.floating) {
-          if (f.poppedAt < 0) continue;
-          const age = (t - f.poppedAt) / 1000;
-          for (const c of scene.confetti) {
-            const d = c.speed * unit * age * 40;
-            const x = f.x + Math.cos(c.ang) * d;
-            const y = f.y + Math.sin(c.ang) * d + 0.5 * 6 * unit * age * age * 40;
-            if (y > height) continue;
-            ctx.fillStyle = c.color;
-            ctx.beginPath();
-            ctx.arc(x, y, 5 * unit, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
     };
 
     const frame = (t: number) => {
@@ -225,7 +197,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
 
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [breath, level, scene, width, height, paused, difficulty, onProgress, onComplete]);
+  }, [breath, level, width, height, paused, difficulty, onProgress, onComplete]);
 
   return (
     <div className={styles.root}>

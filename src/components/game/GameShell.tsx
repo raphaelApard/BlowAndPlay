@@ -49,7 +49,16 @@ export function GameShell({ game, level, profileId }: Props) {
   const settings = useMemo(() => resolveSettings(game.settings, storedSettings), [game.settings, storedSettings]);
   const stageRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [progress, setProgress] = useState<number | undefined>(undefined);
+  // Level progress, written straight to the breath strip: games report it on
+  // every frame, and a state here would re-render the whole shell — the game
+  // included — 60 times a second.
+  const progressRef = useRef<HTMLDivElement>(null);
+  const handleProgress = useCallback((p: number) => {
+    const el = progressRef.current;
+    if (!el) return;
+    el.hidden = false;
+    el.style.transform = `scaleX(${p})`;
+  }, []);
   const [paused, setPaused] = useState(document.hidden);
   // Instruction: the mascot shows it in a bubble, then leaves on the first blow (or after a delay).
   const [hint, setHint] = useState<'shown' | 'leaving' | 'gone'>('shown');
@@ -215,7 +224,7 @@ export function GameShell({ game, level, profileId }: Props) {
             height={size.height}
             paused={paused}
             difficulty={difficulty}
-            onProgress={setProgress}
+            onProgress={handleProgress}
             onComplete={handleComplete}
           />
         )}
@@ -225,7 +234,7 @@ export function GameShell({ game, level, profileId }: Props) {
         <PaperButton icon small className={styles.exit} onClick={() => navigate(backPath)} aria-label={t('common.quit')}>
           <CrossIcon size={40} />
         </PaperButton>
-        <BreathStrip progress={progress} />
+        <BreathStrip progressRef={progressRef} />
         <ParentsButton className={styles.parents} />
         <PaperButton
           small

@@ -321,7 +321,7 @@
   }
 }
 
-/* ─── Celebration: rings, lap around the Moon, confetti ───────────── */
+/* ─── Celebration: rings, lap around the Moon ─────────────────────── */
 .party {
   position: absolute;
   inset: 0;
@@ -419,24 +419,6 @@
   }
   to {
     scale: 1;
-    opacity: 1;
-  }
-}
-.confetti {
-  position: absolute;
-  top: -40px;
-  animation: confettiFall 3s linear infinite;
-}
-@keyframes confettiFall {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(110vh) rotate(620deg);
     opacity: 1;
   }
 }

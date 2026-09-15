@@ -19,7 +19,7 @@ const SKY_STOPS = [
 ];
 
 const LANDING_MS = 2200;
-/** Celebration after landing: a lap around the Moon, rings, confetti. */
+/** Celebration after landing: a lap around the Moon, rings. */
 const PARTY_MS = 5200;
 /** Moon diameter at the end of the flight (220px × scale 2.2), cf. fusee.module.css. */
 const MOON_BASE = 220;
@@ -60,34 +60,6 @@ function makeStars(count: number, seed: number): Star[] {
   }));
 }
 
-interface Confetti {
-  left: number;
-  w: number;
-  h: number;
-  round: boolean;
-  color: string;
-  dur: number;
-  delay: number;
-}
-
-const CONFETTI_COLORS = ['#ffd166', '#ff9a4d', '#ff6b5e', '#8fd4f7', '#9d7bef', '#6ec46c'];
-
-function makeConfetti(count: number, seed: number): Confetti[] {
-  const rand = seeded(seed);
-  return Array.from({ length: count }, (_, i) => {
-    const round = i % 3 === 0;
-    return {
-      left: +(rand() * 96).toFixed(2),
-      w: round ? 12 : 10,
-      h: round ? 12 : 18,
-      round,
-      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-      dur: +(2.6 + rand() * 2.2).toFixed(2),
-      delay: +(-rand() * 4).toFixed(2),
-    };
-  });
-}
-
 /** Trail of the lap around the Moon: increasingly pale dots, lagging behind the rocket. */
 const TRAIL = [0.55, 0.45, 0.36, 0.28, 0.2, 0.13, 0.08].map((opacity, i) => ({ opacity, delay: -(0.12 * (i + 1)) }));
 
@@ -111,7 +83,6 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
   const [phase, setPhase] = useState<'flight' | 'landing' | 'party'>('flight');
 
   const stars = useMemo(() => makeStars(70, 1234), []);
-  const confetti = useMemo(() => makeConfetti(26, 99), []);
 
   useEffect(() => {
     if (paused) return;
@@ -315,23 +286,6 @@ export function Game({ level, breath, height, paused, difficulty, onProgress, on
               </div>
             </div>
           </div>
-
-          {/* Confettis */}
-          {confetti.map((c, i) => (
-            <span
-              key={i}
-              className={styles.confetti}
-              style={{
-                left: `${c.left}%`,
-                width: c.w,
-                height: c.h,
-                borderRadius: c.round ? '50%' : 3,
-                background: c.color,
-                animationDuration: `${c.dur}s`,
-                animationDelay: `${c.delay}s`,
-              }}
-            />
-          ))}
         </div>
       )}
 
