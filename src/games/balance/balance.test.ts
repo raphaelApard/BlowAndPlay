@@ -133,7 +133,7 @@ describe('report', () => {
   it('effort / duration / stars table (typical child)', () => {
     // Computed, not hardcoded: adding a game then fails on the game count
     // below, which names the real cause, rather than on an opaque total.
-    expect(GAMES.length, 'games registered').toBe(7);
+    expect(GAMES.length, 'games registered').toBe(9);
     expect(simulationCount).toBe(GAMES.length * LEVEL_COUNT * DIFFICULTIES.length);
     expect(simulationMs).toBeGreaterThan(0);
     const lines: string[] = [`${simulationCount} games simulated in ${simulationMs.toFixed(0)} ms`];
