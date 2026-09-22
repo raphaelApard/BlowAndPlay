@@ -10,7 +10,7 @@ import { MascotFigure, type MascotId } from '../mascots/MascotFigure';
 import { mascotText } from '../mascots/mascotText';
 import { MASCOTS } from '../mascots/mascots.data';
 import { DEFAULT_MASCOT } from '../mascots/getMascot';
-import { actions, useAppState } from '../store/store';
+import { MAX_DIFFICULTY, MIN_DIFFICULTY, actions, useAppState } from '../store/store';
 import type { Profile } from '../store/types';
 import styles from './screens.module.css';
 
@@ -67,18 +67,23 @@ export function HomeScreen() {
 }
 
 function NewProfileDialog({ onClose, onCreated }: { onClose(): void; onCreated(p: Profile): void }) {
+  const { settings } = useAppState();
   const [name, setName] = useState('');
   const [skin, setSkin] = useState(AVATAR_SKINS[0]);
   const [ring, setRing] = useState(AVATAR_RINGS[0]);
   const [mascot, setMascot] = useState<MascotId>(DEFAULT_MASCOT);
   // Adventure games: all checked to begin with, like the store's default.
   const [games, setGames] = useState<string[]>(() => GAMES.map((g) => g.id));
+  // Difficulty is a global setting, not a per-child one: we start from its
+  // current value and only write it back on submit, so cancelling changes nothing.
+  const [difficulty, setDifficulty] = useState(settings.difficulty);
   const { t } = useT();
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     const profile = actions.createProfile(name, { skin, ring }, mascot);
+    if (difficulty !== settings.difficulty) actions.setDifficulty(difficulty);
     // No stored selection = every game: we only write if the adult has left
     // some out, so that a game added later still appears.
     if (games.length < GAMES.length) {
@@ -140,6 +145,31 @@ function NewProfileDialog({ onClose, onCreated }: { onClose(): void; onCreated(p
               {t('home.mascot')}
             </span>
             <MascotPicker value={mascot} onChange={setMascot} labelledBy="mascot-label" />
+          </div>
+          <div className={styles.field}>
+            <span className={styles.fieldLabel} id="new-difficulty-label">
+              {t('parents.difficulty')}
+            </span>
+            <div className={styles.difficulty}>
+              <label htmlFor="new-difficulty">
+                <strong>{difficulty}</strong> / {MAX_DIFFICULTY}
+              </label>
+              <input
+                id="new-difficulty"
+                type="range"
+                min={MIN_DIFFICULTY}
+                max={MAX_DIFFICULTY}
+                step={1}
+                value={difficulty}
+                aria-labelledby="new-difficulty-label"
+                onChange={(e) => setDifficulty(Number(e.target.value))}
+              />
+              <div className={styles.difficultyScale}>
+                <span>{t('parents.easy')}</span>
+                <span>{t('parents.hard')}</span>
+              </div>
+              <span className={styles.muted}>{t('parents.difficultyHelp')}</span>
+            </div>
           </div>
           <div className={styles.field}>
             <span className={styles.fieldLabel} id="games-label">
