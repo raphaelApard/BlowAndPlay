@@ -49,6 +49,14 @@ interface Sim {
   power: number;
   /** How long the current blow has lasted (ms); 0 when not blowing. */
   chargeMs: number;
+  /**
+   * Strongest `power` reached during the current blow. The aim is this, not
+   * the live `power`: the engine only calls the blow over once the intensity
+   * has fallen back under its release threshold, so reading `power` at that
+   * point would arm the jump with the tail of the breath instead of the aim
+   * the child was holding.
+   */
+  peak: number;
   elapsed: number;
   hops: Hop[];
   splashes: Hop[];
@@ -70,6 +78,7 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
     phase: { kind: 'aim' },
     power: 0,
     chargeMs: 0,
+    peak: 0,
     elapsed: 0,
     hops: [],
     splashes: [],
@@ -165,9 +174,12 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         fx = gapToX(p.gap + (s.at - p.gap) * swim);
         fy = padY + Math.sin(Math.min(1, u * 2.4) * Math.PI) * 26 * unit * (1 - swim * 0.6);
       } else if (p.kind === 'aim') {
-        squash = clamp01(s.power);
-        const reach = reachFor(s.power, difficulty);
-        if (s.power >= MIN_CHARGE) drawAim(ctx, restX, padY, restX + reach * gapPx, unit, t);
+        // The arc holds at the peak of the blow: it is a sight the child sets
+        // and reads, so it must not shrink back while they stop to let go.
+        const charge = s.chargeMs > 0 ? s.peak : s.power;
+        squash = clamp01(charge);
+        const reach = reachFor(charge, difficulty);
+        if (charge >= MIN_CHARGE) drawAim(ctx, restX, padY, restX + reach * gapPx, unit, t);
       } else if (p.kind === 'party') {
         const u = clamp01((t - p.at) / PARTY_MS);
         fy = padY - Math.abs(Math.sin(u * Math.PI * 3)) * 40 * unit;
@@ -211,17 +223,21 @@ export function Game({ level, breath, width, height, paused, difficulty, onProgr
         const blowing = breath.getState().isBlowing;
         if (blowing) {
           s.chargeMs += dt;
+          s.peak = Math.max(s.peak, s.power);
         } else if (s.chargeMs > 0) {
-          // Released: the jump goes off with the charge that was showing.
-          const charge = s.power;
+          // Released: the jump goes off with the charge the arc was showing.
+          const charge = s.peak;
           s.chargeMs = 0;
+          s.peak = 0;
           if (charge >= MIN_CHARGE) jump(t, charge);
         }
         // A blow held far too long springs on its own, so the frog never
         // gets stuck waiting for a child who keeps blowing.
         if (s.chargeMs >= AIM_MS * 4) {
+          const charge = s.peak;
           s.chargeMs = 0;
-          jump(t, s.power);
+          s.peak = 0;
+          jump(t, charge);
         }
       } else if (p.kind === 'jump') {
         if (t - p.at >= JUMP_MS) {

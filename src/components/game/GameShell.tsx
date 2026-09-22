@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useBreath } from '../../breath/BreathProvider';
+import { useBreath } from '../../breath/useBreath';
 import type { BreathSessionStats } from '../../breath/types';
 import { resolveSettings, type AnyGameDefinition, type GameResult, type LevelBase } from '../../games/types';
 import { actions, useAppState, difficultyToUnit } from '../../store/store';
 import { useT } from '../../i18n';
 import { MascotFigure } from '../../mascots/MascotFigure';
 import { selectCurrentProfile } from '../../store/store';
-import { CrossIcon, PaperButton, ParentsButton, cx } from '../ui';
+import { CrossIcon, PaperButton, ParentsButton } from '../ui';
+import { cx } from '../ui/cx';
 import { BreathStrip } from './BreathStrip';
 import styles from './game.module.css';
 

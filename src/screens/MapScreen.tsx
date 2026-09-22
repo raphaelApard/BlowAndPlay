@@ -14,11 +14,13 @@ import {
 } from '../adventure/path';
 import { getGame } from '../games/registry';
 import type { Stars } from '../games/types';
-import { useBreath } from '../breath/BreathProvider';
-import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, Sky, TopBar, cx } from '../components/ui';
+import { useBreath } from '../breath/useBreath';
+import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, PrivacyNote, Sky, TopBar } from '../components/ui';
+import { cx } from '../components/ui/cx';
+import uiStyles from '../components/ui/ui.module.css';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
-import { selectAdventureGames, selectProgress, useAppState } from '../store/store';
+import { actions, selectAdventureGames, selectProgress, useAppState } from '../store/store';
 import { useCurrentProfile } from './useCurrentProfile';
 import styles from './screens.module.css';
 
@@ -168,6 +170,10 @@ export function MapScreen() {
   // `status` is already taken by the node status below: we name this one
   // explicitly to avoid any confusion between breath and step.
   const { status: breathStatus, start } = useBreath();
+
+  // Remembers this as the last visited section, so calibration sends the
+  // child back here next time rather than to the Games tab.
+  useEffect(() => actions.setLastMode('map'), []);
 
   // What the screen shows: during the animation, the finished step stays current.
   const shownCurrent = phase === 'hold' || phase === 'stars' ? fromIdx : phase === 'fly' ? -1 : targetIdx;
@@ -410,6 +416,7 @@ export function MapScreen() {
         </PaperButton>
       )}
       <ParentsButton />
+      <PrivacyNote className={uiStyles.privacyFixed} />
     </Sky>
   );
 }

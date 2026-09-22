@@ -854,3 +854,40 @@
   background: var(--paper);
   box-shadow: 2px 2px 0 var(--ink-a15);
 }
+
+/* Privacy + sources line, bottom of the adult-facing screens. */
+.privacyNote {
+  display: block;
+  text-align: center;
+  color: var(--paper);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.privacyLine {
+  display: block;
+}
+.privacyLink {
+  color: inherit;
+  text-decoration: underline;
+}
+/*
+ * On the adventure and games screens the layout is anchored, not in flow:
+ * the note is pinned at the bottom, centred between the Parents button
+ * (bottom left) and the mascot (bottom right).
+ */
+.privacyFixed {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--edge) + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 340px));
+  z-index: 5;
+}
+@media (orientation: portrait) {
+  .privacyFixed {
+    width: calc(100% - 40px);
+    bottom: calc(8px + var(--safe-bottom));
+    font-size: 12px;
+  }
+}

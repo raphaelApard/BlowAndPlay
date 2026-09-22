@@ -19,8 +19,10 @@ const AIM_PRECISION = 0.13;
  * child aims at a given intensity — so the wobble of their breath is what
  * scatters the landings, exactly as it does in the game.
  *
- * The charge is the intensity *at the moment of release*, like in the game:
- * the arc shows where the jump is pointing, and stopping sends it there.
+ * The charge is the *peak* of the blow, like in the game: the arc holds at
+ * the strongest intensity reached, and stopping sends the jump there. Reading
+ * the intensity at the moment of release instead would fire on the tail of
+ * the breath, which is not what the child aimed with.
  */
 export const simulate: Simulate<GrenouilleLevel> = (level, difficulty, child) => {
   const gaps = padGaps(level.pads, difficulty, 4100 + level.pads * 37);
@@ -30,6 +32,8 @@ export const simulate: Simulate<GrenouilleLevel> = (level, difficulty, child) =>
   let at = 0;
   /** How long the current blow has lasted (ms). */
   let chargeMs = 0;
+  /** Strongest power reached during the current blow — the charge that fires. */
+  let peak = 0;
   /** While >= 0, a jump or a splash is playing out: the child rests. */
   let busyUntil = -1;
   let elapsed = 0;
@@ -64,15 +68,18 @@ export const simulate: Simulate<GrenouilleLevel> = (level, difficulty, child) =>
 
     if (f.st.isBlowing) {
       chargeMs += f.dt;
+      peak = Math.max(peak, f.power);
       // The child lets go once the arc *looks* right to them. Their reading
       // of it is only so good (`AIM_PRECISION`) — that imprecision is a
       // property of the child, not of the level, so a narrower landing
       // window (higher difficulty) turns more of those releases into misses.
-      const settled = chargeMs >= AIM_MS && Math.abs(f.power - aim) <= AIM_PRECISION;
+      const settled = chargeMs >= AIM_MS && Math.abs(peak - aim) <= AIM_PRECISION;
       if (settled || chargeMs >= AIM_MS * 3) {
         chargeMs = 0;
-        if (f.power >= MIN_CHARGE) {
-          busyUntil = f.t + jump(f.power);
+        const charge = peak;
+        peak = 0;
+        if (charge >= MIN_CHARGE) {
+          busyUntil = f.t + jump(charge);
           return { kind: 'rest' };
         }
       }
@@ -80,11 +87,13 @@ export const simulate: Simulate<GrenouilleLevel> = (level, difficulty, child) =>
     }
 
     // The blow ended on its own before the aim settled: the jump still goes,
-    // with whatever charge was there — a weak blow is a short jump.
+    // with the charge the arc was showing — a weak blow is a short jump.
     if (chargeMs > 0) {
       chargeMs = 0;
-      if (f.power >= MIN_CHARGE) {
-        busyUntil = f.t + jump(f.power);
+      const charge = peak;
+      peak = 0;
+      if (charge >= MIN_CHARGE) {
+        busyUntil = f.t + jump(charge);
         return { kind: 'rest' };
       }
     }

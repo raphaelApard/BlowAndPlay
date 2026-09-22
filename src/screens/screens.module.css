@@ -172,7 +172,9 @@
 }
 .dialog {
   composes: card;
-  width: min(560px, 100%);
+  /* Wider on desktop/tablet landscape; the portrait override below keeps it
+     compact on mobile, where the screen itself is the constraint anyway. */
+  width: min(80vw, 100%, 1100px);
   padding: 28px;
   display: flex;
   flex-direction: column;
@@ -181,6 +183,11 @@
   /* Taller than the screen: it is the dialog's body that scrolls. */
   max-height: 100%;
   min-height: 0;
+}
+@media (orientation: portrait) {
+  .dialog {
+    width: min(560px, 100%);
+  }
 }
 .dialog h2 {
   margin: 0;
@@ -246,7 +253,7 @@
 /* Choice of games when creating a child: checkable thumbnails. */
 .gamePicker {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
 .gameChoice {
@@ -898,13 +905,13 @@
   position: absolute;
   inset: 0;
   overflow: auto;
-  padding: calc(24px + var(--safe-top)) var(--edge) calc(40px + var(--safe-bottom));
+  padding: calc(24px + var(--safe-top)) 0 calc(40px + var(--safe-bottom));
   font-weight: 600;
   font-size: 16px;
   line-height: 1.45;
 }
 .parentsInner {
-  max-width: 900px;
+  width: 90%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -944,6 +951,10 @@
 }
 .muted {
   color: var(--mist-ink);
+}
+.parentsFoot {
+  display: flex;
+  justify-content: center;
 }
 .table {
   width: 100%;
@@ -1038,16 +1049,6 @@
   width: 24px;
   height: 24px;
   accent-color: var(--coral);
-}
-/* The game's thumbnail in the adventure games list: the same visual as the
-   carte et l'onglet « Jeux », en petit. */
-.advThumb {
-  width: 64px;
-  height: 48px;
-  flex: none;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 0 0 2px var(--mist);
 }
 .difficultyScale {
   display: flex;

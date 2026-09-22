@@ -1,13 +1,10 @@
 import { useMemo, type CSSProperties } from 'react';
-import { MASCOTS, type MascotDef, type MascotId } from './mascots.data';
+import { type MascotId } from './mascots.data';
+import { getMascot } from './getMascot';
 import './mascots.keyframes.css';
 import styles from './mascots.module.css';
 
 export type { MascotId, MascotDef } from './mascots.data';
-export { MASCOTS } from './mascots.data';
-export { mascotText } from './mascotText';
-
-export const DEFAULT_MASCOT: MascotId = 'miko';
 
 export type MascotMode = 'idle' | 'hello' | 'bravo' | 'think';
 
@@ -18,10 +15,6 @@ const MODES: Record<MascotMode, { body: string; arm: string }> = {
   bravo: { body: 'celebrate 1.2s cubic-bezier(.3,1.35,.55,1) 2', arm: 'armUp 1.2s cubic-bezier(.3,1.35,.55,1) 2' },
   think: { body: 'thinkSway 2.6s ease-in-out infinite', arm: 'armChin 2.6s ease-in-out infinite' },
 };
-
-export function getMascot(id: string | undefined): MascotDef {
-  return MASCOTS.find((m) => m.id === id) ?? MASCOTS.find((m) => m.id === DEFAULT_MASCOT)!;
-}
 
 interface MascotFigureProps {
   id: MascotId | undefined;

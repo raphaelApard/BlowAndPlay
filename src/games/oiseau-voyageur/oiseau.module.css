@@ -1,0 +1,26 @@
+/* Oiseau voyageur — cut-paper lake and sky */
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #7fd0f5;
+}
+.canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* Vignette de la carte « Jeux » */
+.thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #9fdcf7;
+}
+.thumb canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
