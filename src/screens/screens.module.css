@@ -145,6 +145,13 @@
   .homeScroll {
     padding: calc(84px + var(--safe-top)) 0 calc(120px + var(--safe-bottom));
   }
+  .homePrivacy {
+    position: static;
+    transform: none;
+    width: auto;
+    margin-top: 28px;
+    padding: 0 var(--edge);
+  }
 }
 
 .homeLang {
@@ -152,6 +159,20 @@
   top: calc(var(--edge) + var(--safe-top));
   left: var(--edge);
   z-index: 6;
+}
+
+/*
+ * In landscape the title, the balloon and the profile cards are all
+ * absolutely positioned, so the note is pinned at the bottom like on the map
+ * and games screens. In portrait the screen scrolls and it returns to the
+ * flow, after the last card.
+ */
+.homePrivacy {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--edge) + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(620px, calc(100% - 2 * var(--edge)));
 }
 
 /* Dialogue nouveau profil (adulte) */
