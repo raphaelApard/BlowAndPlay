@@ -1,20 +1,15 @@
 import { useState, type CSSProperties, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  AVATAR_RINGS,
-  AVATAR_SKINS,
-  Avatar,
-  Balloon,
-  GameThumbnail,
-  LangSwitch,
-  PaperButton,
-  Sky,
-  cx,
-} from '../components/ui';
+import { Avatar, Balloon, GameThumbnail, LangSwitch, PaperButton, Sky } from '../components/ui';
+import { AVATAR_RINGS, AVATAR_SKINS } from '../components/ui/avatar';
+import { cx } from '../components/ui/cx';
 import { play } from '../audio/sfx';
 import { GAMES } from '../games/registry';
 import { useT } from '../i18n';
-import { DEFAULT_MASCOT, MASCOTS, MascotFigure, mascotText, type MascotId } from '../mascots/MascotFigure';
+import { MascotFigure, type MascotId } from '../mascots/MascotFigure';
+import { mascotText } from '../mascots/mascotText';
+import { MASCOTS } from '../mascots/mascots.data';
+import { DEFAULT_MASCOT } from '../mascots/getMascot';
 import { actions, useAppState } from '../store/store';
 import type { Profile } from '../store/types';
 import styles from './screens.module.css';

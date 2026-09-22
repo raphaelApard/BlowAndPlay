@@ -1,37 +1,9 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { BreathEngine } from './BreathEngine';
+import { BreathContext, type BreathContextValue, type BreathStatus } from './BreathContext';
 import { KeyboardBreathSource } from './KeyboardBreathSource';
 import { MicBreathSource } from './MicBreathSource';
-import type { BreathSourceKind, BreathState } from './types';
-
-export type BreathStatus = 'idle' | 'starting' | 'running' | 'error';
-
-interface BreathContextValue {
-  engine: BreathEngine;
-  sourceKind: BreathSourceKind;
-  /** Chosen mic (null = system default). */
-  micDeviceId: string | null;
-  status: BreathStatus;
-  error: string | null;
-  /** Starts the current source (asks for mic permission if needed). */
-  start(): Promise<boolean>;
-  stop(): void;
-  /** Switches source (mic ↔ keyboard). Restarts if the engine was running. */
-  setSourceKind(kind: BreathSourceKind): Promise<void>;
-  /** Switches mic. Invalidates the calibration. */
-  setMicDeviceId(deviceId: string | null): Promise<void>;
-}
-
-const BreathContext = createContext<BreathContextValue | null>(null);
+import type { BreathSourceKind } from './types';
 
 function createSource(kind: BreathSourceKind, micDeviceId: string | null) {
   return kind === 'mic' ? new MicBreathSource(micDeviceId) : new KeyboardBreathSource();
@@ -135,23 +107,4 @@ export function BreathProvider({
   );
 
   return <BreathContext.Provider value={value}>{children}</BreathContext.Provider>;
-}
-
-export function useBreath(): BreathContextValue {
-  const ctx = useContext(BreathContext);
-  if (!ctx) throw new Error('useBreath must be used under <BreathProvider>');
-  return ctx;
-}
-
-/**
- * Breath state re-rendered on every frame. Costly: prefer `engine.subscribe`
- * writing to the DOM (see `BreathStrip`) for anything that stays on screen.
- */
-export function useBreathState(): BreathState {
-  const { engine } = useBreath();
-  // Stable callbacks: an inline `subscribe` makes React unsubscribe and
-  // resubscribe on every render — that is, on every frame here.
-  const subscribe = useCallback((cb: () => void) => engine.subscribe(cb), [engine]);
-  const getState = useCallback(() => engine.getState(), [engine]);
-  return useSyncExternalStore(subscribe, getState, getState);
 }

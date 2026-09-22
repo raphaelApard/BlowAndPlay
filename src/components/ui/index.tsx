@@ -1,17 +1,14 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { play } from '../../audio/sfx';
-import { useBreath } from '../../breath/BreathProvider';
+import { useBreath } from '../../breath/useBreath';
 import { LANGS, setLang, useT, type Lang } from '../../i18n';
 import { MascotFigure, type MascotMode } from '../../mascots/MascotFigure';
 import type { AnyGameDefinition } from '../../games/types';
 import { actions, selectCurrentProfile, useAppState } from '../../store/store';
 import type { Avatar as AvatarData } from '../../store/types';
 import styles from './ui.module.css';
-
-export function cx(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
+import { cx } from './cx';
 
 // ─── Background ────────────────────────────────────────────────────────
 
@@ -141,9 +138,6 @@ export function Avatar({ avatar, size = 72, shadow = true }: { avatar: AvatarDat
     />
   );
 }
-
-export const AVATAR_SKINS = ['#ffb08a', '#c9a27e', '#f3c9b1', '#8d5a3b', '#ffd6c2', '#5c3a21'];
-export const AVATAR_RINGS = ['#ffd93d', '#6bcb77', '#ff6b6b', '#5ec2f0', '#ffffff'];
 
 // ─── Buttons ───────────────────────────────────────────────────────────
 

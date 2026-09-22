@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { computeCalibration } from '../breath/BreathEngine';
-import { useBreath, useBreathState } from '../breath/BreathProvider';
-import { Candle, PaperButton, ParentsButton, PlayIcon, Sky, cx } from '../components/ui';
+import { useBreath, useBreathState } from '../breath/useBreath';
+import { Candle, PaperButton, ParentsButton, PlayIcon, Sky } from '../components/ui';
+import { cx } from '../components/ui/cx';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
 import { MascotFigure, type MascotMode } from '../mascots/MascotFigure';
