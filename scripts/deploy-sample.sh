@@ -16,10 +16,12 @@
 #       HostName 203.0.113.10
 #       User myuser
 #
-# Usage:
-#   pnpm deploy              build, check, upload
-#   pnpm deploy --dry-run    show what would change, transfer nothing
-#   pnpm deploy --skip-checks  build and upload without lint/test
+# Usage — note the explicit `run`: pnpm has a built-in `deploy` command that
+# shadows this script, so plain `pnpm deploy` does NOT run it.
+#
+#   pnpm run deploy                build, check, upload
+#   pnpm run deploy --dry-run      show what would change, transfer nothing
+#   pnpm run deploy --skip-checks  build and upload without lint/test
 
 set -euo pipefail
 
@@ -44,7 +46,7 @@ for arg in "$@"; do
     --dry-run) dry_run=true ;;
     --skip-checks) skip_checks=true ;;
     -h|--help)
-      sed -n '/^# Usage:/,/--skip-checks/p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '/^# Usage/,/--skip-checks/p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
