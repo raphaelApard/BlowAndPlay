@@ -2,8 +2,19 @@
 #
 # Build the static SPA and mirror dist/ to the production web root.
 #
-# The target host is the `flexiserver` alias from ~/.ssh/config, so the
-# hostname, user, port and key all live there rather than in this script.
+# This is the template. The real script is scripts/deploy.sh, which is
+# gitignored because it holds the server coordinates:
+#
+#   cp scripts/deploy-sample.sh scripts/deploy.sh
+#   chmod +x scripts/deploy.sh
+#   # then fill in the three values below
+#
+# REMOTE_HOST is expected to be a Host alias in ~/.ssh/config, so the
+# hostname, user, port and key stay out of the repository:
+#
+#   Host myserver
+#       HostName 203.0.113.10
+#       User myuser
 #
 # Usage:
 #   pnpm deploy              build, check, upload
@@ -12,8 +23,15 @@
 
 set -euo pipefail
 
-readonly REMOTE_HOST="flexiserver"
-readonly REMOTE_PATH="/home/fexi5977/jeux.acolad.net/htdocs"
+# --- Configuration ----------------------------------------------------------
+# The public address of the deployed site, printed when the upload succeeds.
+readonly SITE_URL="https://example.com/"
+# An SSH Host alias from ~/.ssh/config.
+readonly REMOTE_HOST="myserver"
+# Absolute path to the web root on that host.
+readonly REMOTE_PATH="/home/myuser/example.com/htdocs"
+# ----------------------------------------------------------------------------
+
 readonly LOCAL_DIR="dist"
 
 cd "$(dirname "$0")/.."
@@ -26,7 +44,7 @@ for arg in "$@"; do
     --dry-run) dry_run=true ;;
     --skip-checks) skip_checks=true ;;
     -h|--help)
-      sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '/^# Usage:/,/--skip-checks/p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
@@ -66,7 +84,7 @@ ssh "$REMOTE_HOST" "test -d '$REMOTE_PATH'" \
   || fail "$REMOTE_HOST:$REMOTE_PATH is not reachable or does not exist."
 
 # --delete mirrors the build: stale hashed assets from previous deploys go
-# away. Anything placed in htdocs by hand is removed too, so keep this
+# away. Anything placed in the web root by hand is removed too, so keep this
 # directory owned by the build.
 #
 # .well-known/ is the exception: it is written by the server, not by us, and
@@ -90,5 +108,5 @@ rsync "${rsync_opts[@]}" "$LOCAL_DIR/" "$REMOTE_HOST:$REMOTE_PATH/" \
 if $dry_run; then
   step "Dry run complete"
 else
-  step "Deployed to https://jeux.acolad.net/"
+  step "Deployed to $SITE_URL"
 fi
