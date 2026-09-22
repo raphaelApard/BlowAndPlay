@@ -19,7 +19,7 @@ import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, S
 import { cx } from '../components/ui/cx';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
-import { selectAdventureGames, selectProgress, useAppState } from '../store/store';
+import { actions, selectAdventureGames, selectProgress, useAppState } from '../store/store';
 import { useCurrentProfile } from './useCurrentProfile';
 import styles from './screens.module.css';
 
@@ -169,6 +169,10 @@ export function MapScreen() {
   // `status` is already taken by the node status below: we name this one
   // explicitly to avoid any confusion between breath and step.
   const { status: breathStatus, start } = useBreath();
+
+  // Remembers this as the last visited section, so calibration sends the
+  // child back here next time rather than to the Games tab.
+  useEffect(() => actions.setLastMode('map'), []);
 
   // What the screen shows: during the animation, the finished step stays current.
   const shownCurrent = phase === 'hold' || phase === 'stars' ? fromIdx : phase === 'fly' ? -1 : targetIdx;

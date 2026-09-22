@@ -38,7 +38,7 @@ const EMPTY: AppState = {
   currentProfileId: null,
   progress: {},
   sessions: [],
-  settings: { inputSource: 'mic', difficulty: DEFAULT_DIFFICULTY, micDeviceId: null, lang: null, sound: true },
+  settings: { inputSource: 'mic', difficulty: DEFAULT_DIFFICULTY, micDeviceId: null, lang: null, sound: true, lastMode: 'games' },
   gameSettings: {},
   adventureGames: {},
 };
@@ -245,6 +245,10 @@ export const actions = {
 
   setLang(lang: Lang | null) {
     setState((s) => ({ ...s, settings: { ...s.settings, lang } }));
+  },
+
+  setLastMode(lastMode: 'map' | 'games') {
+    setState((s) => (s.settings.lastMode === lastMode ? s : { ...s, settings: { ...s.settings, lastMode } }));
   },
 
   setDifficulty(difficulty: number) {

@@ -5,7 +5,7 @@ import { GameThumbnail, LevelSquares, Mascot, PaperButton, ParentsButton, PlayIc
 import { GAMES } from '../games/registry';
 import type { LevelBase, Stars } from '../games/types';
 import { useT } from '../i18n';
-import { selectProgress, useAppState } from '../store/store';
+import { actions, selectProgress, useAppState } from '../store/store';
 import { useCurrentProfile } from './useCurrentProfile';
 import styles from './screens.module.css';
 
@@ -35,6 +35,10 @@ export function GamesScreen() {
   // tear down its own timers (silent chimes): the guard keeps the first run in
   // charge, and the state is only cleared once the chimes are over.
   const celebratedRef = useRef(false);
+
+  // Remembers this as the last visited section, so calibration sends the
+  // child back here next time rather than to the adventure map.
+  useEffect(() => actions.setLastMode('games'), []);
 
   useEffect(() => {
     if (!completed || celebratedRef.current) return;
