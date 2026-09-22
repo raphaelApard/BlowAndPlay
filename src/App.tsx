@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useMatomoPageViews } from './analytics';
 import { unlockAudio } from './audio/sfx';
 import { BreathProvider } from './breath/BreathProvider';
 import { useLang } from './i18n';
@@ -16,6 +17,12 @@ function RequireProfile({ children }: { children: ReactNode }) {
   const profile = selectCurrentProfile(useAppState());
   if (!profile) return <Navigate to="/" replace />;
   return children;
+}
+
+/** Reports each route change to Matomo (must live inside the router). */
+function Analytics() {
+  useMatomoPageViews();
+  return null;
 }
 
 /** Reflects the current language on <html lang> (screen readers, hyphenation). */
@@ -53,6 +60,7 @@ export default function App() {
       <HtmlLang />
       <AudioUnlock />
       <BrowserRouter>
+        <Analytics />
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/parents" element={<ParentsScreen />} />
