@@ -1,6 +1,6 @@
 import { useState, type CSSProperties, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Avatar, Balloon, GameThumbnail, LangSwitch, PaperButton, Sky } from '../components/ui';
+import { Avatar, Balloon, GameThumbnail, LangSwitch, PaperButton, PrivacyNote, Sky } from '../components/ui';
 import { AVATAR_RINGS, AVATAR_SKINS } from '../components/ui/avatar';
 import { cx } from '../components/ui/cx';
 import { play } from '../audio/sfx';
@@ -60,6 +60,8 @@ export function HomeScreen() {
       </div>
 
       <LangSwitch className={styles.homeLang} />
+
+      <PrivacyNote className={styles.homePrivacy} />
 
       {creating && <NewProfileDialog onClose={() => setCreating(false)} onCreated={openProfile} />}
     </Sky>
