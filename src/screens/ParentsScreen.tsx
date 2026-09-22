@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { muteSfx } from '../audio/sfx';
-import { useBreath } from '../breath/BreathProvider';
+import { useBreath } from '../breath/useBreath';
 import { listMicrophones, type Microphone } from '../breath/MicBreathSource';
 import type { BreathSourceKind } from '../breath/types';
-import { ArrowIcon, Avatar, GameThumbnail, LangSwitch, PaperButton, Sky, StarRow, cx } from '../components/ui';
+import { ArrowIcon, Avatar, GameThumbnail, LangSwitch, PaperButton, PrivacyNote, Sky, StarRow } from '../components/ui';
+import { cx } from '../components/ui/cx';
 import { GAMES, getGame } from '../games/registry';
 import { resolveSettings, type AnyGameDefinition, type LevelBase, type SettingDef, type SettingValue } from '../games/types';
 import { localeOf, useT } from '../i18n';
-import { MASCOTS, MascotFigure, getMascot, mascotText, type MascotId } from '../mascots/MascotFigure';
+import { MascotFigure, type MascotId } from '../mascots/MascotFigure';
+import { mascotText } from '../mascots/mascotText';
+import { MASCOTS } from '../mascots/mascots.data';
+import { getMascot } from '../mascots/getMascot';
 import { MAX_DIFFICULTY, MIN_DIFFICULTY, actions, selectCurrentProfile, selectProgress, useAppState } from '../store/store';
 import type { Profile } from '../store/types';
 import styles from './screens.module.css';
@@ -180,26 +184,28 @@ function AdventureGamesPanel({ profile, chosen }: { profile: Profile; chosen: st
     <section className={styles.section}>
       <h2>{t('parents.adventureGames', { name: profile.name })}</h2>
       <span className={styles.muted}>{t('parents.adventureGamesHelp', { name: profile.name })}</span>
-      <div className={styles.difficulty}>
+      <div className={styles.gamePicker}>
         {GAMES.map((game) => {
           const on = enabled(game.id);
           // The last checked game cannot be unchecked: the adventure would
           // keep a map with no step.
           const last = on && count === 1;
           return (
-            <label key={game.id} htmlFor={`adv-${game.id}`} className={styles.checkRow}>
-              <input
-                id={`adv-${game.id}`}
-                type="checkbox"
-                checked={on}
-                disabled={last}
-                onChange={(e) => actions.setAdventureGame(profile.id, game.id, e.target.checked)}
-              />
-              <span className={styles.advThumb}>
+            <button
+              key={game.id}
+              type="button"
+              role="checkbox"
+              aria-checked={on}
+              aria-label={tr(game.title)}
+              disabled={last}
+              className={cx(styles.gameChoice, on && styles.gameChoiceOn)}
+              onClick={() => actions.setAdventureGame(profile.id, game.id, !on)}
+            >
+              <span className={styles.gameChoiceThumb}>
                 <GameThumbnail game={game} />
               </span>
-              <span className={styles.grow}>{tr(game.title)}</span>
-            </label>
+              <span>{tr(game.title)}</span>
+            </button>
           );
         })}
       </div>
@@ -281,30 +287,112 @@ export function ParentsScreen() {
           </section>
 
           {current && (
-            <>
-              <section className={styles.section}>
-                <h2>{t('parents.mascotOf', { name: current.name })}</h2>
-                <div className={styles.mascotRow}>
-                  <MascotFigure id={current.mascot} size={150} />
-                  <div className={styles.grow}>
-                    <label htmlFor="mascot">{t('parents.mascotHelp', { name: current.name })}</label>
-                    <select
-                      id="mascot"
-                      className={styles.select}
-                      value={getMascot(current.mascot).id}
-                      onChange={(e) => actions.setMascot(current.id, e.target.value as MascotId)}
-                    >
-                      {MASCOTS.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} — {mascotText(m, lang).tagline}
-                        </option>
-                      ))}
-                    </select>
-                    <span className={styles.muted}>{mascotText(getMascot(current.mascot), lang).description}</span>
-                  </div>
+            <section className={styles.section}>
+              <h2>{t('parents.mascotOf', { name: current.name })}</h2>
+              <div className={styles.mascotRow}>
+                <MascotFigure id={current.mascot} size={150} />
+                <div className={styles.grow}>
+                  <label htmlFor="mascot">{t('parents.mascotHelp', { name: current.name })}</label>
+                  <select
+                    id="mascot"
+                    className={styles.select}
+                    value={getMascot(current.mascot).id}
+                    onChange={(e) => actions.setMascot(current.id, e.target.value as MascotId)}
+                  >
+                    {MASCOTS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} — {mascotText(m, lang).tagline}
+                      </option>
+                    ))}
+                  </select>
+                  <span className={styles.muted}>{mascotText(getMascot(current.mascot), lang).description}</span>
                 </div>
-              </section>
+              </div>
+            </section>
+          )}
 
+          <section className={styles.section}>
+            <h2>{t('parents.settings')}</h2>
+            <div className={styles.row}>
+              <label className={cx(styles.radio, sourceKind === 'mic' && styles.radioOn)}>
+                <input type="radio" name="source" checked={sourceKind === 'mic'} onChange={() => changeSource('mic')} />
+                {t('parents.sourceMic')}
+              </label>
+              <label className={cx(styles.radio, sourceKind === 'keyboard' && styles.radioOn)}>
+                <input type="radio" name="source" checked={sourceKind === 'keyboard'} onChange={() => changeSource('keyboard')} />
+                {t('parents.sourceKeyboard')}
+              </label>
+            </div>
+            {sourceKind === 'mic' && <MicrophonePicker />}
+            <div className={styles.difficulty}>
+              <label htmlFor="sound" className={styles.checkRow}>
+                <input id="sound" type="checkbox" checked={state.settings.sound} onChange={(e) => actions.setSound(e.target.checked)} />
+                {t('parents.sound')}
+              </label>
+            </div>
+            <div className={styles.difficulty}>
+              <label htmlFor="difficulty">
+                {t('parents.difficulty')} : <strong>{state.settings.difficulty}</strong> / {MAX_DIFFICULTY}
+              </label>
+              <input
+                id="difficulty"
+                type="range"
+                min={MIN_DIFFICULTY}
+                max={MAX_DIFFICULTY}
+                step={1}
+                value={state.settings.difficulty}
+                onChange={(e) => actions.setDifficulty(Number(e.target.value))}
+              />
+              <div className={styles.difficultyScale}>
+                <span>{t('parents.easy')}</span>
+                <span>{t('parents.hard')}</span>
+              </div>
+              <span className={styles.muted}>
+                {t('parents.difficultyHelp')}
+              </span>
+            </div>
+            <div className={styles.row}>
+              <PaperButton className={styles.smallBtn} onClick={() => navigate('/calibration?returnTo=/parents')}>
+                {t('parents.recalibrate')}
+              </PaperButton>
+              {current && (
+                <>
+                  <PaperButton className={styles.smallBtn} onClick={() => setConfirm('reset')}>
+                    {t('parents.resetProgress')}
+                  </PaperButton>
+                  <PaperButton className={cx(styles.smallBtn, styles.danger)} onClick={() => setConfirm('delete')}>
+                    {t('parents.deleteProfile')}
+                  </PaperButton>
+                </>
+              )}
+            </div>
+            {confirm && current && (
+              <div className={styles.row}>
+                <span className={styles.grow}>
+                  {t(confirm === 'reset' ? 'parents.confirmReset' : 'parents.confirmDelete', { name: current.name })}
+                </span>
+                <PaperButton tone="ghost" onClick={() => setConfirm(null)}>
+                  {t('common.cancel')}
+                </PaperButton>
+                <PaperButton
+                  className={cx(styles.smallBtn, styles.danger)}
+                  onClick={() => {
+                    if (confirm === 'reset') actions.resetProgress(current.id);
+                    else {
+                      actions.deleteProfile(current.id);
+                      navigate('/', { replace: true });
+                    }
+                    setConfirm(null);
+                  }}
+                >
+                  {t('common.confirm')}
+                </PaperButton>
+              </div>
+            )}
+          </section>
+
+          {current && (
+            <>
               <AdventureGamesPanel profile={current} chosen={state.adventureGames[current.id]} />
 
               <section className={styles.section}>
@@ -394,86 +482,6 @@ export function ParentsScreen() {
             </>
           )}
 
-          <section className={styles.section}>
-            <h2>{t('parents.settings')}</h2>
-            <div className={styles.row}>
-              <label className={cx(styles.radio, sourceKind === 'mic' && styles.radioOn)}>
-                <input type="radio" name="source" checked={sourceKind === 'mic'} onChange={() => changeSource('mic')} />
-                {t('parents.sourceMic')}
-              </label>
-              <label className={cx(styles.radio, sourceKind === 'keyboard' && styles.radioOn)}>
-                <input type="radio" name="source" checked={sourceKind === 'keyboard'} onChange={() => changeSource('keyboard')} />
-                {t('parents.sourceKeyboard')}
-              </label>
-            </div>
-            {sourceKind === 'mic' && <MicrophonePicker />}
-            <div className={styles.difficulty}>
-              <label htmlFor="sound" className={styles.checkRow}>
-                <input id="sound" type="checkbox" checked={state.settings.sound} onChange={(e) => actions.setSound(e.target.checked)} />
-                {t('parents.sound')}
-              </label>
-            </div>
-            <div className={styles.difficulty}>
-              <label htmlFor="difficulty">
-                {t('parents.difficulty')} : <strong>{state.settings.difficulty}</strong> / {MAX_DIFFICULTY}
-              </label>
-              <input
-                id="difficulty"
-                type="range"
-                min={MIN_DIFFICULTY}
-                max={MAX_DIFFICULTY}
-                step={1}
-                value={state.settings.difficulty}
-                onChange={(e) => actions.setDifficulty(Number(e.target.value))}
-              />
-              <div className={styles.difficultyScale}>
-                <span>{t('parents.easy')}</span>
-                <span>{t('parents.hard')}</span>
-              </div>
-              <span className={styles.muted}>
-                {t('parents.difficultyHelp')}
-              </span>
-            </div>
-            <div className={styles.row}>
-              <PaperButton className={styles.smallBtn} onClick={() => navigate('/calibration?returnTo=/parents')}>
-                {t('parents.recalibrate')}
-              </PaperButton>
-              {current && (
-                <>
-                  <PaperButton className={styles.smallBtn} onClick={() => setConfirm('reset')}>
-                    {t('parents.resetProgress')}
-                  </PaperButton>
-                  <PaperButton className={cx(styles.smallBtn, styles.danger)} onClick={() => setConfirm('delete')}>
-                    {t('parents.deleteProfile')}
-                  </PaperButton>
-                </>
-              )}
-            </div>
-            {confirm && current && (
-              <div className={styles.row}>
-                <span className={styles.grow}>
-                  {t(confirm === 'reset' ? 'parents.confirmReset' : 'parents.confirmDelete', { name: current.name })}
-                </span>
-                <PaperButton tone="ghost" onClick={() => setConfirm(null)}>
-                  {t('common.cancel')}
-                </PaperButton>
-                <PaperButton
-                  className={cx(styles.smallBtn, styles.danger)}
-                  onClick={() => {
-                    if (confirm === 'reset') actions.resetProgress(current.id);
-                    else {
-                      actions.deleteProfile(current.id);
-                      navigate('/', { replace: true });
-                    }
-                    setConfirm(null);
-                  }}
-                >
-                  {t('common.confirm')}
-                </PaperButton>
-              </div>
-            )}
-          </section>
-
           {GAMES.some((g) => g.settings && Object.keys(g.settings).length) && (
             <section className={styles.section}>
               <h2>{t('parents.gameSettings')}</h2>
@@ -483,9 +491,14 @@ export function ParentsScreen() {
             </section>
           )}
 
-          <span className={styles.muted} style={{ color: 'var(--paper)' }}>
-            {t('parents.privacy')}
-          </span>
+          <div className={styles.parentsFoot}>
+            <PaperButton onClick={() => navigate(-1)}>
+              <ArrowIcon size={28} left />
+              {t('common.back')}
+            </PaperButton>
+          </div>
+
+          <PrivacyNote />
         </div>
       </div>
     </Sky>

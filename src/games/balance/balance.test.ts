@@ -88,7 +88,7 @@ describe('the games demand a comparable effort', () => {
       it(`level ${li + 1}, difficulty ${DIFFICULTIES[di]}: breath within ±${Math.round((EFFORT_TOLERANCE - 1) * 100)} % of the median`, () => {
         const med = median(byGame.map((o) => o.blowMs));
         const off = GAMES.filter((_, gi) => byGame[gi].blowMs > med * EFFORT_TOLERANCE || byGame[gi].blowMs < med / EFFORT_TOLERANCE).map(
-          (g, _, __) => `${g.id} (${fmt(byGame[GAMES.indexOf(g)].blowMs)} of breath, median ${fmt(med)})`,
+          (g) => `${g.id} (${fmt(byGame[GAMES.indexOf(g)].blowMs)} of breath, median ${fmt(med)})`,
         );
         expect(off, `unbalanced games: ${off.join(' ; ')}`).toEqual([]);
       });
@@ -133,7 +133,7 @@ describe('report', () => {
   it('effort / duration / stars table (typical child)', () => {
     // Computed, not hardcoded: adding a game then fails on the game count
     // below, which names the real cause, rather than on an opaque total.
-    expect(GAMES.length, 'games registered').toBe(7);
+    expect(GAMES.length, 'games registered').toBe(10);
     expect(simulationCount).toBe(GAMES.length * LEVEL_COUNT * DIFFICULTIES.length);
     expect(simulationMs).toBeGreaterThan(0);
     const lines: string[] = [`${simulationCount} games simulated in ${simulationMs.toFixed(0)} ms`];

@@ -106,7 +106,7 @@ against the shared "typical child" model (`TYPICAL_CHILD` in `src/games/balance/
 not a real child) and
 returning per-frame intent (`long` / `bursts` / `hold` / `rest`).
 
-`pnpm balance` simulates 7 games × 3 levels × 10 difficulties = 210 runs and asserts:
+`pnpm balance` simulates 9 games × 3 levels × 10 difficulties = 270 runs and asserts:
 
 - every level finishable at every difficulty;
 - blow time within ±50 % of the cross-game median, game duration within ±60 %;

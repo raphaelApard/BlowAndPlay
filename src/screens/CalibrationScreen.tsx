@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { computeCalibration } from '../breath/BreathEngine';
-import { useBreath, useBreathState } from '../breath/BreathProvider';
-import { Candle, PaperButton, ParentsButton, PlayIcon, Sky, cx } from '../components/ui';
+import { useBreath, useBreathState } from '../breath/useBreath';
+import { Candle, PaperButton, ParentsButton, PlayIcon, Sky } from '../components/ui';
+import { cx } from '../components/ui/cx';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
 import { MascotFigure, type MascotMode } from '../mascots/MascotFigure';
-import { actions, selectCurrentProfile, useAppState } from '../store/store';
+import { actions, getAppState, selectCurrentProfile, useAppState } from '../store/store';
 import styles from './screens.module.css';
 
 const SILENCE_MS = 2000;
@@ -30,7 +31,10 @@ const MASCOT_MODE: Record<Phase, MascotMode> = {
 export function CalibrationScreen() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const returnTo = params.get('returnTo') || '/map';
+  // No explicit returnTo (opening a profile from the home screen): go back
+  // to whichever section — Adventure or Games — was last visited, Games by
+  // default for a child who has never picked one.
+  const returnTo = params.get('returnTo') || (getAppState().settings.lastMode === 'map' ? '/map' : '/games');
   const { engine, status, error, start, sourceKind, setSourceKind } = useBreath();
   const [phase, setPhase] = useState<Phase>('intro');
   const [elapsed, setElapsed] = useState(0);

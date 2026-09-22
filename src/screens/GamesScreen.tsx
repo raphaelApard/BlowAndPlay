@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { play } from '../audio/sfx';
-import { GameThumbnail, LevelSquares, Mascot, PaperButton, ParentsButton, PlayIcon, Sky, TopBar } from '../components/ui';
+import { GameThumbnail, LevelSquares, Mascot, PaperButton, ParentsButton, PlayIcon, PrivacyNote, Sky, TopBar } from '../components/ui';
+import uiStyles from '../components/ui/ui.module.css';
 import { GAMES } from '../games/registry';
 import type { LevelBase, Stars } from '../games/types';
 import { useT } from '../i18n';
-import { selectProgress, useAppState } from '../store/store';
+import { actions, selectProgress, useAppState } from '../store/store';
 import { useCurrentProfile } from './useCurrentProfile';
 import styles from './screens.module.css';
 
@@ -35,6 +36,10 @@ export function GamesScreen() {
   // tear down its own timers (silent chimes): the guard keeps the first run in
   // charge, and the state is only cleared once the chimes are over.
   const celebratedRef = useRef(false);
+
+  // Remembers this as the last visited section, so calibration sends the
+  // child back here next time rather than to the adventure map.
+  useEffect(() => actions.setLastMode('games'), []);
 
   useEffect(() => {
     if (!completed || celebratedRef.current) return;
@@ -88,6 +93,7 @@ export function GamesScreen() {
       </div>
       <TopBar name={profile.name} avatar={profile.avatar} />
       <ParentsButton />
+      <PrivacyNote className={uiStyles.privacyFixed} />
     </Sky>
   );
 }

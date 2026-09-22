@@ -6,7 +6,9 @@ import { makeCourse, makeTargets, tuning as cerfTuning } from './cerf-volant/rul
 import { leavesPerPile, tuning as feuillesTuning } from './feuilles-d-automne/rules';
 import { PAD_AFTER, makeObstacles, makeWorld, tuning as montgolfiereTuning } from './montgolfiere/rules';
 import { OBSTACLE_KINDS } from './montgolfiere/draw';
+import { chargeFor, landingHalf, maxReach, padGaps, reachFor, tuning as grenouilleTuning } from './grenouille/rules';
 import { blowEfficiency, tuning as nuagesTuning } from './pousse-nuages/rules';
+import { deflatePerFrame, inflatePerFrame, tuning as bonhommeTuning } from './bonhomme-gonflable/rules';
 import { tuning as fuseeTuning } from './souffle-fusee/rules';
 
 /**
@@ -201,6 +203,101 @@ describe('feuilles-d-automne', () => {
   });
 });
 
+describe('grenouille', () => {
+  it('keeps a full blow from overshooting the pad it aims at', () => {
+    // The aim arc used to sail on to the pad after the target, so a feeble
+    // blow was enough. A full blow must land only just past the next pad.
+    for (let d = 0; d <= 1.0001; d += 0.1) {
+      const { spacing } = grenouilleTuning(d);
+      expect(maxReach(d) / spacing, `difficulty ${d.toFixed(1)}`).toBeLessThan(1.35);
+    }
+  });
+
+  it('asks for a real blow to reach the next pad', () => {
+    // Charge needed for a nominal step: well above a wisp of air.
+    for (let d = 0; d <= 1.0001; d += 0.1) {
+      const { spacing } = grenouilleTuning(d);
+      expect(chargeFor(spacing, d), `difficulty ${d.toFixed(1)}`).toBeGreaterThan(0.6);
+    }
+  });
+
+  it('spaces the pads further and narrows the landing from easy to hard', () => {
+    const easy = grenouilleTuning(EASY);
+    const hard = grenouilleTuning(HARD);
+    expect(easy).toEqual({ spacing: 1, tolerance: 1, spread: 0 });
+    expect(hard.spacing).toBeCloseTo(1.62);
+    expect(hard.tolerance).toBeCloseTo(0.48);
+    expect(hard.spread).toBeCloseTo(0.3);
+  });
+
+  it('maps a charge to a reach, and back', () => {
+    // The two are inverses: the simulation aims with `chargeFor` at what
+    // `reachFor` will produce, so a drift between them would silently
+    // change how well the typical child plays.
+    for (const d of [0, 0.5, 1]) {
+      for (const gap of [0.4, 0.8, maxReach(d) * 0.9]) {
+        expect(reachFor(chargeFor(gap, d), d)).toBeCloseTo(gap);
+      }
+    }
+  });
+
+  it('clamps a reach outside what a blow can do', () => {
+    expect(reachFor(-1, 0.5)).toBe(reachFor(0, 0.5));
+    expect(reachFor(2, 0.5)).toBe(reachFor(1, 0.5));
+    expect(chargeFor(-5, 0.5)).toBe(0);
+    expect(chargeFor(99, 0.5)).toBe(1);
+  });
+
+  it('narrows the landing window as the difficulty rises', () => {
+    expect(landingHalf(HARD)).toBeLessThan(landingHalf(EASY));
+  });
+
+  it('lays out pads left to right, the same way for the same pond', () => {
+    expect(padGaps(6, 0.5, 42)).toEqual(padGaps(6, 0.5, 42));
+    const gaps = padGaps(8, 0.5, 42);
+    expect(gaps).toHaveLength(8);
+    for (let i = 1; i < gaps.length; i++) {
+      expect(gaps[i]).toBeGreaterThan(gaps[i - 1]);
+    }
+  });
+
+  it('keeps every pad reachable on a full blow', () => {
+    // The pond would dead-end if one step were further than a full-strength
+    // jump, so the widest possible step must stay under a full blow's reach.
+    for (let d = 0; d <= 1.0001; d += 0.05) {
+      const gaps = padGaps(40, d, 99);
+      for (let i = 0; i < gaps.length; i++) {
+        const step = gaps[i] - (i ? gaps[i - 1] : 0);
+        expect(step, `difficulty ${d.toFixed(2)}`).toBeLessThanOrEqual(maxReach(d));
+      }
+    }
+  });
+
+  it('spaces the pads evenly when the difficulty adds no wobble', () => {
+    const gaps = padGaps(5, EASY, 7);
+    for (let i = 1; i < gaps.length; i++) {
+      expect(gaps[i] - gaps[i - 1]).toBeCloseTo(grenouilleTuning(EASY).spacing);
+    }
+  });
+});
+
+describe('bonhomme-gonflable', () => {
+  it('lengthens the breath and sags faster from easy to hard', () => {
+    expect(bonhommeTuning(EASY)).toEqual({ blow: 1, sag: 1 });
+    const hard = bonhommeTuning(HARD);
+    expect(hard.blow).toBeCloseTo(1.7);
+    expect(hard.sag).toBeCloseTo(2.4);
+  });
+
+  it('always sags slower than it inflates', () => {
+    // Otherwise a child breathing normally could never get it up at all.
+    for (let d = 0; d <= 1.0001; d += 0.1) {
+      const { blow, sag } = bonhommeTuning(d);
+      expect(deflatePerFrame(1800, blow, sag), `difficulty ${d.toFixed(1)}`).toBeLessThan(inflatePerFrame(1800, blow));
+    }
+  });
+});
+
 describe('every tuning', () => {
   const tunings = {
     'souffle-fusee': fuseeTuning,
@@ -210,6 +307,8 @@ describe('every tuning', () => {
     'pousse-nuages': nuagesTuning,
     'bateau-pirate': bateauTuning,
     'feuilles-d-automne': feuillesTuning,
+    grenouille: grenouilleTuning,
+    'bonhomme-gonflable': bonhommeTuning,
   };
 
   it.each(Object.entries(tunings))('%s returns finite values across the whole range', (_id, tuning) => {

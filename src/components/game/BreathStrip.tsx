@@ -1,5 +1,5 @@
 import { useEffect, useRef, type Ref } from 'react';
-import { useBreath } from '../../breath/BreathProvider';
+import { useBreath } from '../../breath/useBreath';
 import type { BreathState } from '../../breath/types';
 import styles from './game.module.css';
 

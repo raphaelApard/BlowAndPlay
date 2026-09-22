@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Deploy script: holds the server coordinates.
+# Copy scripts/deploy-sample.sh to scripts/deploy.sh and fill it in.
+scripts/deploy.sh

@@ -47,6 +47,8 @@ export interface Settings {
   lang: Lang | null;
   /** Effets sonores. */
   sound: boolean;
+  /** Last visited top-level section; where calibration sends the child back to. Defaults to Games. */
+  lastMode: 'map' | 'games';
 }
 
 export interface AppState {
