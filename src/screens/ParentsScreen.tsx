@@ -4,7 +4,7 @@ import { muteSfx } from '../audio/sfx';
 import { useBreath } from '../breath/useBreath';
 import { listMicrophones, type Microphone } from '../breath/MicBreathSource';
 import type { BreathSourceKind } from '../breath/types';
-import { ArrowIcon, Avatar, GameThumbnail, LangSwitch, PaperButton, Sky, StarRow } from '../components/ui';
+import { ArrowIcon, Avatar, GameThumbnail, LangSwitch, PaperButton, PrivacyNote, Sky, StarRow } from '../components/ui';
 import { cx } from '../components/ui/cx';
 import { GAMES, getGame } from '../games/registry';
 import { resolveSettings, type AnyGameDefinition, type LevelBase, type SettingDef, type SettingValue } from '../games/types';
@@ -498,9 +498,7 @@ export function ParentsScreen() {
             </PaperButton>
           </div>
 
-          <span className={styles.muted} style={{ color: 'var(--paper)' }}>
-            {t('parents.privacy')}
-          </span>
+          <PrivacyNote />
         </div>
       </div>
     </Sky>

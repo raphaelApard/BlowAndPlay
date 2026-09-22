@@ -554,3 +554,24 @@ export function LangSwitch({ className }: { className?: string }) {
     </div>
   );
 }
+
+const SOURCE_URL = 'https://github.com/raphaelApard/BlowAndPlay';
+
+/**
+ * Privacy line + link to the sources, at the bottom of the screens an adult
+ * reaches: the parents area, the adventure map and the games list.
+ */
+export function PrivacyNote({ className }: { className?: string }) {
+  const { t } = useT();
+  return (
+    <span className={cx(styles.privacyNote, className)} data-no-blow>
+      <span className={styles.privacyLine}>{t('parents.privacy')}</span>
+      <span className={styles.privacyLine}>
+        {t('parents.source')}{' '}
+        <a className={styles.privacyLink} href={SOURCE_URL} target="_blank" rel="noreferrer">
+          {t('parents.sourceLink')}
+        </a>
+      </span>
+    </span>
+  );
+}

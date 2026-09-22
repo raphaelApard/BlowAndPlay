@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { play } from '../audio/sfx';
-import { GameThumbnail, LevelSquares, Mascot, PaperButton, ParentsButton, PlayIcon, Sky, TopBar } from '../components/ui';
+import { GameThumbnail, LevelSquares, Mascot, PaperButton, ParentsButton, PlayIcon, PrivacyNote, Sky, TopBar } from '../components/ui';
+import uiStyles from '../components/ui/ui.module.css';
 import { GAMES } from '../games/registry';
 import type { LevelBase, Stars } from '../games/types';
 import { useT } from '../i18n';
@@ -92,6 +93,7 @@ export function GamesScreen() {
       </div>
       <TopBar name={profile.name} avatar={profile.avatar} />
       <ParentsButton />
+      <PrivacyNote className={uiStyles.privacyFixed} />
     </Sky>
   );
 }

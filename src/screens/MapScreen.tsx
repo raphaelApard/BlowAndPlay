@@ -15,8 +15,9 @@ import {
 import { getGame } from '../games/registry';
 import type { Stars } from '../games/types';
 import { useBreath } from '../breath/useBreath';
-import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, Sky, TopBar } from '../components/ui';
+import { Balloon, GameThumbnail, Mascot, PaperButton, ParentsButton, PlayIcon, PrivacyNote, Sky, TopBar } from '../components/ui';
 import { cx } from '../components/ui/cx';
+import uiStyles from '../components/ui/ui.module.css';
 import { play } from '../audio/sfx';
 import { useT } from '../i18n';
 import { actions, selectAdventureGames, selectProgress, useAppState } from '../store/store';
@@ -415,6 +416,7 @@ export function MapScreen() {
         </PaperButton>
       )}
       <ParentsButton />
+      <PrivacyNote className={uiStyles.privacyFixed} />
     </Sky>
   );
 }
