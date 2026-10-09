@@ -1,9 +1,9 @@
 /**
  * Matomo page tracking for the single-page app.
  *
- * The tracker itself is bootstrapped in `index.html`; it only registers the
- * queue and loads `matomo.js`. Because React Router never reloads the
- * document, each route change has to be reported by hand.
+ * The tracker is bootstrapped in `index.html`, which also sends the landing
+ * page view. Because React Router never reloads the document, each later
+ * route change has to be reported by hand.
  */
 
 type MatomoQueue = unknown[][];
